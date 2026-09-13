@@ -75,6 +75,9 @@ DEFAULT_MAX_PAGES = 200
 DEFAULT_MAX_DEPTH = 3
 DEFAULT_MAX_REQUESTS = 600
 DEFAULT_TIME_BUDGET_S = 150.0
+#: Memory ceiling for a containerised scanner, in GiB. See ``ScanRequest.external_memory_gb``.
+DEFAULT_EXTERNAL_MEMORY_GB: float = 6.0
+
 #: Wall clock for an external scanner. See ``ScanRequest.external_time_budget_s``.
 DEFAULT_EXTERNAL_TIME_BUDGET_S = 1200.0
 #: Per-response read cap. Four megabytes rather than one because a truncated
@@ -181,6 +184,20 @@ class ScanRequest(Frozen):
     external_time_budget_s: float = Field(
         DEFAULT_EXTERNAL_TIME_BUDGET_S, gt=0.0, le=21_600.0
     )
+    #: Memory ceiling for a containerised external scanner, in GiB.
+    #:
+    #: Without one, a container can consume the whole virtual machine that hosts the
+    #: container runtime and kill it. That is not hypothetical: an active ZAP scan of a
+    #: mid-sized application reached 4.94GiB of a Docker Desktop WSL VM's 7.68GiB in three
+    #: minutes, the VM died, and the client reported ``exit 125: error waiting for
+    #: container: unexpected EOF``. Worse, the runtime then sat half-alive - its pipes and
+    #: port forwards still accepting connections with nothing behind them - so every
+    #: *subsequent* scan also failed, against a daemon the previous scan had killed.
+    #:
+    #: The ceiling has to sit far enough below the host VM that the container dies first.
+    #: A container hitting its own limit is a failed scan; a VM hitting its limit is a
+    #: broken machine.
+    external_memory_gb: float = Field(DEFAULT_EXTERNAL_MEMORY_GB, ge=0.5, le=256.0)
     max_response_bytes: int = Field(DEFAULT_MAX_RESPONSE_BYTES, ge=1024, le=20_000_000)
     max_total_bytes: int | None = Field(None, ge=1024)
     timeout_s: float = Field(10.0, gt=0.0, le=120.0)

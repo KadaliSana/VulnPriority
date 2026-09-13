@@ -225,11 +225,37 @@ def _zap_docker_argv(tool: ExternalTool, request: ScanRequest, report: Path) -> 
     # of the same target return different findings.
     minutes = max(1, int(round(request.external_time_budget_s / 60.0)))
     image = safe_argument(tool.image or ZAP_DOCKER_IMAGE, what="container image")
+
+    # A container must not be able to kill the machine that hosts it. Without these an
+    # active scan grew until the Docker Desktop WSL VM died, which failed the scan *and*
+    # left the runtime wedged for every scan afterwards; see ``external_memory_gb``.
+    #
+    # ``--memory-swap`` equal to ``--memory`` disables swap for the container. Allowing it
+    # to swap just moves the same exhaustion into the VM's disk and takes longer to fail.
+    #
+    # The JVM heap is set to *half* the container limit, not the conventional 75%, because
+    # ZAP is not a conventional JVM application. Measured on this image with no limit set:
+    # the JVM chose a 1.92GB heap (MaxRAMPercentage 25% of a 7.86GB VM) and the container
+    # still reached 4.94GB. That is roughly 3GB of non-heap - thread stacks and direct
+    # buffers for an active-scan pool sized from ``nproc``, metaspace, and ZAP's in-memory
+    # session holding every request and response the scan generates. None of it is counted
+    # by ``-Xmx``.
+    #
+    # At 75% a 6GB container would be asked for 4.6GB of heap plus ~3GB of everything else,
+    # and the kernel would kill it. A container killed that way writes no report at all,
+    # which is the exact failure this limit exists to prevent. Half leaves room for the part
+    # of ZAP that ``-Xmx`` cannot see, so the JVM hits its own ceiling first and fails in a
+    # way that says so.
+    memory_gb = float(request.external_memory_gb)
+    heap_mb = max(512, int(memory_gb * 1024 * 0.5))
     return [
         [
             str(tool.executable),
             "run",
             "--rm",
+            "--memory", f"{memory_gb:g}g",
+            "--memory-swap", f"{memory_gb:g}g",
+            "-e", f"ZAP_JVM_OPTS=-Xmx{heap_mb}m",
             # Harmless when Docker already provides the name (Docker Desktop does); the
             # difference between a working scan and a silent no-op on plain Linux.
             "--add-host", f"{DOCKER_HOST_ALIAS}:host-gateway",
