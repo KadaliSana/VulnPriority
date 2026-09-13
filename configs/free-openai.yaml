@@ -1,0 +1,53 @@
+# Live on any OpenAI-compatible provider. As shipped: Groq's free tier.
+#
+#   Get a key:  https://console.groq.com/keys
+#   Run:        GROQ_API_KEY=gsk_... vulnprio run-all --config configs/free-openai.yaml
+#
+# No extra package is needed -- this speaks plain HTTP over the httpx the framework
+# already depends on. Change base_url and model to reach a different provider:
+#
+#   Groq              https://api.groq.com/openai/v1     GROQ_API_KEY
+#                     free models: openai/gpt-oss-20b, openai/gpt-oss-120b,
+#                     qwen/qwen3.8-27b  (30 req/min, 1,000 req/day, 8k tokens/min)
+#   OpenRouter        https://openrouter.ai/api/v1       OPENROUTER_API_KEY
+#                     any model id ending in :free  (20 req/min, 50 req/day, or
+#                     1,000 req/day once you have bought $10 of credit at any point)
+#   Cerebras          https://api.cerebras.ai/v1         CEREBRAS_API_KEY
+#   Together          https://api.together.xyz/v1        TOGETHER_API_KEY
+#   Ollama   (local)  http://localhost:11434/v1          no key -- delete api_key_env
+#   LM Studio(local)  http://localhost:1234/v1           no key
+#   vLLM     (local)  http://localhost:8000/v1           no key
+#
+# A local endpoint needs no key at all: the Authorization header is simply omitted, and
+# nothing derived from your scan leaves the machine.
+#
+# There is no exploit-intelligence layer on this path. None of these providers exposes a
+# web-search tool, so intel stays offline and serves the recorded corpus. For free
+# intelligence as well as free assessment, use configs/free-gemini.yaml.
+#
+# json_mode: auto asks for JSON mode *and* states the schema in the prompt, which is the
+# widest-supported combination. Set json_schema on Groq or OpenRouter for provider-enforced
+# schemas; set prompt for a local server that rejects response_format outright. Whatever
+# comes back is validated against the bounded schema and put through the sandbox output
+# guard regardless, so a weak provider degrades a finding rather than corrupting a score.
+output_dir: runs
+data_dir: data
+seed: 42
+feeds:
+  mode: live_with_cache
+  cache_dir: .cache/feeds
+  cache_ttl_days: 7
+llm:
+  backend: openai_compatible
+  base_url: https://api.groq.com/openai/v1
+  model: openai/gpt-oss-20b
+  api_key_env: GROQ_API_KEY
+  json_mode: auto
+  use_cache: true
+  requests_per_minute: 30
+intel:
+  enabled: false
+  mode: offline
+component_b:
+  attacker_preset: opportunistic
+  impact_preset: default_ecommerce

@@ -1,0 +1,77 @@
+# Monetary impact priors for a general e-commerce application, denominated in Indian
+# rupees. `currency` below is the single authority on what every number in this file
+# means; nothing downstream infers a currency from a field name.
+#
+# SOURCED FIGURE (one, and only one)
+# ---------------------------------
+# `cost_per_record` is anchored on published measurement:
+#
+#   IBM Cost of a Data Breach Report, India figures, 2026.
+#     - average Indian breach cost      Rs 25.5 crore (Rs 255,000,000), up 15.9% YoY
+#     - average records compromised     39,500
+#     => Rs 255,000,000 / 39,500        = Rs 6,456 per record
+#
+# `max_impact` is taken directly from the same source: the cap on any single finding is
+# one average Indian breach, Rs 25.5 crore. (The previous USD preset capped at $5,000,000
+# against a global average breach of roughly $4.4M, so "about one average breach" is the
+# meaning being preserved, not a number being converted.)
+#
+# PROPORTIONAL PRIORS (everything else)
+# -------------------------------------
+# The remaining money figures are NOT independently sourced. They are priors carried over
+# from the previous USD preset at their existing ratio to the per-record figure
+# (Rs 6,456 / $165 = 39.13x) and rounded to three significant figures, which is the
+# precision a prior of this kind deserves. They preserve the model's shape - the relative
+# weight of payment against search, of downtime against disclosure - and nothing more.
+# An operator with their own numbers should replace them; they are a starting point, not
+# a measurement, and must not be quoted as one.
+#
+# `records_by_function` (counts), `regulatory_multiplier` and `reputational_fraction`
+# (dimensionless ratios) carry no currency and are unchanged. Re-denominating a unitless
+# multiplier would be an error, and no source was consulted for an India-specific
+# regulatory posture, so none is claimed.
+
+name: default_ecommerce
+currency: INR
+
+# Sourced: IBM Cost of a Data Breach Report, India 2026 (Rs 25.5 crore / 39,500 records).
+cost_per_record: 6456.0
+
+records_by_function:
+  payment: 20000
+  pii_data: 50000
+  auth: 30000
+  admin: 50000
+  api_data: 8000
+  file_io: 2000
+  search: 500
+  static_content: 0
+  unknown: 1000
+
+# Proportional prior (was $5,000 = 30.3x the per-record figure).
+downtime_cost_per_hour: 196000.0
+
+downtime_hours_by_privilege:
+  0: 0.5
+  1: 2.0
+  2: 8.0
+  3: 24.0
+
+# Proportional priors, ratios to the per-record figure preserved from the USD preset.
+integrity_loss_by_function:
+  payment: 9780000.0
+  admin: 5870000.0
+  auth: 3910000.0
+  pii_data: 3130000.0
+  api_data: 1570000.0
+  file_io: 1170000.0
+  search: 196000.0
+  static_content: 39100.0
+  unknown: 391000.0
+
+# Dimensionless. Unchanged: a multiplier has no currency.
+regulatory_multiplier: 1.2
+reputational_fraction: 0.2
+
+# Sourced: one average Indian breach, Rs 25.5 crore (IBM, India 2026).
+max_impact: 255000000.0

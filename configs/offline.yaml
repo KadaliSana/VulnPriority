@@ -1,0 +1,42 @@
+# Everything pinned offline. Nothing here resolves, probes, or reads a key.
+#
+# Use this for:
+#   * reproduction -- a run whose inputs are fixed on disk produces the same numbers on
+#     any machine, which is what makes a published result checkable;
+#   * the research protocol -- evaluation runs must replay a recorded corpus rather than
+#     acquire today's internet, so the as-of discipline holds (DESIGN 6.5);
+#   * any machine where a network probe would be a waste of 1.5 seconds.
+#
+# configs/default.yaml is `auto` throughout: it prefers the live path and degrades to
+# exactly this configuration when no key and no network are available. The difference is
+# that this file cannot degrade *upwards* -- an exported key does not change what it does.
+output_dir: runs
+data_dir: data
+seed: 42
+feeds:
+  mode: offline
+  fixture_dir: data/fixtures/feeds
+llm:
+  backend: heuristic
+  model: claude-sonnet-5
+intel:
+  enabled: false
+  mode: offline
+component_a:
+  enabled: true
+component_b:
+  enabled: true
+  attacker_preset: opportunistic
+  impact_preset: default_ecommerce
+component_c:
+  enabled: true
+ranking:
+  ranker: lambdamart
+  seed: 42
+evaluation:
+  split_kind: time_ordered
+  n_folds: 3
+  seeds: [42, 43, 44]
+synthetic:
+  seed: 42
+  n_apps: 8

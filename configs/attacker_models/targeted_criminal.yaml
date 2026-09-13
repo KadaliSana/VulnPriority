@@ -1,0 +1,29 @@
+name: targeted_criminal
+description: >-
+  Financially motivated adversary that will develop or buy an exploit for a chosen target,
+  prefers payment and personally identifiable data endpoints, and will chain several steps.
+skill: 0.7
+resources: 0.6
+entry_privilege: 0
+horizon_days: 90
+max_chain_length: 4
+controls_target_content: false
+target_preference:
+  payment: 1.0
+  pii_data: 0.9
+  auth: 0.8
+  admin: 0.7
+w_intercept: -3.4
+w_epss_logit: 0.9
+w_kev: 2.0
+w_kev_ransomware: 0.7
+w_feasibility: 1.8
+w_applicability: 2.0
+w_exposure: 1.0
+w_asset_criticality: 1.1
+w_complexity_high: -0.6
+w_user_interaction: -0.4
+w_privileges_required: -0.5
+w_skill: 0.7
+w_resources: 0.5
+max_p: 0.99

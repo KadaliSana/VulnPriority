@@ -1,0 +1,51 @@
+# Default: prefer the real thing, degrade to offline, and say which one ran.
+#
+# Every switch below says `auto`, which resolves once per run (vulnprio/core/resolve.py):
+#   feeds   -> live_with_cache when the network is reachable, else the fixture corpus
+#   llm     -> the first backend whose credentials are present, cost-ascending:
+#              a configured llm.base_url (Groq, OpenRouter, a local Ollama), then
+#              GEMINI_API_KEY (free tier), then ANTHROPIC_API_KEY (paid), else heuristic
+#   intel   -> on when a backend that can actually search resolved, off otherwise
+#
+# With no keys and no network this resolves to exactly configs/offline.yaml: the
+# deterministic heuristic assessor over fixture feeds, no socket opened and nothing spent.
+# `auto` prefers the live path; it never assumes it.
+#
+# What resolution chose, and why, is printed by `run-all`, recorded in the run manifest,
+# served by /api/health, and stated in the report. A reader never has to guess whether a
+# report came from a live run or a fixture run.
+#
+# Naming a value explicitly turns resolution off for that switch and is never overridden:
+# `mode: offline` means offline, and `backend: anthropic` with no key raises rather than
+# silently downgrading. See configs/offline.yaml (pinned offline) and configs/live.yaml
+# (pinned live).
+output_dir: runs
+data_dir: data
+seed: 42
+feeds:
+  mode: auto
+  fixture_dir: data/fixtures/feeds
+llm:
+  backend: auto
+  model: claude-sonnet-5
+intel:
+  enabled: auto
+  mode: auto
+component_a:
+  enabled: true
+component_b:
+  enabled: true
+  attacker_preset: opportunistic
+  impact_preset: default_ecommerce
+component_c:
+  enabled: true
+ranking:
+  ranker: lambdamart
+  seed: 42
+evaluation:
+  split_kind: time_ordered
+  n_folds: 3
+  seeds: [42, 43, 44]
+synthetic:
+  seed: 42
+  n_apps: 8

@@ -1,0 +1,487 @@
+{
+  "scan_id": "scan_50670a1d226ed75a",
+  "app_id": "app_bank_demo",
+  "app_name": "Northwind Bank Portal",
+  "sector": "fintech",
+  "scanned_at": "2024-05-20T06:30:00",
+  "scanner_name": "vulnprio",
+  "scanner_version": "0.1.0",
+  "hosts": [
+    "bank.example.co"
+  ],
+  "tech_stack": [
+    {
+      "vendor": "djangoproject",
+      "product": "django",
+      "version": "4.2.7",
+      "cpe": "cpe:2.3:a:djangoproject:django:4.2.7:*:*:*:*:*:*:*"
+    },
+    {
+      "vendor": "jquery",
+      "product": "jquery",
+      "version": "3.4.1",
+      "cpe": "cpe:2.3:a:jquery:jquery:3.4.1:*:*:*:*:*:*:*"
+    },
+    {
+      "vendor": "nginx",
+      "product": "nginx",
+      "version": "1.24.0",
+      "cpe": "cpe:2.3:a:nginx:nginx:1.24.0:*:*:*:*:*:*:*"
+    }
+  ],
+  "endpoints": [
+    {
+      "endpoint_id": "ep_c9a728349f10e60b",
+      "app_id": "app_bank_demo",
+      "host": "bank.example.co",
+      "url": "https://bank.example.co/accounts/login",
+      "path": "/accounts/login",
+      "method": "POST",
+      "auth_required": 0,
+      "internet_facing": true,
+      "response_status": 200,
+      "response_content_type": "text/html",
+      "response_size_bytes": 4821,
+      "sets_cookie": true,
+      "parameters": [
+        "csrfmiddlewaretoken",
+        "password",
+        "username"
+      ],
+      "links_to": [
+        "ep_970dae204030e98a",
+        "ep_6fc905a2072d9be1"
+      ],
+      "response_sample": {
+        "text": "<form method=\"post\"><input name=\"csrfmiddlewaretoken\" value=\"k3j2\"></form>",
+        "provenance": "target_response",
+        "source_url": "https://bank.example.co/accounts/login",
+        "fetched_at": null,
+        "language": "und",
+        "sha256": "1ab3b65a6a8b9177d002641cfecf83b7a7938cda86207be12b6082daf21262f1"
+      },
+      "observed_tech": [
+        {
+          "vendor": "djangoproject",
+          "product": "django",
+          "version": "4.2.7",
+          "cpe": "cpe:2.3:a:djangoproject:django:4.2.7:*:*:*:*:*:*:*"
+        },
+        {
+          "vendor": "nginx",
+          "product": "nginx",
+          "version": "1.24.0",
+          "cpe": "cpe:2.3:a:nginx:nginx:1.24.0:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "endpoint_id": "ep_970dae204030e98a",
+      "app_id": "app_bank_demo",
+      "host": "bank.example.co",
+      "url": "https://bank.example.co/admin/customers/{id}",
+      "path": "/admin/customers/{id}",
+      "method": "GET",
+      "auth_required": 2,
+      "internet_facing": true,
+      "response_status": 403,
+      "response_content_type": "text/html",
+      "response_size_bytes": 1180,
+      "sets_cookie": false,
+      "parameters": [
+        "id"
+      ],
+      "links_to": [],
+      "response_sample": {
+        "text": "<h1>403 Forbidden</h1><p>You do not have permission to view the customer record.</p>",
+        "provenance": "target_response",
+        "source_url": "https://bank.example.co/admin/customers/3391",
+        "fetched_at": null,
+        "language": "und",
+        "sha256": "1b9866542acd668af46602064217acfc916d1950ede604c75d718876db15f6df"
+      },
+      "observed_tech": [
+        {
+          "vendor": "djangoproject",
+          "product": "django",
+          "version": "4.2.7",
+          "cpe": "cpe:2.3:a:djangoproject:django:4.2.7:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "endpoint_id": "ep_6fc905a2072d9be1",
+      "app_id": "app_bank_demo",
+      "host": "bank.example.co",
+      "url": "https://bank.example.co/api/v2/accounts/{id}/transfers",
+      "path": "/api/v2/accounts/{id}/transfers",
+      "method": "POST",
+      "auth_required": 1,
+      "internet_facing": true,
+      "response_status": 200,
+      "response_content_type": "application/json",
+      "response_size_bytes": 2960,
+      "sets_cookie": false,
+      "parameters": [
+        "amount",
+        "destination",
+        "limit"
+      ],
+      "links_to": [],
+      "response_sample": {
+        "text": "{\"transfers\":[{\"id\":991,\"amount_cents\":250000,\"destination\":\"GB29NWBK60161331926819\"}]}",
+        "provenance": "target_response",
+        "source_url": "https://bank.example.co/api/v2/accounts/8801/transfers?limit=50",
+        "fetched_at": null,
+        "language": "und",
+        "sha256": "ee21ff1e27fc647262c0e24e4110fc6f5abf52211de180128a85e70bb3fef212"
+      },
+      "observed_tech": [
+        {
+          "vendor": "djangoproject",
+          "product": "django",
+          "version": "4.2.7",
+          "cpe": "cpe:2.3:a:djangoproject:django:4.2.7:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "endpoint_id": "ep_6d182bdce8cb0a94",
+      "app_id": "app_bank_demo",
+      "host": "bank.example.co",
+      "url": "https://bank.example.co/api/v2/statements/{id}",
+      "path": "/api/v2/statements/{id}",
+      "method": "GET",
+      "auth_required": 0,
+      "internet_facing": true,
+      "response_status": 200,
+      "response_content_type": "application/pdf",
+      "response_size_bytes": 88213,
+      "sets_cookie": false,
+      "parameters": [],
+      "links_to": [],
+      "response_sample": null,
+      "observed_tech": [
+        {
+          "vendor": "djangoproject",
+          "product": "django",
+          "version": "4.2.7",
+          "cpe": "cpe:2.3:a:djangoproject:django:4.2.7:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "endpoint_id": "ep_e6ddd9bda978d2c1",
+      "app_id": "app_bank_demo",
+      "host": "bank.example.co",
+      "url": "https://bank.example.co/static/vendor/jquery-3.4.1.min.js",
+      "path": "/static/vendor/jquery-3.4.1.min.js",
+      "method": "GET",
+      "auth_required": 0,
+      "internet_facing": true,
+      "response_status": 200,
+      "response_content_type": "application/javascript",
+      "response_size_bytes": 88145,
+      "sets_cookie": false,
+      "parameters": [],
+      "links_to": [],
+      "response_sample": {
+        "text": "/*! jQuery v3.4.1 | (c) JS Foundation and other contributors */",
+        "provenance": "target_response",
+        "source_url": "https://bank.example.co/static/vendor/jquery-3.4.1.min.js",
+        "fetched_at": null,
+        "language": "und",
+        "sha256": "aa32c7b54e1205da0bf68d8cb03af0d775c2aa8c85c9ae0ad90d8579d9c962c3"
+      },
+      "observed_tech": [
+        {
+          "vendor": "jquery",
+          "product": "jquery",
+          "version": "3.4.1",
+          "cpe": "cpe:2.3:a:jquery:jquery:3.4.1:*:*:*:*:*:*:*"
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "f_52db92981484bf02",
+      "scan_id": "scan_50670a1d226ed75a",
+      "app_id": "app_bank_demo",
+      "endpoint_id": "ep_c9a728349f10e60b",
+      "name": "Broken authentication: no rate limiting on credential submission",
+      "cwe_id": 307,
+      "cve_ids": [],
+      "scanner": "vulnprio",
+      "scanner_plugin_id": "vp-0001",
+      "scanner_severity": "high",
+      "scanner_confidence": 0.85,
+      "description": {
+        "text": "The login endpoint accepted 200 sequential credential attempts from one source address with no lockout, throttling or CAPTCHA.",
+        "provenance": "scanner_output",
+        "source_url": "https://bank.example.co/accounts/login",
+        "fetched_at": null,
+        "language": "und",
+        "sha256": "8bc2ca94a06f0f1b170273262c95ab47566bef4fb335a1c18385afbd6df0f52a"
+      },
+      "evidence": [
+        {
+          "text": "200 POST attempts in 41s, all answered HTTP 200 with 'invalid credentials'.",
+          "provenance": "scanner_output",
+          "source_url": "https://bank.example.co/accounts/login",
+          "fetched_at": null,
+          "language": "und",
+          "sha256": "88317092e3955d472e40a6fef9b6c457ea4edfaf203d6c3e681ad6ee56429738"
+        }
+      ],
+      "affected_component": null,
+      "observed_at": "2024-05-20T06:30:00",
+      "dedup_key": null,
+      "cluster_size": 1
+    },
+    {
+      "finding_id": "f_25b1696f6445241d",
+      "scan_id": "scan_50670a1d226ed75a",
+      "app_id": "app_bank_demo",
+      "endpoint_id": "ep_c9a728349f10e60b",
+      "name": "Session cookie missing the Secure attribute",
+      "cwe_id": 614,
+      "cve_ids": [],
+      "scanner": "vulnprio",
+      "scanner_plugin_id": "vp-0002",
+      "scanner_severity": "medium",
+      "scanner_confidence": 0.9,
+      "description": {
+        "text": "The sessionid cookie is set without the Secure attribute and can therefore be sent over a downgraded connection.",
+        "provenance": "scanner_output",
+        "source_url": "https://bank.example.co/accounts/login",
+        "fetched_at": null,
+        "language": "und",
+        "sha256": "f41a9ac8f9c808ef0c5c0ef2b915b473b0882a36cf97427996aff4399f0003b1"
+      },
+      "evidence": [
+        {
+          "text": "Set-Cookie: sessionid=8f1c2d; HttpOnly; Path=/",
+          "provenance": "target_response",
+          "source_url": "https://bank.example.co/accounts/login",
+          "fetched_at": null,
+          "language": "und",
+          "sha256": "d4d2025279549a0a4a1e939c577e36ae3ec9e33e9196fa7ee56898c78b815acc"
+        }
+      ],
+      "affected_component": null,
+      "observed_at": "2024-05-20T06:30:00",
+      "dedup_key": null,
+      "cluster_size": 1
+    },
+    {
+      "finding_id": "f_b077b787ccc623c0",
+      "scan_id": "scan_50670a1d226ed75a",
+      "app_id": "app_bank_demo",
+      "endpoint_id": "ep_970dae204030e98a",
+      "name": "Broken access control on the customer administration view",
+      "cwe_id": 285,
+      "cve_ids": [],
+      "scanner": "vulnprio",
+      "scanner_plugin_id": "vp-0003",
+      "scanner_severity": "critical",
+      "scanner_confidence": 0.75,
+      "description": {
+        "text": "A session holding only the customer role received a 200 response from the staff-only customer administration view when the request carried an X-Original-URL header.",
+        "provenance": "scanner_output",
+        "source_url": "https://bank.example.co/admin/customers/{id}",
+        "fetched_at": null,
+        "language": "und",
+        "sha256": "8726dd0f3dfddfd7440d645f441572b49a848e9dcc0408b808098fcd026f0a57"
+      },
+      "evidence": [
+        {
+          "text": "{\"customer_id\":3391,\"ssn_last4\":\"4417\",\"status\":\"active\"}",
+          "provenance": "target_response",
+          "source_url": "https://bank.example.co/admin/customers/{id}",
+          "fetched_at": null,
+          "language": "und",
+          "sha256": "31149a1f22b2d0ee4f345a7858b699535fbade24a56b7d7e4d2000f7659464cb"
+        }
+      ],
+      "affected_component": null,
+      "observed_at": "2024-05-20T06:30:00",
+      "dedup_key": null,
+      "cluster_size": 1
+    },
+    {
+      "finding_id": "f_a3e06a169abd14bd",
+      "scan_id": "scan_50670a1d226ed75a",
+      "app_id": "app_bank_demo",
+      "endpoint_id": "ep_6fc905a2072d9be1",
+      "name": "Insecure direct object reference on the transfers collection",
+      "cwe_id": 639,
+      "cve_ids": [],
+      "scanner": "vulnprio",
+      "scanner_plugin_id": "vp-0004",
+      "scanner_severity": "critical",
+      "scanner_confidence": 0.8,
+      "description": {
+        "text": "Changing the account segment of the transfers path returned another customer's transfer history without any authorisation check.",
+        "provenance": "scanner_output",
+        "source_url": "https://bank.example.co/api/v2/accounts/{id}/transfers",
+        "fetched_at": null,
+        "language": "und",
+        "sha256": "de7af76982f2190faa18adcc5f9d2c7dc7ceae3ab96b83a3563b05cc48e38410"
+      },
+      "evidence": [
+        {
+          "text": "{\"account\":8802,\"transfers\":[{\"id\":1042,\"amount_cents\":900000}]}",
+          "provenance": "target_response",
+          "source_url": "https://bank.example.co/api/v2/accounts/{id}/transfers",
+          "fetched_at": null,
+          "language": "und",
+          "sha256": "e91d94a3fb8b9535200fecc7b870c66295f3a05d040071ff605d6af7d45fa1ec"
+        }
+      ],
+      "affected_component": null,
+      "observed_at": "2024-05-20T06:30:00",
+      "dedup_key": null,
+      "cluster_size": 1
+    },
+    {
+      "finding_id": "f_3498056dab1970c1",
+      "scan_id": "scan_50670a1d226ed75a",
+      "app_id": "app_bank_demo",
+      "endpoint_id": "ep_6fc905a2072d9be1",
+      "name": "Missing anti-automation control on funds transfer",
+      "cwe_id": 799,
+      "cve_ids": [],
+      "scanner": "vulnprio",
+      "scanner_plugin_id": "vp-0005",
+      "scanner_severity": "medium",
+      "scanner_confidence": 0.6,
+      "description": {
+        "text": "The transfer endpoint accepted repeated submissions of the same idempotency key.",
+        "provenance": "scanner_output",
+        "source_url": "https://bank.example.co/api/v2/accounts/{id}/transfers",
+        "fetched_at": null,
+        "language": "und",
+        "sha256": "b2a02c352d29c37c7606877df6f3dfc3e9a513409964f8abc2ec1d715169f3be"
+      },
+      "evidence": [
+        {
+          "text": "12 identical transfer requests accepted with the same Idempotency-Key.",
+          "provenance": "scanner_output",
+          "source_url": "https://bank.example.co/api/v2/accounts/{id}/transfers",
+          "fetched_at": null,
+          "language": "und",
+          "sha256": "6c2f04e65f48ccd73d11b690224ba82030cc395e1b2c1ac2cc9392999bd0a272"
+        }
+      ],
+      "affected_component": null,
+      "observed_at": "2024-05-20T06:30:00",
+      "dedup_key": null,
+      "cluster_size": 1
+    },
+    {
+      "finding_id": "f_81d745abc39ebc59",
+      "scan_id": "scan_50670a1d226ed75a",
+      "app_id": "app_bank_demo",
+      "endpoint_id": "ep_6d182bdce8cb0a94",
+      "name": "Unauthenticated statement download by identifier guessing",
+      "cwe_id": 639,
+      "cve_ids": [],
+      "scanner": "vulnprio",
+      "scanner_plugin_id": "vp-0006",
+      "scanner_severity": "high",
+      "scanner_confidence": 0.7,
+      "description": {
+        "text": "Statement documents are served to any requester that knows the statement identifier; no session cookie or bearer token is required.",
+        "provenance": "scanner_output",
+        "source_url": "https://bank.example.co/api/v2/statements/{id}",
+        "fetched_at": null,
+        "language": "und",
+        "sha256": "2e2c29b229466c17f01a3e13f01442e3281b517207b631c98d94eeb4f54f2e8e"
+      },
+      "evidence": [
+        {
+          "text": "%PDF-1.7 ... Northwind Bank statement for account ending 8801 ...",
+          "provenance": "target_response",
+          "source_url": "https://bank.example.co/api/v2/statements/{id}",
+          "fetched_at": null,
+          "language": "und",
+          "sha256": "338ba0cfe16671066446ad31f9713806f076de5f3340fc49853122eebad30e75"
+        }
+      ],
+      "affected_component": null,
+      "observed_at": "2024-05-20T06:30:00",
+      "dedup_key": null,
+      "cluster_size": 1
+    },
+    {
+      "finding_id": "f_bd342e0ed557aa38",
+      "scan_id": "scan_50670a1d226ed75a",
+      "app_id": "app_bank_demo",
+      "endpoint_id": "ep_e6ddd9bda978d2c1",
+      "name": "Vulnerable JavaScript dependency: jQuery 3.4.1",
+      "cwe_id": 79,
+      "cve_ids": [
+        "CVE-2020-11022",
+        "CVE-2020-11023"
+      ],
+      "scanner": "vulnprio",
+      "scanner_plugin_id": "vp-0007",
+      "scanner_severity": "medium",
+      "scanner_confidence": 0.95,
+      "description": {
+        "text": "The bundled jQuery 3.4.1 is affected by CVE-2020-11022 and CVE-2020-11023, cross-site scripting issues in htmlPrefilter.",
+        "provenance": "scanner_output",
+        "source_url": "https://bank.example.co/static/vendor/jquery-3.4.1.min.js",
+        "fetched_at": null,
+        "language": "und",
+        "sha256": "ad863dd3bfce1cee149ace1280eb106295a3eb5185a8b84e860313c1cfc39205"
+      },
+      "evidence": [
+        {
+          "text": "/*! jQuery v3.4.1 | (c) JS Foundation and other contributors */",
+          "provenance": "target_response",
+          "source_url": "https://bank.example.co/static/vendor/jquery-3.4.1.min.js",
+          "fetched_at": null,
+          "language": "und",
+          "sha256": "aa32c7b54e1205da0bf68d8cb03af0d775c2aa8c85c9ae0ad90d8579d9c962c3"
+        }
+      ],
+      "affected_component": {
+        "vendor": "jquery",
+        "product": "jquery",
+        "version": "3.4.1",
+        "cpe": "cpe:2.3:a:jquery:jquery:3.4.1:*:*:*:*:*:*:*"
+      },
+      "observed_at": "2024-05-20T06:30:00",
+      "dedup_key": null,
+      "cluster_size": 1
+    },
+    {
+      "finding_id": "f_ee8800b1d789eb3d",
+      "scan_id": "scan_50670a1d226ed75a",
+      "app_id": "app_bank_demo",
+      "endpoint_id": "ep_e6ddd9bda978d2c1",
+      "name": "Static asset served without a cache-control policy",
+      "cwe_id": 525,
+      "cve_ids": [],
+      "scanner": "vulnprio",
+      "scanner_plugin_id": "vp-0008",
+      "scanner_severity": "low",
+      "scanner_confidence": 0.5,
+      "description": {
+        "text": "The versioned static bundle is served without Cache-Control, so intermediaries may store it inconsistently.",
+        "provenance": "scanner_output",
+        "source_url": "https://bank.example.co/static/vendor/jquery-3.4.1.min.js",
+        "fetched_at": null,
+        "language": "und",
+        "sha256": "13705d65ecd9423c955bc974403cd00393d32e67ef575d2f7699ec91b5a19178"
+      },
+      "evidence": [],
+      "affected_component": null,
+      "observed_at": "2024-05-20T06:30:00",
+      "dedup_key": null,
+      "cluster_size": 1
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+name: opportunistic
+description: >-
+  Mass-scanning adversary using public exploit code. Low skill, low resources, short
+  horizon, no target preference. This is the default because it matches the majority of
+  observed web application compromise.
+skill: 0.3
+resources: 0.2
+entry_privilege: 0
+horizon_days: 30
+max_chain_length: 2
+controls_target_content: false
+target_preference: {}
+w_intercept: -4.2
+w_epss_logit: 1.2
+w_kev: 2.6
+w_kev_ransomware: 0.5
+w_feasibility: 1.3
+w_applicability: 2.0
+w_exposure: 1.4
+w_asset_criticality: 0.4
+w_complexity_high: -1.2
+w_user_interaction: -0.7
+w_privileges_required: -0.9
+w_skill: 0.3
+w_resources: 0.2
+max_p: 0.99

@@ -1,0 +1,1269 @@
+{
+  "resultsPerPage": 12,
+  "startIndex": 0,
+  "totalResults": 12,
+  "format": "NVD_CVE",
+  "version": "2.0",
+  "timestamp": "2024-06-01T00:00:00.000",
+  "vulnerabilities": [
+    {
+      "cve": {
+        "id": "CVE-2024-0001",
+        "sourceIdentifier": "cve@mitre.org",
+        "published": "2024-01-10T15:15:08.123",
+        "lastModified": "2024-03-02T11:00:00.000",
+        "vulnStatus": "Analyzed",
+        "descriptions": [
+          {
+            "lang": "en",
+            "value": "SQL injection in the login handler of Example Struts Commerce 2.5 allows remote attackers to read arbitrary database rows via the username parameter."
+          }
+        ],
+        "metrics": {
+          "cvssMetricV31": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH",
+                "baseScore": 9.8,
+                "baseSeverity": "CRITICAL"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            },
+            {
+              "source": "security@example.com",
+              "type": "Secondary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:L/A:N",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "LOW",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "LOW",
+                "availabilityImpact": "NONE",
+                "baseScore": 8.3,
+                "baseSeverity": "HIGH"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            }
+          ],
+          "cvssMetricV2": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "2.0",
+                "vectorString": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+                "accessVector": "NETWORK",
+                "accessComplexity": "LOW",
+                "authentication": "NONE",
+                "confidentialityImpact": "PARTIAL",
+                "integrityImpact": "PARTIAL",
+                "availabilityImpact": "PARTIAL",
+                "baseScore": 7.5
+              },
+              "baseSeverity": "HIGH",
+              "exploitabilityScore": 10.0,
+              "impactScore": 6.4,
+              "acInsufInfo": false,
+              "obtainAllPrivilege": false,
+              "obtainUserPrivilege": false,
+              "obtainOtherPrivilege": false,
+              "userInteractionRequired": false
+            }
+          ]
+        },
+        "weaknesses": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-89"
+              }
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:apache:struts:*:*:*:*:*:*:*:*",
+                    "matchCriteriaId": ":2.3:A:APACHE:STRUTS:*:*:*:*:*:*:*:*",
+                    "versionStartIncluding": "2.5.0",
+                    "versionEndExcluding": "2.5.22"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-0001",
+            "source": "cve@mitre.org",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          },
+          {
+            "url": "https://github.com/example/struts-advisories/blob/main/CVE-2024-0001.md",
+            "source": "cve@mitre.org",
+            "tags": [
+              "Exploit",
+              "Third Party Advisory"
+            ]
+          },
+          {
+            "url": "https://malicious.example.net/cve-2024-0001",
+            "source": "cve@mitre.org",
+            "tags": [
+              "Third Party Advisory"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2021-44228",
+        "sourceIdentifier": "security@apache.org",
+        "published": "2021-12-10T10:15:09.143",
+        "lastModified": "2023-11-07T03:39:23.747",
+        "vulnStatus": "Modified",
+        "descriptions": [
+          {
+            "lang": "en",
+            "value": "Apache Log4j2 2.0-beta9 through 2.15.0 JNDI features used in configuration, log messages, and parameters do not protect against attacker controlled LDAP and other JNDI related endpoints, allowing remote code execution."
+          }
+        ],
+        "metrics": {
+          "cvssMetricV31": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "CHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH",
+                "baseScore": 10.0,
+                "baseSeverity": "CRITICAL"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            },
+            {
+              "source": "security@apache.org",
+              "type": "Secondary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "CHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH",
+                "baseScore": 10.0,
+                "baseSeverity": "CRITICAL"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            }
+          ],
+          "cvssMetricV2": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "2.0",
+                "vectorString": "AV:N/AC:M/Au:N/C:C/I:C/A:C",
+                "accessVector": "NETWORK",
+                "accessComplexity": "MEDIUM",
+                "authentication": "NONE",
+                "confidentialityImpact": "COMPLETE",
+                "integrityImpact": "COMPLETE",
+                "availabilityImpact": "COMPLETE",
+                "baseScore": 9.3
+              },
+              "baseSeverity": "HIGH",
+              "exploitabilityScore": 10.0,
+              "impactScore": 6.4,
+              "acInsufInfo": false,
+              "obtainAllPrivilege": false,
+              "obtainUserPrivilege": false,
+              "obtainOtherPrivilege": false,
+              "userInteractionRequired": false
+            }
+          ]
+        },
+        "weaknesses": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-502"
+              }
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "E:2.3:A:APACHE:LOG4J:*:*:*:*:*:*:*:*",
+                    "versionStartIncluding": "2.0",
+                    "versionEndExcluding": "2.15.0"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
+            "source": "security@apache.org",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          },
+          {
+            "url": "https://www.cisa.gov/news-events/alerts/2021/12/11/apache-log4j-vulnerability",
+            "source": "security@apache.org",
+            "tags": [
+              "US Government Resource"
+            ]
+          },
+          {
+            "url": "https://owasp.org/es/log4shell-resumen",
+            "source": "security@apache.org",
+            "tags": [
+              "Third Party Advisory"
+            ]
+          },
+          {
+            "url": "https://github.com/ejemplo/log4shell-notas",
+            "source": "security@apache.org",
+            "tags": [
+              "Third Party Advisory"
+            ]
+          },
+          {
+            "url": "https://www.exploit-db.com/exploits/50592",
+            "source": "security@apache.org",
+            "tags": [
+              "Exploit"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2017-5638",
+        "sourceIdentifier": "security@apache.org",
+        "published": "2017-03-11T02:59:00.233",
+        "lastModified": "2022-02-07T16:14:46.037",
+        "vulnStatus": "Modified",
+        "descriptions": [
+          {
+            "lang": "en",
+            "value": "The Jakarta Multipart parser in Apache Struts 2 2.3.x before 2.3.32 and 2.5.x before 2.5.10.1 mishandles file upload, which allows remote attackers to execute arbitrary commands via a crafted Content-Type header."
+          }
+        ],
+        "metrics": {
+          "cvssMetricV30": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "3.0",
+                "vectorString": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "CHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH",
+                "baseScore": 10.0,
+                "baseSeverity": "CRITICAL"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            }
+          ],
+          "cvssMetricV2": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "2.0",
+                "vectorString": "AV:N/AC:L/Au:N/C:C/I:C/A:C",
+                "accessVector": "NETWORK",
+                "accessComplexity": "LOW",
+                "authentication": "NONE",
+                "confidentialityImpact": "COMPLETE",
+                "integrityImpact": "COMPLETE",
+                "availabilityImpact": "COMPLETE",
+                "baseScore": 10.0
+              },
+              "baseSeverity": "HIGH",
+              "exploitabilityScore": 10.0,
+              "impactScore": 6.4,
+              "acInsufInfo": false,
+              "obtainAllPrivilege": false,
+              "obtainUserPrivilege": false,
+              "obtainOtherPrivilege": false,
+              "userInteractionRequired": false
+            }
+          ]
+        },
+        "weaknesses": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-20"
+              }
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:apache:struts:*:*:*:*:*:*:*:*",
+                    "matchCriteriaId": ":2.3:A:APACHE:STRUTS:*:*:*:*:*:*:*:*",
+                    "versionStartIncluding": "2.5.0",
+                    "versionEndExcluding": "2.5.10.1"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2017-5638",
+            "source": "security@apache.org",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          },
+          {
+            "url": "https://www.exploit-db.com/exploits/41570",
+            "source": "security@apache.org",
+            "tags": [
+              "Exploit"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2014-0160",
+        "sourceIdentifier": "secalert@redhat.com",
+        "published": "2014-04-07T22:55:03.893",
+        "lastModified": "2023-11-07T02:18:10.323",
+        "vulnStatus": "Modified",
+        "descriptions": [
+          {
+            "lang": "en",
+            "value": "The TLS and DTLS implementations in OpenSSL 1.0.1 before 1.0.1g do not properly handle Heartbeat Extension packets, which allows remote attackers to obtain sensitive information from process memory."
+          }
+        ],
+        "metrics": {
+          "cvssMetricV2": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "2.0",
+                "vectorString": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+                "accessVector": "NETWORK",
+                "accessComplexity": "LOW",
+                "authentication": "NONE",
+                "confidentialityImpact": "PARTIAL",
+                "integrityImpact": "NONE",
+                "availabilityImpact": "NONE",
+                "baseScore": 5.0
+              },
+              "baseSeverity": "MEDIUM",
+              "exploitabilityScore": 10.0,
+              "impactScore": 6.4,
+              "acInsufInfo": false,
+              "obtainAllPrivilege": false,
+              "obtainUserPrivilege": false,
+              "obtainOtherPrivilege": false,
+              "userInteractionRequired": false
+            }
+          ]
+        },
+        "weaknesses": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-119"
+              }
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*",
+                    "matchCriteriaId": ".3:A:OPENSSL:OPENSSL:*:*:*:*:*:*:*:*",
+                    "versionStartIncluding": "1.0.1",
+                    "versionEndExcluding": "1.0.1g"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2014-0160",
+            "source": "secalert@redhat.com",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2019-11043",
+        "sourceIdentifier": "cve@mitre.org",
+        "published": "2019-10-28T19:15:10.887",
+        "lastModified": "2023-11-07T03:02:20.983",
+        "vulnStatus": "Modified",
+        "descriptions": [
+          {
+            "lang": "en",
+            "value": "In PHP versions 7.1.x below 7.1.33, 7.2.x below 7.2.24 and 7.3.x below 7.3.11 in certain nginx plus php-fpm configurations, it is possible to cause php-fpm to execute remote code via a crafted URL path."
+          }
+        ],
+        "metrics": {
+          "cvssMetricV31": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH",
+                "baseScore": 9.8,
+                "baseSeverity": "CRITICAL"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            }
+          ],
+          "cvssMetricV2": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "2.0",
+                "vectorString": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+                "accessVector": "NETWORK",
+                "accessComplexity": "LOW",
+                "authentication": "NONE",
+                "confidentialityImpact": "PARTIAL",
+                "integrityImpact": "PARTIAL",
+                "availabilityImpact": "PARTIAL",
+                "baseScore": 7.5
+              },
+              "baseSeverity": "HIGH",
+              "exploitabilityScore": 10.0,
+              "impactScore": 6.4,
+              "acInsufInfo": false,
+              "obtainAllPrivilege": false,
+              "obtainUserPrivilege": false,
+              "obtainOtherPrivilege": false,
+              "userInteractionRequired": false
+            }
+          ]
+        },
+        "weaknesses": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-787"
+              }
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:php:php:*:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "CPE:2.3:A:PHP:PHP:*:*:*:*:*:*:*:*",
+                    "versionStartIncluding": "7.1.0",
+                    "versionEndExcluding": "7.1.33"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2019-11043",
+            "source": "cve@mitre.org",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          },
+          {
+            "url": "https://www.exploit-db.com/exploits/47553",
+            "source": "cve@mitre.org",
+            "tags": [
+              "Exploit"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2022-22965",
+        "sourceIdentifier": "security@vmware.com",
+        "published": "2022-04-01T23:15:13.077",
+        "lastModified": "2023-11-07T03:44:33.240",
+        "vulnStatus": "Modified",
+        "descriptions": [
+          {
+            "lang": "en",
+            "value": "A Spring MVC or Spring WebFlux application running on JDK 9+ may be vulnerable to remote code execution via data binding when deployed as a WAR on Apache Tomcat."
+          }
+        ],
+        "metrics": {
+          "cvssMetricV31": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH",
+                "baseScore": 9.8,
+                "baseSeverity": "CRITICAL"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            },
+            {
+              "source": "security@vmware.com",
+              "type": "Secondary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH",
+                "baseScore": 9.8,
+                "baseSeverity": "CRITICAL"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            }
+          ]
+        },
+        "weaknesses": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-94"
+              }
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:vmware:spring_framework:*:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "ARE:SPRING_FRAMEWORK:*:*:*:*:*:*:*:*",
+                    "versionEndExcluding": "5.3.18"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2022-22965",
+            "source": "security@vmware.com",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          },
+          {
+            "url": "https://portswigger.net/daily-swig/spring4shell",
+            "source": "security@vmware.com",
+            "tags": [
+              "Press/Media Coverage"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2020-1938",
+        "sourceIdentifier": "security@apache.org",
+        "published": "2020-02-24T22:15:11.027",
+        "lastModified": "2023-11-07T03:19:44.330",
+        "vulnStatus": "Modified",
+        "descriptions": [
+          {
+            "lang": "en",
+            "value": "When using the Apache JServ Protocol connector, Apache Tomcat treats AJP connections as having higher trust, allowing an attacker to read or include files in the web application directory."
+          }
+        ],
+        "metrics": {
+          "cvssMetricV31": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH",
+                "baseScore": 9.8,
+                "baseSeverity": "CRITICAL"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            },
+            {
+              "source": "security@apache.org",
+              "type": "Secondary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "NONE",
+                "availabilityImpact": "NONE",
+                "baseScore": 7.5,
+                "baseSeverity": "HIGH"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            }
+          ]
+        },
+        "weaknesses": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-269"
+              }
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:apache:tomcat:*:*:*:*:*:*:*:*",
+                    "matchCriteriaId": ":2.3:A:APACHE:TOMCAT:*:*:*:*:*:*:*:*",
+                    "versionStartIncluding": "9.0.0",
+                    "versionEndExcluding": "9.0.31"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-1938",
+            "source": "security@apache.org",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2023-44487",
+        "sourceIdentifier": "cve@mitre.org",
+        "published": "2023-10-10T14:15:10.883",
+        "lastModified": "2024-04-03T15:15:52.293",
+        "vulnStatus": "Modified",
+        "descriptions": [
+          {
+            "lang": "en",
+            "value": "The HTTP/2 protocol allows a denial of service because request cancellation can reset many streams quickly, as exploited in the wild in 2023."
+          }
+        ],
+        "metrics": {
+          "cvssMetricV31": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "NONE",
+                "integrityImpact": "NONE",
+                "availabilityImpact": "HIGH",
+                "baseScore": 7.5,
+                "baseSeverity": "HIGH"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            }
+          ]
+        },
+        "weaknesses": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-400"
+              }
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:apache:tomcat:*:*:*:*:*:*:*:*",
+                    "matchCriteriaId": ":2.3:A:APACHE:TOMCAT:*:*:*:*:*:*:*:*",
+                    "versionStartIncluding": "10.1.0",
+                    "versionEndExcluding": "10.1.14"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-44487",
+            "source": "cve@mitre.org",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2018-11776",
+        "sourceIdentifier": "security@apache.org",
+        "published": "2018-08-22T13:29:00.263",
+        "lastModified": "2023-11-07T02:55:48.727",
+        "vulnStatus": "Modified",
+        "descriptions": [
+          {
+            "lang": "en",
+            "value": "Apache Struts versions 2.3 to 2.3.34 and 2.5 to 2.5.16 suffer from possible remote code execution when namespace value is not set for a result defined in underlying configurations."
+          }
+        ],
+        "metrics": {
+          "cvssMetricV30": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "3.0",
+                "vectorString": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "HIGH",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH",
+                "baseScore": 8.1,
+                "baseSeverity": "HIGH"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            }
+          ],
+          "cvssMetricV2": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "2.0",
+                "vectorString": "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+                "accessVector": "NETWORK",
+                "accessComplexity": "MEDIUM",
+                "authentication": "NONE",
+                "confidentialityImpact": "PARTIAL",
+                "integrityImpact": "PARTIAL",
+                "availabilityImpact": "PARTIAL",
+                "baseScore": 6.8
+              },
+              "baseSeverity": "MEDIUM",
+              "exploitabilityScore": 10.0,
+              "impactScore": 6.4,
+              "acInsufInfo": false,
+              "obtainAllPrivilege": false,
+              "obtainUserPrivilege": false,
+              "obtainOtherPrivilege": false,
+              "userInteractionRequired": false
+            }
+          ]
+        },
+        "weaknesses": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-20"
+              }
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:apache:struts:*:*:*:*:*:*:*:*",
+                    "matchCriteriaId": ":2.3:A:APACHE:STRUTS:*:*:*:*:*:*:*:*",
+                    "versionStartIncluding": "2.5.0",
+                    "versionEndIncluding": "2.5.16"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2018-11776",
+            "source": "security@apache.org",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2024-3400",
+        "sourceIdentifier": "psirt@paloaltonetworks.com",
+        "published": "2024-04-12T08:15:06.230",
+        "lastModified": "2024-05-20T09:11:22.100",
+        "vulnStatus": "Analyzed",
+        "descriptions": [
+          {
+            "lang": "en",
+            "value": "A command injection in the GlobalProtect feature of PAN-OS enables an unauthenticated attacker to execute arbitrary code with root privileges on the firewall."
+          }
+        ],
+        "metrics": {
+          "cvssMetricV31": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "CHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH",
+                "baseScore": 10.0,
+                "baseSeverity": "CRITICAL"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            },
+            {
+              "source": "psirt@paloaltonetworks.com",
+              "type": "Secondary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "CHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH",
+                "baseScore": 10.0,
+                "baseSeverity": "CRITICAL"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            }
+          ]
+        },
+        "weaknesses": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-77"
+              }
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:o:paloaltonetworks:pan-os:11.1.0:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "NETWORKS:PAN-OS:11.1.0:*:*:*:*:*:*:*"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-3400",
+            "source": "psirt@paloaltonetworks.com",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2024-27198",
+        "sourceIdentifier": "cve@jetbrains.com",
+        "published": "2024-03-04T18:15:07.567",
+        "lastModified": "2024-03-05T13:41:01.900",
+        "vulnStatus": "Awaiting Analysis",
+        "descriptions": [
+          {
+            "lang": "en",
+            "value": "In JetBrains TeamCity before 2023.11.4 authentication bypass allowing to perform admin actions was possible."
+          }
+        ],
+        "metrics": {
+          "cvssMetricV40": [
+            {
+              "source": "cve@jetbrains.com",
+              "type": "Secondary",
+              "cvssData": {
+                "version": "4.0",
+                "vectorString": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "attackRequirements": "NONE",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "vulnConfidentialityImpact": "HIGH",
+                "vulnIntegrityImpact": "HIGH",
+                "vulnAvailabilityImpact": "HIGH",
+                "subConfidentialityImpact": "NONE",
+                "subIntegrityImpact": "NONE",
+                "subAvailabilityImpact": "NONE",
+                "baseScore": 9.3,
+                "baseSeverity": "CRITICAL"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            }
+          ],
+          "cvssMetricV31": [
+            {
+              "source": "cve@jetbrains.com",
+              "type": "Secondary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "NONE",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH",
+                "baseScore": 9.8,
+                "baseSeverity": "CRITICAL"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            }
+          ]
+        },
+        "weaknesses": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-288"
+              }
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:jetbrains:teamcity:*:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "A:JETBRAINS:TEAMCITY:*:*:*:*:*:*:*:*",
+                    "versionEndExcluding": "2023.11.4"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-27198",
+            "source": "cve@jetbrains.com",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2025-1234",
+        "sourceIdentifier": "cve@mitre.org",
+        "published": "2025-01-20T10:00:00.000",
+        "lastModified": "2025-01-25T10:00:00.000",
+        "vulnStatus": "Awaiting Analysis",
+        "descriptions": [
+          {
+            "lang": "en",
+            "value": "Server-side template injection in Example Portal 4.2 allows an authenticated user to execute arbitrary expressions. Published after the evaluation cut-off on purpose: the as-of guard must hide it."
+          }
+        ],
+        "metrics": {
+          "cvssMetricV31": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "cvssData": {
+                "version": "3.1",
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                "attackVector": "NETWORK",
+                "attackComplexity": "LOW",
+                "privilegesRequired": "LOW",
+                "userInteraction": "NONE",
+                "scope": "UNCHANGED",
+                "confidentialityImpact": "HIGH",
+                "integrityImpact": "HIGH",
+                "availabilityImpact": "HIGH",
+                "baseScore": 8.8,
+                "baseSeverity": "HIGH"
+              },
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            }
+          ]
+        },
+        "weaknesses": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "description": [
+              {
+                "lang": "en",
+                "value": "CWE-1336"
+              }
+            ]
+          }
+        ],
+        "configurations": [
+          {
+            "nodes": [
+              {
+                "operator": "OR",
+                "negate": false,
+                "cpeMatch": [
+                  {
+                    "vulnerable": true,
+                    "criteria": "cpe:2.3:a:example:portal:4.2:*:*:*:*:*:*:*",
+                    "matchCriteriaId": "3:A:EXAMPLE:PORTAL:4.2:*:*:*:*:*:*:*"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-1234",
+            "source": "cve@mitre.org",
+            "tags": [
+              "Vendor Advisory"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

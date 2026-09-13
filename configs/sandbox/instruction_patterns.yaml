@@ -1,0 +1,1077 @@
+# vulnprio instruction-pattern library.
+
+#
+
+# Every entry is applied case-insensitively to text that has already been through
+
+# vulnprio.sandbox.normalize, so patterns may assume single-space separators, no
+
+# zero-width characters and folded homoglyphs. They are still written with \s+ between
+
+# words so that they survive re-use on raw text.
+
+#
+
+# Design rule: a pattern fires on an *imperative addressed to the reader/model*, not on
+
+# the vocabulary of security writing. Advisories legitimately say "an attacker can act as
+
+# a proxy", "set the Secure flag", "severity: critical" and "CVSS base score 9.8"; none of
+
+# those may produce a signal, because a detector that flags ordinary advisory prose is
+
+# useless in production and scores badly on the benign controls of the adversarial corpus.
+
+version: 1
+
+name: vulnprio-instruction-patterns
+
+updated: '2024-06-01'
+
+description: >-
+
+  Prompt-injection pattern library covering instruction override, role hijack, schema
+
+  smuggling, canary exfiltration, delimiter escape, numeric overflow, fabricated evidence,
+
+  hidden text, encoded payloads and multilingual variants (ru, zh, es, de, ar).
+
+
+
+patterns:
+
+
+
+  # ------------------------------------------------------------------ instruction override
+
+  - id: io_ignore_previous
+
+    category: instruction_override
+
+    regex: '\bignore\s+(?:all\s+)?(?:of\s+)?(?:the\s+)?(?:previous|prior|above|preceding|earlier|foregoing|last)\s+(?:\w+\s+){0,2}?(?:instruction|instructions|prompt|prompts|message|messages|direction|directions|rule|rules|guidance)\b'
+
+    description: Classic "ignore the previous instructions" override.
+
+
+
+  - id: io_ignore_everything_above
+
+    category: instruction_override
+
+    regex: '\bignore\s+(?:everything|all)\s+(?:above|before|that\s+(?:came|was)\s+before|you\s+(?:were\s+)?(?:told|given))\b'
+
+    description: Override phrased against the whole preceding context rather than "instructions".
+
+
+
+  - id: io_disregard_instructions
+
+    category: instruction_override
+
+    regex: '\bdisregard\s+(?:all\s+)?(?:of\s+)?(?:the\s+|your\s+|any\s+)*(?:previous|prior|above|earlier|system|original|foregoing)\s+(?:\w+\s+){0,2}?(?:instruction|instructions|prompt|prompts|rule|rules|message|messages|guidance)\b'
+
+    description: Disregard-the-system-prompt and its variants.
+
+
+
+  - id: io_forget_previous
+
+    category: instruction_override
+
+    regex: '\bforget\s+(?:everything|all|any|what)\s+(?:\w+\s+){0,3}?(?:above|before|previous|prior|earlier|you\s+(?:were\s+)?(?:told|read|given))\b'
+
+    description: Memory-wipe phrasing used to shed the system prompt.
+
+
+
+  - id: io_new_instructions
+
+    category: instruction_override
+
+    regex: '\b(?:new|updated|revised|real|actual|corrected|additional)\s+(?:system\s+)?instructions?\s*(?:follow\b|below\b|[:\-])'
+
+    description: Announces a replacement instruction block inside untrusted content.
+
+
+
+  - id: io_override_system
+
+    category: instruction_override
+
+    regex: '\boverride\s+(?:the\s+|your\s+|all\s+)*(?:system|previous|prior|safety|security|default)\s+(?:prompt|instruction|instructions|rule|rules|policy|policies|setting|settings)\b'
+
+    description: Explicit request to override system-level configuration.
+
+
+
+  - id: io_do_not_follow
+
+    category: instruction_override
+
+    regex: '\bdo\s+not\s+(?:follow|obey|comply\s+with|apply)\s+(?:the\s+|any\s+|your\s+)*(?:previous|above|prior|earlier|system|original)\b'
+
+    description: Negative override of the preceding instructions.
+
+
+
+  - id: io_instead_follow
+
+    category: instruction_override
+
+    regex: '\binstead\s+(?:of\s+(?:following|obeying)\s+)?(?:the\s+)?(?:previous|above|system|original)\s+(?:instruction|instructions|prompt)\b'
+
+    description: Substitution phrasing ("instead of the system prompt, do this").
+
+
+
+  - id: io_from_now_on
+
+    category: instruction_override
+
+    regex: '\bfrom\s+now\s+on\s*,?\s+(?:you|ignore|always|never|respond|answer|output|treat|rate|score)\b'
+
+    description: Persistent-behaviour override opener.
+
+
+
+  - id: io_stop_following
+
+    category: instruction_override
+
+    regex: '\bstop\s+(?:following|obeying|applying|enforcing)\s+(?:the\s+|your\s+)*(?:previous|above|system|original|safety|security)\b'
+
+    description: Asks the model to abandon its governing instructions.
+
+
+
+  - id: io_attention_model
+
+    category: instruction_override
+
+    regex: '\b(?:important|urgent|attention|warning|notice)\s*[:!\-]{1,2}\s*(?:to\s+the\s+)?(?:ai|a\.i\.|llm|assistant|model|language\s+model|agent|chatbot)\b'
+
+    description: Untrusted content addressing the model directly.
+
+
+
+  - id: io_you_must_rate
+
+    category: instruction_override
+
+    regex: '\byou\s+(?:must|shall|should|will|have\s+to|need\s+to)\s+(?:now\s+)?(?:always\s+|immediately\s+|instead\s+)?(?:rate|score|classify|prioriti[sz]e|treat|flag|mark)\s+(?:this|it|the\s+(?:finding|vulnerability|issue|alert|endpoint))\b'
+
+    description: Direct command to the model about the assessment outcome.
+
+
+
+  - id: io_you_must_output
+
+    category: instruction_override
+
+    regex: '\byou\s+(?:must|shall|should|will|have\s+to|need\s+to)\s+(?:only\s+)?(?:output|return|respond\s+with|reply\s+with|emit|answer\s+with)\s+(?:the\s+following|this|that|json|exactly|only)\b'
+
+    description: Direct command constraining the model's output.
+
+
+
+  - id: io_no_longer_bound
+
+    category: instruction_override
+
+    regex: '\b(?:you\s+are\s+)?no\s+longer\s+(?:bound|restricted|limited|constrained|governed)\s+by\b'
+
+    description: Claims the model's constraints have been lifted.
+
+
+
+  - id: io_this_overrides
+
+    category: instruction_override
+
+    regex: '\bthis\s+(?:message|text|note|section|content|paragraph)\s+(?:takes\s+precedence|overrides|supersedes|replaces)\b'
+
+    description: Untrusted text asserting precedence over operator text.
+
+
+
+  # ------------------------------------------------------------------------- role hijack
+
+  - id: rh_you_are_now
+
+    category: role_hijack
+
+    regex: '\byou\s+are\s+now\s+(?:an?|the|in|operating|acting|running|allowed|permitted|free|no\s+longer)\b'
+
+    description: Role reassignment ("you are now a ...").
+
+
+
+  - id: rh_act_as
+
+    category: role_hijack
+
+    regex: '\b(?:act|behave|operate|function|serve)\s+as\s+(?:an?\s+|the\s+)?(?:\w+\s+){0,3}?(?:assistant|ai|llm|model|agent|chatbot|bot|dan|jailbroken|unrestricted|uncensored|persona)\b'
+
+    description: Asks the reader to take on a model persona (not "act as a proxy").
+
+
+
+  - id: rh_act_as_if_you
+
+    category: role_hijack
+
+    regex: '\bact\s+as\s+if\s+you\s+(?:are|were|have|had)\b'
+
+    description: Counterfactual role instruction addressed to the model.
+
+
+
+  - id: rh_pretend_you_are
+
+    category: role_hijack
+
+    regex: '\bpretend\s+(?:that\s+)?(?:you\s+(?:are|were)|to\s+be\s+(?:an?\s+)?(?:ai|assistant|model|different|new))\b'
+
+    description: Pretence framing of a role hijack.
+
+
+
+  - id: rh_roleplay
+
+    category: role_hijack
+
+    regex: '\brole[\s\-]?play(?:ing)?\s+(?:as\b|the\s+role\s+of\b)'
+
+    description: Roleplay framing used to shed instructions.
+
+
+
+  - id: rh_chat_turn_marker
+
+    category: role_hijack
+
+    regex: '(?:<\|\s*(?:im_start|im_end|start_header_id|end_header_id|endoftext)\s*\|>|<\|?\s*(?:im_start|im_end)?\s*\|?\s*(?:system|assistant|user|human)\s*\|?>|\[\s*/?\s*(?:INST|SYSTEM|ASSISTANT)\s*\])'
+
+    description: Forged chat-template turn markers smuggled into content.
+
+
+
+  - id: rh_system_directive
+
+    category: role_hijack
+
+    regex: '\b(?:system|assistant|developer|operator)\s*(?:prompt|message|note)?\s*:\s*(?:you\b|your\b|ignore\b|disregard\b|always\b|never\b|new\b|override\b|the\s+following\b|treat\b|set\b|rate\b|report\b)'
+
+    description: '"system:" / "assistant:" impersonation followed by an imperative.'
+
+
+
+  - id: rh_system_turn_imperative
+
+    category: role_hijack
+
+    regex: '(?:^|[
+
+>\]\)\.]|\s)(?:system|assistant|developer|operator)\s*:\s*(?:give|make|treat|rank|assign|prioriti[sz]e|output|return|respond|print|elevate|promote|escalate|raise|lower|classify|label|flag|consider)\b'
+
+    description: Forged turn marker followed by a ranking or output imperative.
+
+
+
+  - id: rh_system_turn_declarative
+    category: role_hijack
+    regex: '(?:^|[\n>\)\.]|\s)(?:system|assistant|developer)\s*:\s*(?:the|this|that|these|those|it)\s+(?:\w+\s+){0,2}?(?:finding|findings|vulnerability|vulnerabilities|alert|alerts|issue|issues|item|items|entry|above|preceding|previous)\b'
+    description: >-
+      Forged turn marker making an assertion about the finding rather than issuing an
+      imperative, which is how a deflation attack avoids the imperative patterns. Deliberately
+      narrow: "System: Windows Server 2019" and "Operator: the administrator on call" are
+      ordinary advisory prose and must not fire.
+
+  - id: rh_jailbreak_mode
+
+    category: role_hijack
+
+    regex: '\b(?:dan\s+mode|developer\s+mode\s+enabled|jailbreak(?:en)?|jailbroken|do\s+anything\s+now|god\s+mode)\b'
+
+    description: Named jailbreak personas.
+
+
+
+  - id: rh_switch_persona
+
+    category: role_hijack
+
+    regex: '\b(?:switch|change|reset)\s+(?:to\s+)?(?:your\s+)?(?:persona|character|role|mode|identity)\s+(?:to|into)\b'
+
+    description: Persona switch request.
+
+
+
+  - id: rh_you_are_not_analyst
+
+    category: role_hijack
+
+    regex: '\byou\s+are\s+not\s+(?:an?\s+)?(?:\w+\s+){0,2}?(?:analyst|assistant|ai|model|scanner)\s*[,.;]\s*you\s+are\b'
+
+    description: Negation-then-reassignment role hijack.
+
+
+
+  # --------------------------------------------------------------------- schema smuggling
+
+  - id: ss_confidence_assignment
+
+    category: schema_smuggling
+
+    regex: '[\x22\x27]?\bconfidence[\x22\x27]?\s*[:=]\s*[\x22\x27]?(?:1(?:\.0+)?|0?\.9\d*)\b'
+
+    description: >-
+
+      Smuggled numeric assignment of the confidence field. Word values are deliberately not
+
+      matched: scanner alerts legitimately print "Confidence: High".
+
+
+
+  - id: ss_feasibility_assignment
+
+    category: schema_smuggling
+
+    regex: '[\x22\x27]?\b(?:exploit_)?feasibility[\x22\x27]?\s*[:=]\s*[\x22\x27]?(?:1(?:\.0+)?|0?\.[89]\d*|high|very\s+high|critical)\b'
+
+    description: Smuggled assignment of exploit_feasibility.
+
+
+
+  - id: ss_criticality_assignment
+
+    category: schema_smuggling
+
+    regex: '[\x22\x27]?\b(?:asset_)?criticality[\x22\x27]?\s*[:=]\s*[\x22\x27]?(?:1(?:\.0+)?|0?\.[89]\d*|maximum)\b'
+
+    description: Smuggled assignment of asset criticality.
+
+
+
+  - id: ss_p_exploit_assignment
+
+    category: schema_smuggling
+
+    regex: '[\x22\x27]?\bp_(?:exploit|applicable)[\x22\x27]?\s*[:=]\s*[\x22\x27]?(?:1(?:\.0+)?|0?\.9\d*)\b'
+
+    description: Smuggled assignment of a probability field.
+
+
+
+  - id: ss_internal_field_assignment
+
+    category: schema_smuggling
+
+    regex: '[\x22\x27]?\b(?:relevance_grade|data_sensitivity|impact_[cia]|expected_loss|chain_weight|reach_delta|privilege_gained|exploit_maturity|version_match|evidence_spans)[\x22\x27]?\s*[:=]\s*[\x22\x27]?\w'
+
+    description: Assignment of a framework-internal field name that scanner text never uses.
+
+
+
+  - id: ss_verdict_assignment
+
+    category: schema_smuggling
+
+    regex: '[\x22\x27]?\bverdict[\x22\x27]?\s*[:=]\s*[\x22\x27]?(?:applicable|not_applicable|uncertain|injected|clean)\b'
+
+    description: Smuggled applicability verdict.
+
+
+
+  - id: ss_maturity_assignment
+
+    category: schema_smuggling
+
+    regex: '[\x22\x27]?\b(?:exploit_)?maturity[\x22\x27]?\s*[:=]\s*[\x22\x27]?(?:weaponized|weaponised|functional)\b'
+
+    description: Smuggled exploit-maturity upgrade.
+
+
+
+  - id: ss_set_field_to
+
+    category: schema_smuggling
+
+    regex: '\bset\s+(?:the\s+)?(?:field\s+|value\s+of\s+)?[\x22\x27]?(?:confidence|criticality|asset_criticality|exploit_feasibility|feasibility|p_exploit|p_applicable|data_sensitivity|exposure|impact_[cia]|priority|score|verdict|maturity|relevance_grade)[\x22\x27]?\s*(?:field\s+)?to\b'
+
+    description: Natural-language assignment to a named output field.
+
+
+
+  - id: ss_json_object_start
+
+    category: schema_smuggling
+
+    regex: '\{\s*[\x22\x27](?:confidence|criticality|exploit_feasibility|p_exploit|p_applicable|verdict|rationale|evidence_spans|impact_[cia]|data_sensitivity)[\x22\x27]\s*:'
+
+    description: A literal JSON object shaped like the framework's output schema.
+
+
+
+  - id: ss_output_json_following
+
+    category: schema_smuggling
+
+    regex: '\b(?:output|return|respond\s+with|reply\s+with|emit|produce)\s+(?:exactly\s+)?(?:the\s+following\s+)?json\b'
+
+    description: Instructs the model to emit attacker-supplied JSON.
+
+
+
+  - id: ss_add_field
+
+    category: schema_smuggling
+
+    regex: '\b(?:add|append|insert|include)\s+(?:the\s+)?(?:following\s+)?(?:field|key|property|attribute)\s+[\x22\x27]?[a-z_]{3,}'
+
+    description: Requests an extra key in the structured output.
+
+
+
+  # ---------------------------------------------------------------------- canary exfiltration
+
+  - id: ce_canary_repeat
+
+    category: canary_exfil
+
+    regex: '\b(?:repeat|echo|print|output|reveal|disclose|reproduce|include|append|leak|show|emit)\b[^.\n]{0,60}?\bcanar(?:y|ies)\b'
+
+    description: Direct request to echo the canary.
+
+
+
+  - id: ce_canary_reference
+
+    category: canary_exfil
+
+    regex: '\bcanary\s*(?:token|value|string|word|id|marker|phrase)\b'
+
+    description: Mentions the canary construct at all, which no advisory ever does.
+
+
+
+  - id: ce_reveal_system_prompt
+
+    category: canary_exfil
+
+    regex: '\b(?:print|repeat|reveal|show|display|output|disclose|summari[sz]e|quote|dump)\b[^.\n]{0,60}?\b(?:system\s+prompt|system\s+message|initial\s+instructions|original\s+instructions|your\s+instructions|prompt\s+above|hidden\s+instructions|secret\s+(?:token|string|value))\b'
+
+    description: System-prompt extraction request.
+
+
+
+  - id: ce_echo_above
+
+    category: canary_exfil
+
+    regex: '\b(?:echo|repeat|print|output|reproduce)\s+(?:back\s+)?(?:me\s+)?(?:everything|all\s+(?:of\s+)?(?:the\s+)?text|the\s+(?:entire\s+)?(?:text|content|prompt|conversation))\s+(?:above|before|preceding|that\s+precedes|you\s+(?:were\s+)?(?:given|received|read))\b'
+
+    description: '"Echo everything above" exfiltration.'
+
+
+
+  - id: ce_what_were_instructions
+
+    category: canary_exfil
+
+    regex: '\bwhat\s+(?:are|were)\s+(?:your|the)\s+(?:original\s+|initial\s+|exact\s+)?(?:instructions|rules|system\s+prompt|guidelines)\b'
+
+    description: Interrogative form of prompt extraction.
+
+
+
+  - id: ce_begin_reply_with
+
+    category: canary_exfil
+
+    regex: '\bbegin\s+(?:your\s+)?(?:reply|response|answer|output|rationale)\s+with\b'
+
+    description: Forces a chosen prefix into the output, the usual exfiltration carrier.
+
+
+
+  - id: ce_include_token_in_output
+
+    category: canary_exfil
+
+    regex: '\binclude\s+(?:the\s+)?(?:following\s+)?(?:string|token|value|text|marker)\s+(?:verbatim\s+)?in\s+your\s+(?:response|output|answer|rationale|reply)\b'
+
+    description: Requests verbatim inclusion of attacker-chosen text in the output.
+
+
+
+  - id: ce_copy_into_field
+
+    category: canary_exfil
+
+    regex: '\b(?:copy|place|put|write)\s+(?:the\s+)?(?:above|following|entire|whole)\b[^.\n]{0,40}?\b(?:into|in)\s+(?:the\s+)?(?:rationale|evidence_spans?|description|output|response)\b'
+
+    description: Requests the preceding context be copied into an output field.
+
+
+
+  # ------------------------------------------------------------------------ delimiter escape
+
+  - id: de_untrusted_close
+
+    category: delimiter_escape
+
+    regex: '<\s*/\s*untrusted\b[^>]{0,120}>'
+
+    description: Attempt to close the sandbox envelope.
+
+
+
+  - id: de_untrusted_open
+
+    category: delimiter_escape
+
+    regex: '<\s*untrusted\b[^>]{0,120}>'
+
+    description: Attempt to forge a new sandbox envelope.
+
+
+
+  - id: de_end_marker
+
+    category: delimiter_escape
+
+    regex: '-{2,}\s*(?:END|STOP|CLOSE|BEGIN|START)\s*(?:OF\s*)?(?:UNTRUSTED|INPUT|DOCUMENT|CONTEXT|DATA|SEGMENT|BLOCK|QUOTE|SYSTEM)?\s*-{2,}'
+
+    description: Dashed pseudo-delimiter such as ---END---.
+
+
+
+  - id: de_close_block_phrase
+
+    category: delimiter_escape
+
+    regex: '\b(?:end|close|terminate|exit)\s+(?:of\s+)?(?:the\s+)?(?:untrusted|quoted|sandboxed|attacker)\s+(?:block|section|content|text|segment|envelope|region)\b'
+
+    description: Natural-language request to end the quoted region.
+
+
+
+  - id: de_generic_xml_close
+
+    category: delimiter_escape
+
+    regex: '<\s*/\s*(?:document|context|input|data|instructions|prompt|system|content|user_input|untrusted_content)\s*>'
+
+    description: Closing tag of a plausible container element.
+
+
+
+  - id: de_code_fence_break
+
+    category: delimiter_escape
+
+    regex: '```\s*(?:end|system|assistant|instructions?)\b'
+
+    description: Code-fence break followed by a privileged-sounding label.
+
+
+
+  - id: de_nonce_forge
+
+    category: delimiter_escape
+
+    regex: '\bnonce\s*[:=]\s*[\x22\x27]?[A-Za-z0-9_-]{4,}[\x22\x27]?\s*(?:>|\]|\})'
+
+    description: Forged nonce attribute intended to close or open an envelope.
+
+
+
+  # ------------------------------------------------------------------------ numeric overflow
+
+  - id: no_big_score
+
+    category: numeric_overflow
+
+    regex: '\b(?:score|rating|priority|criticality|severity|confidence)\s*(?:of|is|=|:|at)?\s*(?:9{3,}|[1-9]\d{2,})(?:\.\d+)?\b'
+
+    description: Three-digit or larger score, e.g. "score 999".
+
+
+
+  - id: no_out_of_ten
+
+    category: numeric_overflow
+
+    regex: '\b(?:1[1-9]|[2-9]\d|\d{3,})\s*(?:out\s+of|of)\s*10\b|(?:score|rating|rated|severity|cvss)[^.\n]{0,20}?\b(?:1[1-9]|[2-9]\d|\d{3,})\s*/\s*10\b'
+
+    description: Out-of-range fraction such as "11/10".
+
+
+
+  - id: no_max_possible
+
+    category: numeric_overflow
+
+    regex: '\b(?:the\s+)?(?:maximum|highest|max|top)\s+possible\s+(?:score|priority|severity|rating|criticality|value|confidence)\b'
+
+    description: Asks for the extreme of the scale rather than an assessment.
+
+
+
+  - id: no_infinite_risk
+
+    category: numeric_overflow
+
+    regex: '\b(?:infinite|unlimited|unbounded|immeasurable|off\s+the\s+charts)\s+(?:risk|severity|priority|score|impact|loss)\b'
+
+    description: Unrepresentable magnitude claim.
+
+
+
+  - id: no_cvss_over_ten
+
+    category: numeric_overflow
+
+    regex: '\bcvss\b[^.\n]{0,20}?\b(?:1[1-9](?:\.\d+)?|[2-9]\d(?:\.\d+)?|\d{3,})\b'
+
+    description: CVSS value above the 0-10 scale (10.0 and "CVSS v3.1" stay clean).
+
+
+
+  - id: no_beyond_scale
+
+    category: numeric_overflow
+
+    regex: '\b(?:beyond|above|exceeds?|over)\s+(?:the\s+)?(?:maximum|normal|standard|usual)\s+(?:scale|range|score|severity|bound|bounds)\b'
+
+    description: Explicit request to exceed the defined scale.
+
+
+
+  # ------------------------------------------------------------------- fabricated evidence
+
+  - id: fe_confirmed_exploited_directive
+
+    category: fake_evidence_inflate
+
+    regex: '\b(?:this|the)\s+(?:vulnerability|finding|issue|cve|alert)\s+(?:is|has\s+been|was)\s+(?:confirmed|verified|known|documented)\s+(?:to\s+be\s+)?(?:actively\s+)?exploit(?:ed)?\b[^.\n]{0,80}?\b(?:therefore|so\s+you|you\s+must|you\s+should|rate|score|treat|prioriti[sz]e|assign)\b'
+
+    description: Unverifiable exploitation claim used as an instruction to the reader.
+
+
+
+  - id: fe_must_treat_as_max
+
+    category: fake_evidence_inflate
+
+    regex: '\b(?:must|should|shall)\s+(?:be\s+)?(?:treated|rated|scored|classified|prioriti[sz]ed|assigned)\s+(?:as\s+|at\s+|with\s+)?(?:the\s+)?(?:maximum|highest|critical|top|10(?:\.0)?|1\.0)\b'
+
+    description: Instruction to assign the extreme of the scale.
+
+
+
+  - id: fe_note_to_model
+
+    category: fake_evidence_inflate
+
+    regex: '\bnote\s+(?:to|for)\s+(?:the\s+)?(?:ai|a\.i\.|llm|model|assistant|analyst|reviewer|evaluator|grader)\b'
+
+    description: Side-channel note addressed to whoever reads the content.
+
+
+
+  - id: fe_operator_impersonation
+
+    category: fake_evidence_inflate
+
+    regex: '\bthis\s+(?:text|content|message|section|note|document)\s+(?:is|was)\s+(?:written|authored|approved|provided|signed)\s+by\s+(?:the\s+)?(?:operator|system|administrator|security\s+team|framework|vendor\s+security)\b'
+
+    description: Untrusted content claiming operator provenance.
+
+
+
+  - id: fe_authoritative_directive
+
+    category: fake_evidence_inflate
+
+    regex: '\b(?:authoritative|official|verified|trusted|confirmed)\s+(?:source|statement|assessment|determination|instruction)\s*[:\-]\s*(?:ignore|treat|set|rate|score|this\s+must)\b'
+
+    description: Authority claim immediately followed by an imperative.
+
+
+
+  - id: fe_agency_claim_directive
+
+    category: fake_evidence_inflate
+
+    regex: '\b(?:cisa|nvd|mitre|first\.org|the\s+vendor)\s+(?:has\s+)?(?:confirmed|verified|stated|instructed|mandates?|requires?)\b[^.\n]{0,60}?\b(?:you\s+(?:must|should)|rate|score|set|treat|assign)\b'
+
+    description: Agency-attributed claim phrased as an instruction to the model.
+
+
+
+  - id: fe_trust_this_content
+
+    category: fake_evidence_inflate
+
+    regex: '\b(?:trust|believe|accept)\s+(?:this|the\s+following)\s+(?:content|text|statement|assessment|source)\s+(?:over|instead\s+of|rather\s+than|above)\b'
+
+    description: Asks the reader to prefer untrusted content over trusted evidence.
+
+
+
+  - id: fd_false_positive_directive
+
+    category: fake_evidence_deflate
+
+    regex: '\b(?:this|the)\s+(?:finding|vulnerability|alert|issue)\s+is\s+(?:a\s+)?(?:false\s+positive|not\s+exploitable|harmless|benign|informational\s+only)\b[^.\n]{0,80}?\b(?:ignore|skip|deprioriti[sz]e|do\s+not|rate|score|set|mark|suppress)\b'
+
+    description: Deflation claim wired to an instruction.
+
+
+
+  - id: fd_safe_to_ignore
+
+    category: fake_evidence_deflate
+
+    regex: '\b(?:safe\s+to\s+ignore|can\s+be\s+safely\s+ignored|no\s+action\s+(?:is\s+)?required|nothing\s+to\s+worry\s+about)\b'
+
+    description: Direct deflation phrasing.
+
+
+
+  - id: fd_already_patched_directive
+
+    category: fake_evidence_deflate
+
+    regex: '\b(?:already\s+(?:patched|fixed|remediated|mitigated)|not\s+applicable\s+to\s+this\s+(?:system|application|deployment))\b[^.\n]{0,80}?\b(?:so\s+)?(?:ignore|set|rate|score|mark|skip|assign|deprioriti[sz]e)\b'
+
+    description: Remediation claim wired to an instruction.
+
+
+
+  - id: fd_rank_last
+
+    category: fake_evidence_deflate
+
+    regex: '\b(?:rank|place|put|sort|order|list|move|push|demote)\s+(?:(?:it|this|that|them|these|those|the)\s+)?(?:\w+\s+){0,2}?(?:as\s+)?(?:the\s+)?(?:last|lowest|least|bottom|at\s+the\s+(?:bottom|end))\b'
+
+    description: Bare imperative asking for the finding to be ordered last.
+
+
+
+  - id: fd_mark_not_applicable
+
+    category: fake_evidence_deflate
+
+    regex: '\b(?:mark|set|flag|classify|label|report)\s+(?:it|this|them|the\s+\w+)?\s*(?:as\s+)?(?:not[\s\-]applicable|non[\s\-]applicable|inapplicable|false\s+positive|out\s+of\s+scope)\b'
+
+    description: Imperative asking the reader to record a deflating verdict.
+
+
+
+  - id: fi_rank_first
+
+    category: fake_evidence_inflate
+
+    regex: '\b(?:rank|place|put|sort|order|list|move|promote|elevate)\s+(?:(?:it|this|that|them|these|those|the)\s+)?(?:\w+\s+){0,2}?(?:as\s+)?(?:the\s+)?(?:first|top|highest|number\s+one|at\s+the\s+top)\b'
+
+    description: Bare imperative asking for the finding to be ordered first.
+
+
+
+  - id: fd_suppress_finding
+
+    category: fake_evidence_deflate
+
+    regex: '\b(?:suppress|exclude|remove|omit|drop)\s+(?:this|the)\s+(?:finding|vulnerability|alert|issue)\s+from\s+(?:the\s+)?(?:report|queue|ranking|output|results)\b'
+
+    description: Asks for the finding to be removed from the queue.
+
+
+
+  # ------------------------------------------------------------------------------ hidden text
+
+  - id: ht_display_none
+
+    category: hidden_text
+
+    regex: '\bdisplay\s*:\s*none\b'
+
+    description: Hidden-element styling surviving into the sanitized text.
+
+
+
+  - id: ht_invisible_style
+
+    category: hidden_text
+
+    regex: '\b(?:visibility\s*:\s*hidden|font-size\s*:\s*0(?:\.0+)?(?:px|pt|em|rem)?\b|opacity\s*:\s*0(?:\.0+)?\b)'
+
+    description: Other invisibility styling.
+
+
+
+  - id: ht_offscreen
+
+    category: hidden_text
+
+    regex: '\b(?:text-indent\s*:\s*-\s*\d{3,}|left\s*:\s*-\s*\d{4,})'
+
+    description: Off-screen positioning used to hide text from humans only.
+
+
+
+  - id: ht_aria_hidden
+
+    category: hidden_text
+
+    regex: '\baria-hidden\s*=\s*[\x22\x27]?true\b'
+
+    description: Content marked hidden from assistive technology but readable by a model.
+
+
+
+  # -------------------------------------------------------------------------- encoded payload
+
+  - id: ep_decode_instruction
+
+    category: encoded_payload
+
+    regex: '\b(?:base64|b64|hex|url|caesar)\s*[\-\s]?(?:decode|decoded|decoding)\b'
+
+    description: Instruction to decode a smuggled payload.
+
+
+
+  - id: ep_decode_the_following
+
+    category: encoded_payload
+
+    regex: '\bdecode\s+(?:the\s+)?(?:following|below|string|payload|text|message|blob)\b'
+
+    description: Generic decode instruction.
+
+
+
+  - id: ep_rot13
+
+    category: encoded_payload
+
+    regex: '\brot13\b'
+
+    description: ROT13 obfuscation marker.
+
+
+
+  - id: ep_execute_decoded
+
+    category: encoded_payload
+
+    regex: '\b(?:then|and)\s+(?:follow|execute|obey|apply|run)\s+(?:the\s+)?(?:decoded|resulting|hidden|embedded)\s+(?:instructions|commands|text|payload)\b'
+
+    description: Two-stage payload - decode, then obey.
+
+
+
+  # --------------------------------------------------------------------------- multilingual
+
+  - id: ml_ru_ignore_previous
+
+    category: multilingual
+
+    regex: 'игнорир\w*\s+(?:все\s+)?(?:предыдущ\w+|вышеуказанн\w+|прежн\w+|предшествующ\w+)\s+(?:инструкц\w+|указан\w+|команд\w+|правил\w+)'
+
+    description: Russian "ignore the previous instructions".
+
+
+
+  - id: ml_ru_you_are_now
+
+    category: multilingual
+
+    regex: '(?:ты|вы)\s+(?:теперь|сейчас)\s+(?:—\s*)?(?:являешься\s+)?(?:ассистент\w*|модель\w*|систем\w+|эксперт\w*|бот\w*)'
+
+    description: Russian role hijack.
+
+
+
+  - id: ml_ru_new_instructions
+
+    category: multilingual
+
+    regex: 'нов\w+\s+инструкц\w+\s*[:\-]'
+
+    description: Russian "new instructions:".
+
+
+
+  - id: ml_ru_reveal_prompt
+
+    category: multilingual
+
+    regex: '(?:покажи|выведи|повтори|раскрой)\w*\s+(?:свой\s+|мне\s+)?(?:системн\w+\s+(?:промпт|подсказк\w+|инструкц\w+)|исходн\w+\s+инструкц\w+)'
+
+    description: Russian system-prompt extraction.
+
+
+
+  - id: ml_ru_set_max
+
+    category: multilingual
+
+    regex: '(?:установи|задай|поставь)\w*\s+(?:максимальн\w+|наивысш\w+)\s+(?:приоритет\w*|оценк\w+|балл\w*|уровень)'
+
+    description: Russian "set the maximum priority".
+
+
+
+  - id: ml_zh_ignore
+
+    category: multilingual
+
+    regex: '忽略(?:(?:以上|之前|前面|所有|上述|全部|先前)(?:的)?){0,3}(?:指令|指示|提示|命令|规则)'
+
+    description: Chinese "ignore the above instructions".
+
+
+
+  - id: ml_zh_you_are_now
+
+    category: multilingual
+
+    regex: '(?:你现在是|现在你是|你必须扮演|你将扮演|从现在开始[，,]?你)'
+
+    description: Chinese role hijack.
+
+
+
+  - id: ml_zh_reveal_prompt
+
+    category: multilingual
+
+    regex: '(?:输出|重复|显示|打印|告诉我)(?:你的)?(?:系统)?(?:提示词|提示语|系统提示|原始指令)'
+
+    description: Chinese system-prompt extraction.
+
+
+
+  - id: ml_zh_set_max
+
+    category: multilingual
+
+    regex: '(?:设置|设定|评为|打)(?:.{0,8}?)(?:最高分|满分|最高级别|10分)'
+
+    description: Chinese "give it the maximum score".
+
+
+
+  - id: ml_es_ignore
+
+    category: multilingual
+
+    regex: '\bignor[ae](?:r|d)?\s+(?:todas\s+)?(?:las\s+)?instrucciones\s+(?:anteriores|previas|de\s+arriba)'
+
+    description: Spanish "ignore the previous instructions".
+
+
+
+  - id: ml_es_haz_caso_omiso
+
+    category: multilingual
+
+    regex: '\bhaz\s+caso\s+omiso\s+(?:de|a)\b'
+
+    description: Spanish idiomatic "disregard".
+
+
+
+  - id: ml_es_you_are_now
+
+    category: multilingual
+
+    regex: '\bahora\s+eres\s+(?:un|una|el|la)\b'
+
+    description: Spanish role hijack.
+
+
+
+  - id: ml_es_reveal_prompt
+
+    category: multilingual
+
+    regex: '\b(?:muestra|repite|imprime|revela)\s+(?:tu\s+|el\s+)?(?:mensaje\s+del\s+sistema|indicaciones\s+del\s+sistema|prompt\s+del\s+sistema|instrucciones\s+originales)'
+
+    description: Spanish system-prompt extraction.
+
+
+
+  - id: ml_de_ignore
+
+    category: multilingual
+
+    regex: '\bignorier(?:e|en)\s+(?:sie\s+)?(?:alle\s+)?(?:vorherigen|obigen|bisherigen|vorangegangenen)\s+(?:anweisungen|befehle|anleitungen|regeln)'
+
+    description: German "ignore all previous instructions".
+
+
+
+  - id: ml_de_you_are_now
+
+    category: multilingual
+
+    regex: '\b(?:du\s+bist|sie\s+sind)\s+(?:jetzt|nun|ab\s+sofort)\s+(?:ein|eine|der|die|das)\b'
+
+    description: German role hijack.
+
+
+
+  - id: ml_de_reveal_prompt
+
+    category: multilingual
+
+    regex: '\b(?:zeige|wiederhole|gib|nenne)\s+(?:mir\s+)?(?:deine[nr]?|ihre[nr]?)\s+(?:system[\-\s]?prompt|systemanweisungen|urspr[uü]nglichen\s+anweisungen)'
+
+    description: German system-prompt extraction.
+
+
+
+  - id: ml_de_set_max
+
+    category: multilingual
+
+    regex: '\b(?:setze|stufe|bewerte)\s+(?:die\s+|das\s+|es\s+)?(?:bewertung|priorit[aä]t|kritikalit[aä]t|risiko)?\s*(?:auf|als)\s+(?:maximal|h[oö]chste|kritisch|10)'
+
+    description: German "set the rating to maximum".
+
+
+
+  - id: ml_ar_ignore
+
+    category: multilingual
+
+    regex: 'تجاهل\s+(?:كل\s+|جميع\s+)?(?:التعليمات|الأوامر|التوجيهات)'
+
+    description: Arabic "ignore the instructions".
+
+
+
+  - id: ml_ar_you_are_now
+
+    category: multilingual
+
+    regex: 'أنت\s+الآن'
+
+    description: Arabic "you are now".
+
+
+
+  - id: ml_ar_reveal_prompt
+
+    category: multilingual
+
+    regex: '(?:اطبع|أظهر|كرر|اكشف)\s+(?:موجه\s+النظام|تعليمات\s+النظام|التعليمات\s+الأصلية)'
+
+    description: Arabic system-prompt extraction.
+

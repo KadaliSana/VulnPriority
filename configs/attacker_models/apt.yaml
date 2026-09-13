@@ -1,0 +1,29 @@
+name: apt
+description: >-
+  Well-resourced adversary able to weaponise vulnerabilities without public exploit code
+  and to chain long paths. Public exploit signals matter less; applicability matters more.
+skill: 0.95
+resources: 0.95
+entry_privilege: 0
+horizon_days: 365
+max_chain_length: 6
+controls_target_content: false
+target_preference:
+  admin: 1.0
+  pii_data: 1.0
+  api_data: 0.8
+  auth: 0.9
+w_intercept: -2.8
+w_epss_logit: 0.5
+w_kev: 1.2
+w_kev_ransomware: 0.1
+w_feasibility: 1.2
+w_applicability: 2.2
+w_exposure: 0.7
+w_asset_criticality: 1.4
+w_complexity_high: -0.2
+w_user_interaction: -0.2
+w_privileges_required: -0.3
+w_skill: 1.0
+w_resources: 0.8
+max_p: 0.99

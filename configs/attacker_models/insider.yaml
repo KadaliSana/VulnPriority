@@ -1,0 +1,28 @@
+name: insider
+description: >-
+  Authenticated application user abusing their access. Starts at USER privilege, so
+  privilege-required penalties largely vanish and internet exposure matters less.
+skill: 0.5
+resources: 0.3
+entry_privilege: 1
+horizon_days: 180
+max_chain_length: 3
+controls_target_content: false
+target_preference:
+  admin: 1.0
+  pii_data: 0.9
+  payment: 0.8
+w_intercept: -3.6
+w_epss_logit: 0.6
+w_kev: 1.4
+w_kev_ransomware: 0.2
+w_feasibility: 1.6
+w_applicability: 2.0
+w_exposure: 0.2
+w_asset_criticality: 1.2
+w_complexity_high: -0.5
+w_user_interaction: -0.2
+w_privileges_required: -0.1
+w_skill: 0.5
+w_resources: 0.3
+max_p: 0.99

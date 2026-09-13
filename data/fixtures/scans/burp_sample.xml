@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<!DOCTYPE issues [
+<!ELEMENT issues (issue*)>
+<!ATTLIST issues burpVersion CDATA "">
+<!ATTLIST issues exportTime CDATA "">
+]>
+<issues burpVersion="2024.2.1.3" exportTime="Wed May 15 11:42:07 GMT 2024">
+  <issue>
+    <serialNumber>7743092118004226560</serialNumber>
+    <type>1049088</type>
+    <name>SQL injection</name>
+    <host ip="203.0.113.24">https://portal.example.org</host>
+    <path><![CDATA[/api/login]]></path>
+    <location><![CDATA[/api/login [username parameter]]]></location>
+    <severity>High</severity>
+    <confidence>Certain</confidence>
+    <issueBackground><![CDATA[SQL injection vulnerabilities arise when user-controllable data is incorporated into database SQL queries in an unsafe manner.]]></issueBackground>
+    <issueDetail><![CDATA[The username parameter appears to be vulnerable to SQL injection attacks. The payload ' waitfor delay '0:0:20'-- was submitted and the application took 20,118 milliseconds to respond.]]></issueDetail>
+    <remediationBackground><![CDATA[Use parameterised queries for all database access.]]></remediationBackground>
+    <requestresponse>
+      <request method="POST" base64="true">UE9TVCAvYXBpL2xvZ2luIEhUVFAvMS4xDQpIb3N0OiBwb3J0YWwuZXhhbXBsZS5vcmcNCkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24veC13d3ctZm9ybS11cmxlbmNvZGVkDQpDb250ZW50LUxlbmd0aDogNjINCg0KdXNlcm5hbWU9YWRtaW4nK3dhaXRmb3IrZGVsYXkrJzAlM2EwJTNhMjAnLS0mcGFzc3dvcmQ9bGV0bWVpbg==</request>
+      <response base64="true">SFRUUC8xLjEgNTAwIEludGVybmFsIFNlcnZlciBFcnJvcg0KU2VydmVyOiBuZ2lueC8xLjE4LjANClgtUG93ZXJlZC1CeTogRXhwcmVzcw0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9qc29uDQpTZXQtQ29va2llOiBjb25uZWN0LnNpZD1zJTNBYWJjREVGMTIzOyBQYXRoPS8NCg0KeyJlcnJvciI6IlRpbWVvdXQgZXhwaXJlZC4gVGhlIHRpbWVvdXQgcGVyaW9kIGVsYXBzZWQgcHJpb3IgdG8gY29tcGxldGlvbiBvZiB0aGUgb3BlcmF0aW9uLiJ9</response>
+      <responseRedirected>false</responseRedirected>
+    </requestresponse>
+  </issue>
+  <issue>
+    <serialNumber>7743092118004226561</serialNumber>
+    <type>2097920</type>
+    <name>Cross-site scripting (reflected)</name>
+    <host ip="203.0.113.24">https://portal.example.org</host>
+    <path><![CDATA[/search]]></path>
+    <location><![CDATA[/search [q parameter]]]></location>
+    <severity>High</severity>
+    <confidence>Firm</confidence>
+    <issueBackground><![CDATA[Reflected cross-site scripting arises when data is copied from a request and echoed into the application's immediate response in an unsafe way.]]></issueBackground>
+    <issueDetail><![CDATA[The value of the q request parameter is copied into the HTML document as plain text between tags. The payload xss8a9z&lt;script&gt;alert(1)&lt;/script&gt; was echoed unmodified.]]></issueDetail>
+    <remediationBackground><![CDATA[HTML-encode all user input on output.]]></remediationBackground>
+    <requestresponse>
+      <request method="GET" base64="true">R0VUIC9zZWFyY2g/cT14c3M4YTl6JTNDc2NyaXB0JTNFYWxlcnQoMSklM0Mvc2NyaXB0JTNFIEhUVFAvMS4xDQpIb3N0OiBwb3J0YWwuZXhhbXBsZS5vcmcNCkFjY2VwdDogdGV4dC9odG1sDQoNCg==</request>
+      <response base64="true">SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IG5naW54LzEuMTguMA0KWC1Qb3dlcmVkLUJ5OiBFeHByZXNzDQpDb250ZW50LVR5cGU6IHRleHQvaHRtbDsgY2hhcnNldD11dGYtOA0KDQo8aHRtbD48Ym9keT48aDE+Tm8gcmVzdWx0cyBmb3IgeHNzOGE5ejxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L2gxPjwvYm9keT48L2h0bWw+</response>
+      <responseRedirected>false</responseRedirected>
+    </requestresponse>
+  </issue>
+  <issue>
+    <serialNumber>7743092118004226562</serialNumber>
+    <type>5243392</type>
+    <name>Cleartext submission of password</name>
+    <host ip="203.0.113.24">https://portal.example.org</host>
+    <path><![CDATA[/admin/login]]></path>
+    <location><![CDATA[/admin/login [password parameter]]]></location>
+    <severity>High</severity>
+    <confidence>Certain</confidence>
+    <issueBackground><![CDATA[Some applications transmit passwords over unencrypted connections, making them vulnerable to interception.]]></issueBackground>
+    <issueDetail><![CDATA[The page contains a form that submits the password field over plain HTTP.]]></issueDetail>
+    <remediationBackground><![CDATA[Serve the login form and its target over HTTPS only.]]></remediationBackground>
+    <requestresponse>
+      <request method="GET" base64="true">R0VUIC9hZG1pbi9sb2dpbiBIVFRQLzEuMQ0KSG9zdDogcG9ydGFsLmV4YW1wbGUub3JnDQoNCg==</request>
+      <response base64="true">SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IG5naW54LzEuMTguMA0KWC1Qb3dlcmVkLUJ5OiBFeHByZXNzDQpDb250ZW50LVR5cGU6IHRleHQvaHRtbDsgY2hhcnNldD11dGYtOA0KDQo8aHRtbD48Ym9keT48Zm9ybSBhY3Rpb249Imh0dHA6Ly9wb3J0YWwuZXhhbXBsZS5vcmcvYWRtaW4vbG9naW4iIG1ldGhvZD0iUE9TVCI+PGlucHV0IG5hbWU9InVzZXIiPjxpbnB1dCB0eXBlPSJwYXNzd29yZCIgbmFtZT0icGFzc3dvcmQiPjwvZm9ybT48L2JvZHk+PC9odG1sPg==</response>
+      <responseRedirected>false</responseRedirected>
+    </requestresponse>
+  </issue>
+  <issue>
+    <serialNumber>7743092118004226563</serialNumber>
+    <type>2098944</type>
+    <name>Serialized object in HTTP message</name>
+    <host ip="203.0.113.24">https://portal.example.org</host>
+    <path><![CDATA[/api/v2/accounts/7c9e6679-7425-40de-944b-e07fc1f90ae7]]></path>
+    <location><![CDATA[/api/v2/accounts/7c9e6679-7425-40de-944b-e07fc1f90ae7 [state parameter]]]></location>
+    <severity>High</severity>
+    <confidence>Firm</confidence>
+    <issueBackground><![CDATA[Serialized objects in HTTP messages can lead to remote code execution when the application deserializes attacker-controlled data.]]></issueBackground>
+    <issueDetail><![CDATA[A Java serialized object (magic bytes rO0AB) was observed in the state parameter. This pattern is associated with CWE-502 and with CVE-2017-9805 in affected stacks.]]></issueDetail>
+    <remediationBackground><![CDATA[Do not deserialize untrusted input; use a data-only format.]]></remediationBackground>
+    <requestresponse>
+      <request method="POST" base64="true">UE9TVCAvYXBpL3YyL2FjY291bnRzLzdjOWU2Njc5LTc0MjUtNDBkZS05NDRiLWUwN2ZjMWY5MGFlNyBIVFRQLzEuMQ0KSG9zdDogcG9ydGFsLmV4YW1wbGUub3JnDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL3gtd3d3LWZvcm0tdXJsZW5jb2RlZA0KDQpzdGF0ZT1yTzBBQlhOeUFCRnFZWFpoTG5WMGFXd3VTR0Z6YUUxaGNBVUgyc0hERm1EUkF3QUNSZ0FL</request>
+      <response base64="true">SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IG5naW54LzEuMTguMA0KWC1Qb3dlcmVkLUJ5OiBFeHByZXNzDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb24NCg0KeyJhY2NvdW50IjoiN2M5ZTY2NzktNzQyNS00MGRlLTk0NGItZTA3ZmMxZjkwYWU3IiwidGllciI6ImdvbGQiLCJiYWxhbmNlX2NlbnRzIjoxMTI0MDB9</response>
+      <responseRedirected>false</responseRedirected>
+    </requestresponse>
+  </issue>
+  <issue>
+    <serialNumber>7743092118004226564</serialNumber>
+    <type>6291968</type>
+    <name>Directory listing</name>
+    <host ip="203.0.113.24">https://portal.example.org</host>
+    <path><![CDATA[/admin/backups]]></path>
+    <location><![CDATA[/admin/backups]]></location>
+    <severity>Medium</severity>
+    <confidence>Firm</confidence>
+    <issueBackground><![CDATA[Web servers may be configured to list the contents of directories.]]></issueBackground>
+    <issueDetail><![CDATA[The directory /admin/backups returned an index listing database dump files.]]></issueDetail>
+    <remediationBackground><![CDATA[Disable directory indexing on the web server.]]></remediationBackground>
+    <requestresponse>
+      <request method="GET" base64="true">R0VUIC9hZG1pbi9iYWNrdXBzLyBIVFRQLzEuMQ0KSG9zdDogcG9ydGFsLmV4YW1wbGUub3JnDQoNCg==</request>
+      <response base64="true">SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IG5naW54LzEuMTguMA0KWC1Qb3dlcmVkLUJ5OiBFeHByZXNzDQpDb250ZW50LVR5cGU6IHRleHQvaHRtbA0KDQo8aHRtbD48aGVhZD48dGl0bGU+SW5kZXggb2YgL2FkbWluL2JhY2t1cHM8L3RpdGxlPjwvaGVhZD48Ym9keT48YSBocmVmPSJwb3J0YWwtMjAyNC0wNS0wMS5zcWwuZ3oiPnBvcnRhbC0yMDI0LTA1LTAxLnNxbC5nejwvYT48L2JvZHk+PC9odG1sPg==</response>
+      <responseRedirected>false</responseRedirected>
+    </requestresponse>
+  </issue>
+  <issue>
+    <serialNumber>7743092118004226565</serialNumber>
+    <type>5245344</type>
+    <name>Vulnerable JavaScript dependency</name>
+    <host ip="203.0.113.24">https://portal.example.org</host>
+    <path><![CDATA[/static/js/angular-1.5.8.min.js]]></path>
+    <location><![CDATA[/static/js/angular-1.5.8.min.js]]></location>
+    <severity>Medium</severity>
+    <confidence>Firm</confidence>
+    <issueBackground><![CDATA[The application loads a JavaScript library with known published vulnerabilities.]]></issueBackground>
+    <issueDetail><![CDATA[The file angular-1.5.8.min.js corresponds to AngularJS 1.5.8, which is affected by CVE-2019-10768 and related prototype pollution issues.]]></issueDetail>
+    <remediationBackground><![CDATA[Upgrade the bundled library to a supported release.]]></remediationBackground>
+    <requestresponse>
+      <request method="GET" base64="true">R0VUIC9zdGF0aWMvanMvYW5ndWxhci0xLjUuOC5taW4uanMgSFRUUC8xLjENCkhvc3Q6IHBvcnRhbC5leGFtcGxlLm9yZw0KDQo=</request>
+      <response base64="true">SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IG5naW54LzEuMTguMA0KWC1Qb3dlcmVkLUJ5OiBFeHByZXNzDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2phdmFzY3JpcHQNCg0KLyoNCiBBbmd1bGFySlMgdjEuNS44DQogKGMpIDIwMTAtMjAxNiBHb29nbGUsIEluYy4NCiov</response>
+      <responseRedirected>false</responseRedirected>
+    </requestresponse>
+  </issue>
+  <issue>
+    <serialNumber>7743092118004226566</serialNumber>
+    <type>5244416</type>
+    <name>Password field with autocomplete enabled</name>
+    <host ip="203.0.113.24">https://portal.example.org</host>
+    <path><![CDATA[/api/login]]></path>
+    <location><![CDATA[/api/login [password parameter]]]></location>
+    <severity>Low</severity>
+    <confidence>Certain</confidence>
+    <issueBackground><![CDATA[Browsers may cache values typed into password fields.]]></issueBackground>
+    <issueDetail><![CDATA[The password field on the login form does not set autocomplete=off.]]></issueDetail>
+    <remediationBackground><![CDATA[Set autocomplete=off on sensitive form fields.]]></remediationBackground>
+    <requestresponse>
+      <request method="GET" base64="true">R0VUIC9hcGkvbG9naW4gSFRUUC8xLjENCkhvc3Q6IHBvcnRhbC5leGFtcGxlLm9yZw0KDQo=</request>
+      <response base64="true">SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IG5naW54LzEuMTguMA0KWC1Qb3dlcmVkLUJ5OiBFeHByZXNzDQpDb250ZW50LVR5cGU6IHRleHQvaHRtbDsgY2hhcnNldD11dGYtOA0KDQo8aHRtbD48Ym9keT48Zm9ybSBtZXRob2Q9IlBPU1QiPjxpbnB1dCB0eXBlPSJwYXNzd29yZCIgbmFtZT0icGFzc3dvcmQiPjwvZm9ybT48L2JvZHk+PC9odG1sPg==</response>
+      <responseRedirected>false</responseRedirected>
+    </requestresponse>
+  </issue>
+  <issue>
+    <serialNumber>7743092118004226567</serialNumber>
+    <type>5243136</type>
+    <name>Path-relative style sheet import</name>
+    <host ip="203.0.113.24">https://portal.example.org</host>
+    <path><![CDATA[/static/css/main.css]]></path>
+    <location><![CDATA[/static/css/main.css]]></location>
+    <severity>Information</severity>
+    <confidence>Tentative</confidence>
+    <issueBackground><![CDATA[Path-relative style sheet imports can be abused for relative path overwrite.]]></issueBackground>
+    <issueDetail><![CDATA[The page imports a style sheet using a path-relative URL.]]></issueDetail>
+    <remediationBackground><![CDATA[Use absolute paths for style sheet imports.]]></remediationBackground>
+    <requestresponse>
+      <request method="GET" base64="true">R0VUIC9zdGF0aWMvY3NzL21haW4uY3NzIEhUVFAvMS4xDQpIb3N0OiBwb3J0YWwuZXhhbXBsZS5vcmcNCg0K</request>
+      <response base64="true">SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IG5naW54LzEuMTguMA0KWC1Qb3dlcmVkLUJ5OiBFeHByZXNzDQpDb250ZW50LVR5cGU6IHRleHQvY3NzDQoNCkBpbXBvcnQgJ3RoZW1lLmNzcyc7DQoubmF2YmFye21hcmdpbjowfQ==</response>
+      <responseRedirected>false</responseRedirected>
+    </requestresponse>
+  </issue>
+</issues>

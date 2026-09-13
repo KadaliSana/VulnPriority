@@ -1,0 +1,44 @@
+# Live on Google's free tier. Requires GEMINI_API_KEY and nothing else.
+#
+#   Get a key:  https://aistudio.google.com/apikey       (no card, no billing account)
+#   Install:    pip install -e ".[gemini]"
+#   Run:        vulnprio run-all --config configs/free-gemini.yaml
+#
+# gemini-3.5-flash-lite carries a no-cost request quota and free Google Search grounding, which
+# is why this is the only free configuration that gets the exploit-intelligence layer as
+# well as model-backed assessment.
+#
+# Free-tier grounded search is capped at 500 requests per day, shared between Flash and
+# Flash-Lite, and the intelligence layer spends one per finding. Per-model request rates
+# are shown in AI Studio for your own project rather than published, so set
+# requests_per_minute from what yours says -- 15 is a safe starting point and pacing costs
+# nothing when you are inside the quota anyway. A 429 that survives the retry budget
+# degrades that one finding to the heuristic and records it in the audit; it never aborts
+# a scan.
+#
+# Note that gemini-2.5-pro has no free grounding quota. Flash is the model to stay on.
+output_dir: runs
+data_dir: data
+seed: 42
+feeds:
+  mode: live_with_cache
+  cache_dir: .cache/feeds
+  cache_ttl_days: 7
+llm:
+  backend: gemini
+  model: gemini-3.5-flash-lite
+  api_key_env: GEMINI_API_KEY
+  use_cache: true
+  requests_per_minute: 15
+  retry_backoff_s: 2.0
+  max_backoff_s: 60.0
+intel:
+  enabled: true
+  mode: live
+  search_provider: gemini
+  model: gemini-3.5-flash-lite
+  api_key_env: GEMINI_API_KEY
+  requests_per_minute: 15
+component_b:
+  attacker_preset: opportunistic
+  impact_preset: default_ecommerce

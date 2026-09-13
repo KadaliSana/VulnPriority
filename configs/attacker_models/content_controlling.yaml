@@ -1,0 +1,26 @@
+name: content_controlling
+description: >-
+  Red-team preset. The adversary authors the text the framework reads: target responses
+  and referenced pages. Used by the adversarial evaluation to test ranking manipulation.
+skill: 0.8
+resources: 0.6
+entry_privilege: 0
+horizon_days: 90
+max_chain_length: 4
+controls_target_content: true
+target_preference:
+  admin: 1.0
+  payment: 0.9
+w_intercept: -3.4
+w_epss_logit: 0.9
+w_kev: 2.0
+w_feasibility: 1.8
+w_applicability: 2.0
+w_exposure: 1.0
+w_asset_criticality: 1.1
+w_complexity_high: -0.6
+w_user_interaction: -0.4
+w_privileges_required: -0.5
+w_skill: 0.8
+w_resources: 0.6
+max_p: 0.99

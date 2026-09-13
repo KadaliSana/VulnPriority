@@ -1,0 +1,256 @@
+{
+  "run_id": "run_772a4bd597478a1a",
+  "created_at": "2026-09-13T02:09:15.478311",
+  "config_hash": "772a4bd597478a1a",
+  "config": {
+    "output_dir": "runs-adv",
+    "run_id": null,
+    "data_dir": "data",
+    "as_of": null,
+    "seed": 42,
+    "feeds": {
+      "mode": "offline",
+      "fixture_dir": "data\\synthetic\\317e07a9bc9147ce\\feeds",
+      "cache_dir": ".cache\\feeds",
+      "cache_ttl_days": 7,
+      "http_timeout_s": 20.0,
+      "nvd_api_key_env": "NVD_API_KEY",
+      "max_references_per_cve": 8,
+      "reference_char_budget": 6000,
+      "reference_host_allowlist": [
+        "nvd.nist.gov",
+        "cve.mitre.org",
+        "www.cisa.gov",
+        "github.com",
+        "www.exploit-db.com",
+        "owasp.org",
+        "portswigger.net"
+      ],
+      "max_reference_bytes": 400000
+    },
+    "llm": {
+      "backend": "heuristic",
+      "model": "claude-sonnet-5",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "max_tokens": 2048,
+      "temperature": 0.0,
+      "max_retries": 2,
+      "timeout_s": 120.0,
+      "cache_dir": ".cache\\llm",
+      "use_cache": true,
+      "consistency_shrinkage": 0.5,
+      "max_divergence": 0.35,
+      "fallback_to_heuristic": true
+    },
+    "sandbox": {
+      "max_chars_per_segment": 6000,
+      "max_segments": 12,
+      "canary_enabled": true,
+      "canary_length": 24,
+      "nonce_length": 16,
+      "patterns_file": "configs\\sandbox\\instruction_patterns.yaml",
+      "suspicious_signal_threshold": 1,
+      "injected_signal_threshold": 3,
+      "require_evidence_spans": true,
+      "influence_budget": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 0.8,
+        "3": 0.35,
+        "4": 0.15
+      },
+      "corroborated_budget": 1.0,
+      "deflation_budget_factor": 0.4,
+      "allow_downgrade_below_floor": false,
+      "max_untrusted_shap_share": 0.35
+    },
+    "component_a": {
+      "enabled": true,
+      "lexicon_path": null,
+      "assess_endpoints": true,
+      "assess_exploitability": true,
+      "assess_applicability": true,
+      "max_references_in_prompt": 4
+    },
+    "component_b": {
+      "enabled": true,
+      "attacker_preset": "opportunistic",
+      "attacker": null,
+      "impact_preset": "default_ecommerce",
+      "impact": null,
+      "remediation_hours_by_cwe": {},
+      "remediation_default_hours": 4.0,
+      "remediation_hours_per_extra_endpoint": 0.5,
+      "remediation_hourly_rate_usd": 120.0
+    },
+    "component_c": {
+      "enabled": true,
+      "criticality_weight_exponent": 1.0,
+      "max_hops": 6,
+      "top_paths": 10,
+      "min_edge_probability": 0.0001,
+      "chokepoint_delta_fraction": 0.25,
+      "chain_weight": 1.0,
+      "admit_lateral_edges": true,
+      "verify_monotonicity": true
+    },
+    "ranking": {
+      "ranker": "lambdamart",
+      "objective": "rank:ndcg",
+      "eval_metric": "ndcg@10",
+      "lambdarank_pair_method": "topk",
+      "lambdarank_num_pair_per_sample": 8,
+      "n_estimators": 300,
+      "max_depth": 4,
+      "learning_rate": 0.05,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "min_child_weight": 2.0,
+      "reg_lambda": 1.0,
+      "tree_method": "hist",
+      "n_jobs": 1,
+      "seed": 42,
+      "impact_weighted_pairs": true,
+      "monotone": {
+        "b_kev": 1,
+        "b_epss": 1,
+        "c_reach_delta_log": 1,
+        "b_expected_loss_log": 1
+      },
+      "head_scale_pos_weight": null,
+      "head_calibration": "isotonic",
+      "explain_top_n": 5
+    },
+    "evaluation": {
+      "k_values": [
+        5,
+        10,
+        20
+      ],
+      "split_kind": "time_ordered",
+      "n_folds": 3,
+      "gap_days": 30,
+      "min_train_scans": 4,
+      "label_policy": {
+        "horizon_days": 90,
+        "accepted_sources": [
+          "kev",
+          "exploit_evidence",
+          "synthetic_oracle"
+        ],
+        "kev_grade": 4,
+        "exploit_evidence_grade": 3,
+        "incident_grade": 4,
+        "require_version_match": true,
+        "drop_version_mismatch": true,
+        "min_source_agreement": 0.0,
+        "min_exploit_maturity_for_evidence": 3,
+        "weight_by_impact": true
+      },
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "bootstrap_iters": 500,
+      "baselines": [
+        "cvss_only",
+        "epss_only",
+        "kev_first",
+        "scanner_severity",
+        "expected_loss",
+        "vmc_chain",
+        "random"
+      ],
+      "vmc_epss_threshold": 0.088,
+      "vmc_cvss_threshold": 7.0,
+      "calibration_bins": 10,
+      "classification_threshold": 0.5,
+      "minority_maturity_floor": 3
+    },
+    "selection": {
+      "budget_hours": 40.0,
+      "hour_granularity": 0.5,
+      "method": "dp_exact",
+      "max_items_for_exact": 400
+    },
+    "simulation": {
+      "weeks": 26,
+      "capacity_hours_per_week": 20.0,
+      "policies": [
+        "lambdamart",
+        "expected_loss",
+        "cvss_only",
+        "epss_only",
+        "kev_first"
+      ],
+      "reference_policy": "cvss_only"
+    },
+    "adversarial": {
+      "corpus_path": "data\\adversarial\\corpus_v1.yaml",
+      "max_containment_breach_rate": 0.0,
+      "max_canary_leak_rate": 0.0,
+      "max_goal_directed_rank_success_rate": 0.05,
+      "max_attack_success_rate": 0.05,
+      "min_detection_rate": 0.8,
+      "max_false_positive_rate": 0.1
+    },
+    "synthetic": {
+      "seed": 42,
+      "n_apps": 8,
+      "endpoints_per_app": [
+        12,
+        30
+      ],
+      "findings_per_app": [
+        30,
+        90
+      ],
+      "scans_per_app": 3,
+      "scan_interval_days": 30,
+      "start_date": "2024-01-15",
+      "base_exploit_rate": 0.06,
+      "label_lag_days": [
+        3,
+        45
+      ],
+      "injection_fraction": 0.0,
+      "non_english_fraction": 0.2,
+      "sectors": [
+        "ecommerce",
+        "healthcare",
+        "saas",
+        "fintech"
+      ]
+    }
+  },
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "dataset_hash": "317e07a9bc9147ce",
+  "package_versions": {
+    "python": "3.12.2",
+    "platform": "Windows-11",
+    "vulnprio": "0.1.0",
+    "numpy": "2.2.6",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "scikit-learn": "1.8.0",
+    "xgboost": "3.0.3",
+    "networkx": "3.4.2",
+    "pydantic": "2.7.4",
+    "shap": "0.52.0",
+    "typer": "0.26.7",
+    "httpx": "0.28.1",
+    "matplotlib": "3.10.8",
+    "pyyaml": "6.0.3",
+    "anthropic": "1.5.0"
+  },
+  "llm_backend": "heuristic",
+  "llm_model": "claude-sonnet-5",
+  "feed_mode": "offline",
+  "as_of": "2024-06-28",
+  "command": "vulnprio adversarial --dataset data/synthetic/317e07a9bc9147ce --output-dir runs-adv"
+}

@@ -1,0 +1,27 @@
+# Everything pinned live on the paid Anthropic path. Requires ANTHROPIC_API_KEY
+# (and optionally NVD_API_KEY, which raises the NVD rate limit).
+#
+# Nothing here resolves: every switch is named, so a missing key raises rather than
+# quietly degrading to the heuristic. That is the point of this file -- it is for a run
+# that must be live, where a silent fixture run would be worse than a failure.
+#
+# For the free equivalents see configs/free-gemini.yaml and configs/free-openai.yaml.
+# For a run that prefers live but tolerates offline, use configs/default.yaml (`auto`).
+output_dir: runs
+data_dir: data
+seed: 42
+feeds:
+  mode: live_with_cache
+  cache_dir: .cache/feeds
+  cache_ttl_days: 7
+llm:
+  backend: anthropic
+  model: claude-sonnet-5
+  use_cache: true
+intel:
+  enabled: true
+  mode: live
+  search_provider: anthropic
+component_b:
+  attacker_preset: targeted_criminal
+  impact_preset: default_ecommerce

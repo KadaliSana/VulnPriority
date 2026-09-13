@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.cache/
+runs/
+data/synthetic/
+build/
+dist/
+.venv/
+*.parquet
+# generated sites and reports
+site/
+site-demo/
+*.report.html
+# secrets: .env.example is the committed template
+.env
+.env.*
+!.env.example

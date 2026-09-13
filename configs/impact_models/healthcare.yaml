@@ -1,0 +1,79 @@
+# Monetary impact priors for a healthcare application, denominated in Indian rupees.
+# `currency` below is the single authority on what every number in this file means.
+#
+# This preset exists to say one thing: health data is more sensitive than retail data, so
+# a breach of it costs more. That statement lives in the *ratios* between this file and
+# `default_ecommerce.yaml`, and those ratios are unchanged from the USD presets:
+#
+#   cost_per_record          2.47x the e-commerce figure
+#   downtime_cost_per_hour   2.4x
+#   integrity loss           higher on pii_data, lower on payment (the sensitivity flips)
+#   regulatory_multiplier    2.0 against 1.2
+#   reputational_fraction    0.3 against 0.2
+#   max_impact               2x
+#
+# SOURCED FIGURE
+# --------------
+# Only the e-commerce anchor is measured: IBM Cost of a Data Breach Report, India figures,
+# 2026 - Rs 25.5 crore average Indian breach cost (up 15.9% YoY) across 39,500 records
+# compromised on average, or Rs 6,456 per record. `max_impact` here is two average Indian
+# breaches, Rs 51 crore, which is the same 2x relationship to the e-commerce cap the USD
+# presets carried.
+#
+# PROPORTIONAL PRIORS
+# -------------------
+# Every other money figure is a prior, not a measurement: the previous USD figure at its
+# existing ratio to the per-record anchor (39.13x), rounded to three significant figures.
+# IBM publishes a healthcare-specific premium for other markets; no India-specific
+# healthcare figure was consulted, so none is claimed here. An operator with their own
+# numbers should replace these.
+#
+# `records_by_function` (counts), `regulatory_multiplier` and `reputational_fraction`
+# (dimensionless) carry no currency and are unchanged.
+
+name: healthcare
+currency: INR
+
+# Proportional prior: 2.47x the sourced e-commerce per-record figure, as in the USD preset.
+cost_per_record: 16000.0
+
+records_by_function:
+  pii_data: 40000
+  auth: 20000
+  admin: 40000
+  payment: 5000
+  api_data: 6000
+  file_io: 3000
+  search: 500
+  static_content: 0
+  unknown: 1000
+
+# Proportional prior (was $12,000).
+downtime_cost_per_hour: 470000.0
+
+downtime_hours_by_privilege:
+  0: 0.5
+  1: 3.0
+  2: 12.0
+  3: 36.0
+
+# Proportional priors. Note pii_data above payment: that ordering is the whole point of
+# this preset and is preserved exactly from the USD version.
+integrity_loss_by_function:
+  pii_data: 11700000.0
+  admin: 7830000.0
+  auth: 4700000.0
+  payment: 3520000.0
+  api_data: 1960000.0
+  file_io: 1570000.0
+  search: 196000.0
+  static_content: 39100.0
+  unknown: 391000.0
+
+# Dimensionless. Unchanged: a multiplier has no currency.
+regulatory_multiplier: 2.0
+reputational_fraction: 0.3
+
+# Two average Indian breaches (IBM, India 2026), the same 2x relationship to the
+# e-commerce cap that the USD presets carried.
+max_impact: 510000000.0

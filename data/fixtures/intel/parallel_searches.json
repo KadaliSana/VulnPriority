@@ -1,0 +1,116 @@
+{
+  "version": "1",
+  "note": "Raw Parallel /v1/search response bodies, keyed by CVE, in the shape a live turbo-mode key returned: the undocumented top-level 'metadata' key (null on every observed call), 'publish_date' null on every result including NVD detail pages, 'usage' as a single {name: sku_search, count: 1} entry per request whatever the length of search_queries, and excerpts that are raw scraped page text complete with navigation furniture and embedded newlines. Excerpt bodies are abbreviated for repository size and the result lists trimmed from the ten a live call returns; every key, type and null is as observed. Nothing here is cleaned: normalising retrieved text is vulnprio.sandbox.pipeline's job, and a fixture that arrived pre-cleaned would test the parser against a page the internet never sends.",
+  "mode": "turbo",
+  "endpoint": "https://api.parallel.ai/v1/search",
+  "responses": {
+    "CVE-2017-5638": {
+      "search_id": "search_fixture_5638",
+      "session_id": "session_fixture_5638",
+      "metadata": null,
+      "warnings": null,
+      "usage": [
+        {
+          "name": "sku_search",
+          "count": 1
+        }
+      ],
+      "results": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2017-5638",
+          "title": "NVD - CVE-2017-5638",
+          "publish_date": null,
+          "excerpts": [
+            "An official website of the United States government\nHere's how you know\n\nCVE-2017-5638 Detail\n\nThe Jakarta Multipart parser in Apache Struts 2 2.3.x before 2.3.32 and 2.5.x before 2.5.10.1 has incorrect exception handling and error-message generation during file-upload attempts, which allows remote attackers to execute arbitrary commands via a crafted Content-Type, Content-Disposition, or Content-Length HTTP header.",
+            "CVSS 3.x Severity and Metrics:\nNIST: NVD\nBase Score: 10.0 CRITICAL\nVector: CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H"
+          ]
+        },
+        {
+          "url": "https://github.com/payatu/CVE-2017-5638",
+          "title": "GitHub - payatu/CVE-2017-5638",
+          "publish_date": null,
+          "excerpts": [
+            "Skip to content\nNavigation Menu\nYou must be signed in to change notification settings\n\npayatu/CVE-2017-5638\n\nApache Struts2 S2-045 remote code execution proof of concept. Sends a crafted Content-Type header and reads the command output from the response.",
+            "Usage: python exploit.py <url> <command>\n\nTested against Struts 2.3.31 and 2.5.10 running on Tomcat 8."
+          ]
+        },
+        {
+          "url": "https://github.com/mazen160/struts-pwn",
+          "title": "GitHub - mazen160/struts-pwn: An exploit for Apache Struts CVE-2017-5638",
+          "publish_date": null,
+          "excerpts": [
+            "An exploit for Apache Struts CVE-2017-5638\n\nstruts-pwn is a tool to check and exploit the Apache Struts Jakarta Multipart parser vulnerability. It supports a single target or a list of targets and can run arbitrary OS commands on a vulnerable host."
+          ]
+        },
+        {
+          "url": "https://github.com/deepfence/apache-struts",
+          "title": "GitHub - deepfence/apache-struts",
+          "publish_date": null,
+          "excerpts": [
+            "You must be signed in to change notification settings\n\nA deliberately vulnerable Apache Struts 2 application, packaged as a container, for exercising detection of CVE-2017-5638 in a lab."
+          ]
+        },
+        {
+          "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+          "title": "Known Exploited Vulnerabilities Catalog | CISA",
+          "publish_date": "2021-11-03",
+          "excerpts": [
+            "An official website of the United States government\n\nApache Struts 2 contains an improper input validation vulnerability in the Jakarta Multipart parser that could allow an attacker to execute arbitrary commands. Known to be used in ransomware campaigns: Unknown."
+          ]
+        },
+        {
+          "url": "https://example-blog.invalid/struts-writeup",
+          "title": "A host that is not on the configured allowlist",
+          "publish_date": null,
+          "excerpts": [
+            "Present so the fixture exercises the client-side allowlist: the Search API has no domain parameter, so a result from a host the configuration did not allow has to be dropped here or the allowlist means nothing."
+          ]
+        }
+      ]
+    },
+    "CVE-2024-0001": {
+      "search_id": "search_fixture_0001",
+      "session_id": "session_fixture_0001",
+      "metadata": null,
+      "warnings": null,
+      "usage": [
+        {
+          "name": "sku_search",
+          "count": 1
+        }
+      ],
+      "results": [
+        {
+          "url": "https://www.exploit-db.com/exploits/00000",
+          "title": "Example Struts - SQL Injection (PoC)",
+          "publish_date": "2024-01-20T00:00:00Z",
+          "excerpts": [
+            "# Exploit Title: Example Struts SQL Injection\n# Date: 2024-01-20\n# Tested on: Example Struts 2.5.12\n\nA proof of concept that extracts the user table through the username parameter of /api/login."
+          ]
+        },
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-0001",
+          "title": "NVD - CVE-2024-0001",
+          "publish_date": "not a date the framework can parse",
+          "excerpts": [
+            "An official website of the United States government\n\nA SQL injection in Example Struts allows remote attackers to read the database.",
+            "CVSS 3.1 Base Score: 9.8 CRITICAL"
+          ]
+        }
+      ]
+    },
+    "EMPTY": {
+      "search_id": "search_fixture_empty",
+      "session_id": "session_fixture_empty",
+      "metadata": null,
+      "warnings": null,
+      "usage": [
+        {
+          "name": "sku_search",
+          "count": 1
+        }
+      ],
+      "results": []
+    }
+  }
+}

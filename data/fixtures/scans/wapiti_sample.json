@@ -1,0 +1,140 @@
+{
+  "vulnerabilities": {
+    "SQL Injection": [
+      {
+        "method": "GET",
+        "path": "https://shop.example.com/product.php",
+        "info": "QUERY_STRING injection via the id parameter",
+        "level": 3,
+        "parameter": "id=__SQL__",
+        "module": "sql",
+        "http_request": "GET /product.php?id=1%27 HTTP/1.1\nHost: shop.example.com\nUser-Agent: Wapiti/3.1.7\n\n",
+        "curl_command": "curl \"https://shop.example.com/product.php?id=1%27\"",
+        "wstg": ["WSTG-INPV-05"],
+        "detail": {
+          "response": {
+            "status_code": 500,
+            "headers": {"Content-Type": "text/html; charset=utf-8", "Server": "Apache/2.4.41"},
+            "body": "<html><body>You have an error in your SQL syntax near '1''</body></html>"
+          }
+        }
+      },
+      {
+        "method": "GET",
+        "path": "https://shop.example.com/product.php",
+        "info": "QUERY_STRING injection via the ref parameter",
+        "level": 3,
+        "parameter": "ref=__SQL__",
+        "module": "sql",
+        "http_request": "GET /product.php?ref=1%27 HTTP/1.1\nHost: shop.example.com\n\n",
+        "wstg": ["WSTG-INPV-05"]
+      }
+    ],
+    "Cross Site Scripting": [
+      {
+        "method": "GET",
+        "path": "https://shop.example.com/search.php",
+        "info": "XSS vulnerability found via injection in the q parameter",
+        "level": 2,
+        "parameter": "q=__XSS__",
+        "module": "xss",
+        "http_request": "GET /search.php?q=%3Cscript%3E HTTP/1.1\nHost: shop.example.com\n\n",
+        "wstg": ["WSTG-INPV-01"],
+        "detail": {
+          "response": {
+            "status_code": 200,
+            "headers": {"Content-Type": "text/html", "Set-Cookie": "PHPSESSID=abc123; Path=/"},
+            "body": "<html><body>No results for your search</body></html>"
+          }
+        }
+      }
+    ],
+    "Secure Flag cookie": [
+      {
+        "method": "GET",
+        "path": "https://shop.example.com/login.php",
+        "info": "Secure flag is not set in the cookie PHPSESSID",
+        "level": 1,
+        "parameter": "",
+        "module": "cookieflags",
+        "http_request": "GET /login.php HTTP/1.1\nHost: shop.example.com\n\n"
+      }
+    ]
+  },
+  "anomalies": {
+    "Internal Server Error": [
+      {
+        "method": "GET",
+        "path": "https://shop.example.com/report.php",
+        "info": "The server responded with a 500 status while testing the range parameter",
+        "level": 2,
+        "parameter": "range=__ANOM__",
+        "module": "sql",
+        "http_request": "GET /report.php?range=1 HTTP/1.1\nHost: shop.example.com\n\n"
+      }
+    ]
+  },
+  "additionals": {
+    "Fingerprint web technology": [
+      {
+        "method": "GET",
+        "path": "https://shop.example.com/",
+        "info": "The detected technology is Apache 2.4.41 with PHP 7.4.3",
+        "level": 0,
+        "parameter": "",
+        "module": "wapp",
+        "http_request": "GET / HTTP/1.1\nHost: shop.example.com\n\n",
+        "detail": {
+          "response": {
+            "status_code": 200,
+            "headers": {
+              "Content-Type": "text/html",
+              "Server": "Apache/2.4.41 (Ubuntu)",
+              "X-Powered-By": "PHP/7.4.3"
+            },
+            "body": "<html><head><title>Example Shop</title></head><body>Welcome</body></html>"
+          }
+        }
+      }
+    ]
+  },
+  "infos": {
+    "target": "https://shop.example.com/",
+    "date": "2024-05-15T09:12:33",
+    "version": "Wapiti 3.1.7",
+    "scope": "folder",
+    "crawled_pages_nbr": 24,
+    "detailed_report_level": 2
+  },
+  "classifications": {
+    "SQL Injection": {
+      "desc": "SQL injection is a vulnerability where the application builds a SQL statement from unvalidated input.",
+      "sol": "Use parameterised queries and never concatenate user input into SQL.",
+      "ref": {"CWE-89: Improper Neutralization of Special Elements used in an SQL Command": "https://cwe.mitre.org/data/definitions/89.html"},
+      "wstg": ["WSTG-INPV-05"],
+      "cwe": "89"
+    },
+    "Cross Site Scripting": {
+      "desc": "Cross-site scripting allows an attacker to execute script in the victim's browser.",
+      "sol": "Encode output according to the context it is written into.",
+      "ref": {"CWE-79": "https://cwe.mitre.org/data/definitions/79.html"},
+      "wstg": ["WSTG-INPV-01"],
+      "cwe": "79"
+    },
+    "Secure Flag cookie": {
+      "desc": "A cookie without the Secure flag is transmitted over unencrypted connections.",
+      "sol": "Set the Secure attribute on every session cookie.",
+      "ref": {"CWE-614": "https://cwe.mitre.org/data/definitions/614.html"}
+    },
+    "Internal Server Error": {
+      "desc": "The server returned an unhandled error while being tested.",
+      "sol": "Investigate the server-side error and handle the input safely.",
+      "ref": {}
+    },
+    "Fingerprint web technology": {
+      "desc": "The technology stack of the application was identified.",
+      "sol": "Suppress version information in banners where it is not needed.",
+      "ref": {}
+    }
+  }
+}

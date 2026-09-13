@@ -1,0 +1,89 @@
+{
+  "host": "shop.example.com",
+  "ip": "203.0.113.10",
+  "port": "443",
+  "banner": "Apache/2.4.41 (Ubuntu) OpenSSL/1.1.1f",
+  "starttime": "2024-05-15T09:12:33",
+  "vulnerabilities": [
+    {
+      "id": "999957",
+      "method": "GET",
+      "url": "/",
+      "msg": "The anti-clickjacking X-Frame-Options header is not present.",
+      "references": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options",
+      "OSVDB": "0"
+    },
+    {
+      "id": "999103",
+      "method": "GET",
+      "url": "/",
+      "msg": "The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type.",
+      "references": "https://www.netsparker.com/web-vulnerability-scanner/",
+      "OSVDB": "0"
+    },
+    {
+      "id": "000330",
+      "method": "GET",
+      "url": "/uploads/",
+      "msg": "Directory indexing found. The /uploads/ directory lists its contents.",
+      "references": "",
+      "OSVDB": "3268"
+    },
+    {
+      "id": "000375",
+      "method": "GET",
+      "url": "/admin/index.php",
+      "msg": "This might be an interesting admin login page.",
+      "references": "",
+      "OSVDB": "3092"
+    },
+    {
+      "id": "000600",
+      "method": "GET",
+      "url": "/phpinfo.php",
+      "msg": "Output from the phpinfo() function was found. This reveals the PHP configuration and server paths.",
+      "references": "",
+      "OSVDB": "3233"
+    },
+    {
+      "id": "000450",
+      "method": "OPTIONS",
+      "url": "/",
+      "msg": "Allowed HTTP Methods: GET, HEAD, POST, OPTIONS, TRACE.",
+      "references": "",
+      "OSVDB": "0"
+    },
+    {
+      "id": "000451",
+      "method": "TRACE",
+      "url": "/",
+      "msg": "HTTP TRACE method is active which suggests the host is vulnerable to cross site tracing.",
+      "references": "https://www.owasp.org/index.php/Cross_Site_Tracing",
+      "OSVDB": "877"
+    },
+    {
+      "id": "000720",
+      "method": "GET",
+      "url": "/backup.sql",
+      "msg": "A database backup file was found and is downloadable.",
+      "references": "",
+      "OSVDB": "3093"
+    },
+    {
+      "id": "000004",
+      "method": "GET",
+      "url": "/",
+      "msg": "Server leaks inodes via ETags, header found with file /, fields: 0x27 0x5f0a1b9c",
+      "references": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2003-1418",
+      "OSVDB": "0"
+    },
+    {
+      "id": "000810",
+      "method": "GET",
+      "url": "/",
+      "msg": "Apache/2.4.41 appears to be outdated. The current stable release is newer.",
+      "references": "",
+      "OSVDB": "0"
+    }
+  ]
+}

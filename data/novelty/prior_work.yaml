@@ -1,0 +1,2272 @@
+# Prior work, as structured data.
+#
+# Every entry is one study reviewed in the literature review *AI-Driven Automated Web
+# Application Vulnerability Prioritization* (Table 1, "Existing methodologies in the reviewed
+# corpus"). Authors, year, venue, dataset, headline result and limitation are taken from the
+# review's own tables and prose. Nothing here is invented: where the review does not state
+# something, the field says so or the capability is coded `unknown`.
+#
+# CAPABILITY CODING
+#   has      the study satisfies the dimension's test as stated in capabilities.py
+#   partial  it satisfies part of the test, or satisfies it in a weaker form the review names
+#   lacks    the review gives positive evidence that the approach does not do this
+#   unknown  the review does not say. NOT evidence of absence; it weakens novelty claims.
+#
+# The coder is the framework's own author, working from a secondary source. That is a real
+# threat to every conclusion drawn from this file and it is recorded in `caveats` below rather
+# than left implicit.
+#
+# Reference numbers in square brackets are the review's own bibliography numbering.
+
+version: 1
+review_title: AI-Driven Automated Web Application Vulnerability Prioritization
+review_corpus_note: >-
+  The reviewed corpus is Table 1 of the review: 45 distinct studies. Forty-three of them are
+  references [25]-[67]; the remaining two, Spring et al. [6] and Hore et al. [15], are cited
+  earlier in the review but appear in Table 1 as reviewed studies. Table 1's per-paradigm
+  counts sum to 46 because Sheng et al. [50] is counted twice, under deep learning and again
+  under systematic surveys. References [1]-[24] other than [6] and [15] are standards,
+  tools and background citations, not reviewed studies, and are deliberately absent here.
+
+# Corpus-level threats to any conclusion drawn from this file. analysis.py surfaces these
+# verbatim in `threats_to_novelty`; they are data, not narrative decoration.
+caveats:
+  - id: corpus_boundary
+    text: >-
+      "No prior study does X" here means "no study among these 45 does X". It is a claim about
+      one literature review's corpus, not about the literature. A reviewer who knows a
+      counterexample outside this corpus refutes the claim without contradicting this file.
+  - id: secondary_evidence
+    text: >-
+      Capability codings are derived from the review's summaries and comparison tables, not from
+      reading the 45 primary papers. A study may implement a capability the review does not
+      mention. Every `unknown` cell is a possible counterexample, which is why unknown counts
+      are reported next to every claim.
+  - id: commercial_systems_unassessed
+    text: >-
+      Commercial and public prioritization systems named in the review's background section but
+      not reviewed as studies - Tenable VPR, Qualys TruRisk, CISA SSVC, CISA Vulnrichment, EPSS
+      itself, DefectDojo - are not in this corpus. The review states that the commercial
+      scoring methodologies are proprietary, so they cannot be coded either way. Several of
+      them plausibly implement exploitation grounding and asset context at least as well as
+      anything here.
+  - id: injection_defence_is_borrowed
+    text: >-
+      The two dimensions on which this framework is unprecedented in this corpus - untrusted
+      evidence containment and adversarial robustness of the prioritizer - rest on mechanisms
+      from the LLM-security literature the proposal itself cites: Greshake et al. on indirect
+      prompt injection [22], OWASP LLM01:2025 [23], NIST AI 100-2e2025 [24]. Applying them to a
+      vulnerability prioritizer and measuring the result is new here; the mechanisms are not.
+  - id: robustness_outside_corpus
+    text: >-
+      Le et al. [67] report that 3 of the 84 studies in their survey tested adversarial
+      robustness. Those three are not in this corpus and were not examined. The robustness
+      novelty claim is bounded by that fact.
+  - id: dimensions_chosen_by_the_authors
+    text: >-
+      The 23 comparison dimensions were chosen by the framework's authors after the framework
+      was designed. A dimension set chosen that way favours the system it describes. Dimensions
+      on which this framework would score badly - cost of operation, analyst acceptance,
+      detection coverage, deployment maturity, peer review - are absent.
+  - id: no_real_deployment
+    text: >-
+      Every evidence pointer for this framework is a unit test over fixtures or synthetic data.
+      No number in this analysis comes from a real scan history, and the combination of
+      capabilities claimed as novel has never been run against a real deployment.
+
+studies:
+  # ---------------------------------------------------------------- statistical / analytical
+  - key: liu2012
+    authors: Liu, Zhang, Kong & Wu
+    year: 2012
+    venue: Journal of Systems and Software
+    reference: "[25]"
+    paradigm: statistical
+    description: >-
+      Extends VRSS with a vulnerability-type factor derived by Analytic Hierarchy Process from
+      expert pairwise comparisons.
+    dataset: 11,395 CVEs, 2008-2010 (NVD, X-Force)
+    headline_result: >-
+      274 distinct score categories against 57 for CVSS and 97 for VRSS, with all consistency
+      indices below 0.10.
+    limitation: >-
+      Subjective pairwise comparisons; no validation against exploitation outcomes.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: partial
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: per_item_explainability
+        note: >-
+          Coded partial, not has: the formula is fully auditable, which is per-item explanation
+          in the weak sense, but the review reports no per-finding attribution.
+
+  - key: sen2016
+    authors: Sen & Heim
+    year: 2016
+    venue: Decision Sciences
+    reference: "[35]"
+    paradigm: statistical
+    description: >-
+      Extended Cox proportional-hazards survival model of the time from disclosure to exploit
+      publication, testing vulnerability characteristics as drivers.
+    dataset: 844 vulnerabilities, 2002-2005 (OSVDB, CVE)
+    headline_result: >-
+      Harrell's C = 72%; immediate disclosure raised the hazard of exploit publication 27-fold
+      (HR = 26.7); infrastructure software lowered it by 75%; severity had no effect.
+    limitation: >-
+      Underground exploits unobserved; narrow 2002-2005 window.
+    survey: false
+    capabilities:
+      decision_theoretic_target: partial
+      explicit_attacker_model: partial
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: has
+      application_context_awareness: partial
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: partial
+      non_cvss_ground_truth: has
+      time_ordered_evaluation: partial
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: partial
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: explicit_attacker_model
+        note: >-
+          The review states this study applies game-theoretic reasoning "but only to disclosure
+          timing" - adversary reasoning outside the prioritization path, hence partial.
+      - dimension: calibrated_probabilities
+        note: >-
+          Harrell's C is a concordance (discrimination) measure. No calibration is reported.
+
+  - key: amankwah2020
+    authors: Amankwah, Chen, Kudjo, Agyemang & Amponsah
+    year: 2020
+    venue: Service Oriented Computing and Applications
+    reference: "[36]"
+    paradigm: statistical
+    description: >-
+      Four-benchmark OWASP-derived severity scoring applied to OWASP ZAP scan output on a
+      deliberately vulnerable web application.
+    dataset: DVWA, 8 web vulnerability classes
+    headline_result: >-
+      100% precision on the five classes the scanner detected; web-specific scoring criteria.
+    limitation: >-
+      One scanner, one target application; 3 of 8 classes undetected entirely.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: has
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: partial
+      non_cvss_ground_truth: partial
+      time_ordered_evaluation: lacks
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: web_application_native_evidence
+        note: >-
+          One of only three studies in the corpus operating on web application evidence directly
+          (Gap 6), and the closest prior work to this framework's ingest layer.
+
+  - key: spring2021
+    authors: Spring, Hatleback, Householder, Manion & Shick
+    year: 2021
+    venue: IEEE Security & Privacy
+    reference: "[6]"
+    paradigm: statistical
+    description: >-
+      Position paper arguing that CVSS lacks formal and empirical justification and improperly
+      treats ordinal measurements as ratio quantities; identifies chaining as a first-order
+      failure of the standard.
+    dataset: unknown
+    headline_result: >-
+      Argues CVSS has no formal or empirical justification for its formula and that ordinal
+      measurements are treated as ratio quantities.
+    limitation: >-
+      A critique rather than a method: it identifies the construct problem without supplying a
+      replacement target.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: unknown
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: unknown
+    caveats:
+      - dimension: multi_hop_directed_chain
+        note: >-
+          Coded lacks because it models nothing, but this is the study that names chaining as a
+          first-order CVSS deficiency. It motivates the dimension rather than satisfying it.
+      - dimension: decision_theoretic_target
+        note: >-
+          Coded lacks for the same reason: it establishes the measurement-theory problem this
+          framework's expected-loss target answers, which makes it prior art for the diagnosis
+          even though it proposes no construct.
+
+  - key: anand2022
+    authors: Anand, Singh, Selwal, Singh & Ghafoor
+    year: 2022
+    venue: Expert Systems
+    reference: "[37]"
+    paradigm: statistical
+    description: >-
+      IVQFIoT extends CVSS v3.1 with corporal impact, vulnerability age, fault tolerance,
+      cascading effect and system safety for IoT and cyber-physical systems.
+    dataset: IoT and cyber-physical system vulnerabilities (size not reported in the review)
+    headline_result: >-
+      Proposes five additional metric dimensions for IoT and cyber-physical scoring.
+    limitation: >-
+      The mathematical formulation of the proposed metrics is left to future work.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: partial
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: partial
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: partial
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: lacks
+      offline_reproducible_execution: unknown
+    caveats:
+      - dimension: multi_hop_directed_chain
+        note: >-
+          "Cascading effect" is named as a metric dimension but its formulation is deferred, so
+          the chaining capability is proposed rather than implemented.
+
+  - key: howland2023
+    authors: Howland
+    year: 2023
+    venue: "Digital Threats: Research and Practice"
+    reference: "[33]"
+    paradigm: statistical
+    description: >-
+      Correlates CVSS v3 base scores and sub-metrics against vendor weaponisation indicators,
+      as a direct empirical falsification test of the dominant severity metric.
+    dataset: 28,779 CVEs with Qualys threat indicators
+    headline_result: >-
+      Pearson rho = 0.099 between CVSS v3 score and weaponisation; Privileges Required is the
+      strongest sub-metric at rho = 0.180.
+    limitation: >-
+      Weaponisation is a vendor-derived proxy; CVSS v4.0 not assessed.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: has
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: lacks
+      non_cvss_ground_truth: has
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: non_cvss_ground_truth
+        note: >-
+          Coded has: the outcome variable is weaponisation, not CVSS. The review's own caveat -
+          that weaponisation is a vendor-derived proxy - applies.
+      - dimension: component_level_ablation
+        note: >-
+          Per-sub-metric correlations are component attribution of a kind, hence partial.
+
+  - key: sharma2023_viewss
+    authors: "Sharma, Sabharwal & Nagpal"
+    year: 2023
+    venue: Computers & Security
+    reference: "[26]"
+    paradigm: statistical
+    description: >-
+      VIEWSS varies the impact-to-exploitability weighting across 4:6, 5:5 and 6:4 ratios to
+      spread the score distribution.
+    dataset: 83,595 NVD CVEs (2017-2022); 12,243 correlated high-risk vulnerabilities
+    headline_result: >-
+      79 unique, near-normally distributed scores; identifies 51.3% of high-risk vulnerabilities
+      at a threshold of 8.0 against 44.9% for CVSS v3.
+    limitation: >-
+      Severity-only; no exploitation evidence or asset context.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: partial
+      non_cvss_ground_truth: unknown
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: decision_theoretic_target
+        note: >-
+          Gap 1 names this study as the "technical severity" operationalisation of priority - a
+          defined score, but not a quantity with a decision interpretation.
+
+  - key: sharma2023_threatagent
+    authors: "Sharma, Vidalis, Menon & Anand"
+    year: 2023
+    venue: Multimedia Tools and Applications
+    reference: "[38]"
+    paradigm: statistical
+    description: >-
+      Semi-automatic model profiling threat agents against vulnerability exploitations in NIST
+      databases.
+    dataset: 151,833 NVD entries, 1999-2021
+    headline_result: >-
+      A semi-automatic threat-agent profiling framework over 151,833 NVD entries; the review
+      records no accuracy measures.
+    limitation: >-
+      No accuracy measures reported.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: partial
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: partial
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: unknown
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: explicit_attacker_model
+        note: >-
+          The strongest adversary modelling in the corpus. Coded partial rather than has because
+          the review reports threat-agent profiling, not an adversary parameterisation whose
+          change reorders a queue, and reports no accuracy measures for it.
+
+  - key: albanese2023
+    authors: "Albanese, Iganibo & Adebiyi"
+    year: 2023
+    venue: Computers & Security
+    reference: "[39]"
+    paradigm: statistical
+    description: >-
+      A framework for designing vulnerability metrics in which exploitation likelihood and
+      exposure factor are exponential-decay functions of CVSS sub-scores, IDS rule and exploit
+      availability, vulnerability age and plugin coverage.
+    dataset: 33,741 CVEs (2020-2021), IDS rules, Exploit-DB
+    headline_result: >-
+      Top-ten ranking quality rises from about 0% for CVSS base scores alone to 97.48% once
+      exploit and IDS-rule variables are included.
+    limitation: >-
+      Manual variable and weight selection; CVSS v2 used for evaluation; attacker and defender
+      modelling explicitly deferred to future work.
+    survey: false
+    capabilities:
+      decision_theoretic_target: partial
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: has
+      application_context_awareness: partial
+      context_without_manual_tagging: partial
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: partial
+      non_cvss_ground_truth: partial
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: explicit_attacker_model
+        note: >-
+          Gap 2 cites this study specifically: it defers attacker and defender modelling to
+          future work. Coded lacks on the review's own statement.
+
+  - key: heluany2026
+    authors: "Heluany, Houmb, Franceschett & Gkioulos"
+    year: 2026
+    venue: International Journal of Critical Infrastructure Protection
+    reference: "[40]"
+    paradigm: statistical
+    description: >-
+      Maps IEC 62443-3-3 achieved security levels onto CVSS v3.x environmental metrics for smart
+      grid device prioritization.
+    dataset: 18 PLC CVEs, 17 operator-station CVEs; ENTSO-E facility data
+    headline_result: >-
+      Contextualisation downgraded 94% of notifications; CVE-2016-3312 moved from Critical 9.1
+      to Medium 5.9.
+    limitation: >-
+      Expert-judgement based; scoped to low-impact facilities only.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: has
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: partial
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: context_without_manual_tagging
+        note: >-
+          Context is strong but entirely expert-supplied: security levels are assigned by
+          analysts, which is exactly the manual tagging this dimension excludes.
+
+  - key: walkowski2026
+    authors: "Walkowski, Nowak, Balsam, Nowak, Oko & Sujecki"
+    year: 2026
+    venue: Computers & Security
+    reference: "[34]"
+    paradigm: statistical
+    description: >-
+      Entropy, paired t-tests and KL divergence over the whole CVSS corpus to quantify
+      inconsistency across scoring standards and sources.
+    dataset: 297,780 CVEs; 506,653 CVSS entries, 1988-2025
+    headline_result: >-
+      NVD and CNA agree on severity category in just 65.9% of cases; only 2.32% of CVEs carry
+      scores from all three families; v3.x scores exceed v2.0 by 1.57 points; 48.3% v3.0-v3.1
+      exact agreement.
+    limitation: >-
+      NVD-only; single snapshot; base scores only.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: lacks
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: non_cvss_ground_truth
+        note: >-
+          This study supplies the empirical ceiling (65.9%) that motivates the dimension. It
+          studies the instrument rather than exploitation, so it does not satisfy the test
+          itself. The framework turns its source-disagreement measure into a model feature,
+          which is an operationalisation of this study rather than a novelty over it.
+
+  # ---------------------------------------------------------------------- machine learning
+  - key: khazaei2016
+    authors: "Khazaei, Ghasemzadeh & Derhami"
+    year: 2016
+    venue: Journal of Intelligent & Fuzzy Systems
+    reference: "[27]"
+    paradigm: machine_learning
+    description: >-
+      TF-IDF text mining with PCA and LDA reduction feeding SVM, random forest and a Mamdani
+      fuzzy inference system to predict CVSS scores from descriptions.
+    dataset: 19,320 vulnerability descriptions
+    headline_result: >-
+      Fuzzy inference with LDA features reached about 88% test accuracy, ahead of SVM (86.23%)
+      and random forest (85.78%); without dimensionality reduction SVM accuracy collapsed to
+      55.89%.
+    limitation: >-
+      Sensitive to kernel, parameter and dimensionality choices; CVSS-derived labels.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: lacks
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: non_cvss_ground_truth
+        note: Gap 3 names this study among those training and evaluating on CVSS labels.
+
+  - key: kudjo2020
+    authors: "Kudjo, Chen, Mensah, Amankwah & Kudjo"
+    year: 2020
+    venue: Software Quality Journal
+    reference: "[41]"
+    paradigm: machine_learning
+    description: >-
+      X-means "Bellwether" instance selection choosing exemplary training subsets, with random
+      forest, deep network, logistic regression and KNN classifiers over CVE descriptions.
+    dataset: 2,625 browser and 1,469 Linux kernel vulnerabilities
+    headline_result: >-
+      F-measures from 14.3% to 97.8%, random forest reaching 98.5% on Firefox, significantly
+      better than growing-portfolio baselines (p < 0.05, Cliff's delta > 0.276); Bellwether
+      subsets comprised 29.3-97.7% of the full portfolio.
+    limitation: >-
+      Binary severe/non-severe target; only four applications studied.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: lacks
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+
+  - key: mathieu2023
+    authors: "Mathieu & Turovlin"
+    year: 2023
+    venue: Information & Computer Security
+    reference: "[42]"
+    paradigm: machine_learning
+    description: >-
+      Classification and regression trees over CVSS sub-metrics and product group, aimed at ERP
+      managers prioritising known vulnerabilities.
+    dataset: 563 SAP CVEs, 2013-2021
+    headline_result: >-
+      84.9% test accuracy and AUC 0.9477 for the Critical class; the sole Critical terminal node
+      was dominated by CWE-306 at 20.3% despite that weakness accounting for only 3.2% of SAP
+      vulnerabilities.
+    limitation: >-
+      15.1% misclassification; single vendor (SAP); NVD-only inputs.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: partial
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: has
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: partial
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: minority_class_cost_sensitive
+        note: >-
+          Coded partial: the CWE-306 finding is precisely a minority-class argument - frequency
+          based triage would systematically miss it - but no imbalance-robust metric is reported.
+
+  - key: kekul2024
+    authors: "Kekul, Ergen & Arslan"
+    year: 2024
+    venue: International Journal of Information Security
+    reference: "[43]"
+    paradigm: machine_learning
+    description: >-
+      Word2Vec, Doc2Vec and FastText embeddings of vulnerability descriptions paired with five
+      classifiers to estimate CVSS metrics.
+    dataset: 163,229 records for CVSS 2.0 and 89,868 for CVSS 3.1
+    headline_result: >-
+      87.34-96.25% success on CVSS 2.0 metrics, best being Access Vector at 96.25%; 84-95% on
+      CVSS 3.1; severity-score mean absolute error 0.74 and 0.14 respectively.
+    limitation: >-
+      No transformer comparison; inherits NVD description brevity; CVSS-derived labels.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: lacks
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+
+  - key: pourbehzadi2024
+    authors: "Pourbehzadi, Javidi, Howell, Kamar & Sheybani"
+    year: 2024
+    venue: Decision Support Systems
+    reference: "[44]"
+    paradigm: machine_learning
+    description: >-
+      Interpretable principal component analysis with support vector regression to automate
+      vulnerability severity scoring from report keywords.
+    dataset: 2,079 CVE reports; six companies for the generalisation test
+    headline_result: >-
+      R-squared 0.9763 against 0.9492 for plain SVR and 0.8445 for LSTM, generalising across six
+      companies at R-squared 0.70-0.97.
+    limitation: >-
+      May replicate human scoring bias; trained on 2017-2019 only.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: has
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+
+  - key: sevimlideniz2026
+    authors: "Sevimli Deniz & Koca"
+    year: 2026
+    venue: Computers & Security
+    reference: "[45]"
+    paradigm: machine_learning
+    description: >-
+      Reframes prioritization as a resource-constrained decision problem: XGBoost over 19
+      structured features under a Top-K knapsack formulation, evaluated with Precision@K,
+      NDCG@K and RiskCapture@K.
+    dataset: 1,406 real enterprise instances across 86 assets
+    headline_result: >-
+      Context-aware model reached ROC-AUC 0.941 +/- 0.011 and Precision@10 of 0.90, against
+      0.589 and 0.70 for a CVSS-only baseline; four-stage ablation gave CVSS alone 0.656, CIA
+      sub-metrics 0.690, contextual asset features 0.921 and vulnerability age 0.937.
+    limitation: >-
+      Single enterprise, 1,406 instances; equal remediation cost assumed; remediation benefit
+      approximated by predicted probability.
+    survey: false
+    capabilities:
+      decision_theoretic_target: has
+      explicit_attacker_model: lacks
+      monetary_business_impact: partial
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: has
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: has
+      per_item_explainability: partial
+      non_cvss_ground_truth: partial
+      time_ordered_evaluation: unknown
+      component_level_ablation: has
+      minority_class_cost_sensitive: unknown
+      calibrated_probabilities: partial
+      resource_constrained_selection: has
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: resource_constrained_selection
+        note: >-
+          The nearest prior work to this framework's selection layer, and it got there first.
+          The framework's only advance is unequal remediation cost charged per root-cause
+          cluster, which is the assumption this study had to make and could not test.
+      - dimension: monetary_business_impact
+        note: >-
+          "Business impact" is one of the 19 features. The review does not state that it is
+          monetary, so this is coded partial rather than has.
+      - dimension: component_level_ablation
+        note: >-
+          The four-stage feature-group ablation is the clearest evidence in the corpus for the
+          value of context, and the review names it as one of only three ablation exceptions.
+
+  # ------------------------------------------------ deep learning / representation learning
+  - key: sharma2020_cnn
+    authors: "Sharma, Sibal & Sabharwal"
+    year: 2020
+    venue: International Journal of System Assurance Engineering and Management
+    reference: "[28]"
+    paradigm: deep_learning
+    description: >-
+      GloVe embeddings with a CNN classifier for three-class severity prediction from
+      vulnerability description text.
+    dataset: 10,000 CVE Details records
+    headline_result: >-
+      0.78-0.85 accuracy on single-vendor sets but 0.92-0.94 on mixed-vendor sets, indicating
+      that description-style diversity rather than volume drives generalisation.
+    limitation: >-
+      Accuracy varies 0.78-0.94 by vendor; no machine-learning baselines compared.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: lacks
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+
+  - key: costa2022
+    authors: "Costa, Roxo, Sequeiros, Proenca & Inacio"
+    year: 2022
+    venue: IEEE Access
+    reference: "[29]"
+    paradigm: deep_learning
+    description: >-
+      Fine-tunes five BERT variants to classify all eight CVSS v3 base metrics from description
+      text, with a Shapley analysis of what drives predictions.
+    dataset: 79,810 CVSS v3 instances
+    headline_result: >-
+      DistilBERT outperformed every larger sibling, reaching up to 28% higher accuracy than the
+      prior state of the art on multi-class categories; Shapley analysis showed predictions
+      disproportionately driven by specific product names rather than vulnerability semantics.
+    limitation: >-
+      Predictions skewed by named products; CVSS v3 records only.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: has
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: per_item_explainability
+        note: >-
+          Prior art for SHAP-style attribution in this literature, and for its diagnostic value:
+          the attribution is what exposed the product-name shortcut. The framework claims no
+          novelty here.
+
+  - key: samtani2022
+    authors: "Samtani, Chai & Chen"
+    year: 2022
+    venue: MIS Quarterly
+    reference: "[46]"
+    paradigm: deep_learning
+    description: >-
+      EVA-DSSM, a deep structured semantic model with bidirectional LSTM and dual attention,
+      linking dark-web exploits to known vulnerability listings.
+    dataset: 18,052 dark-web exploits, 87,019 vulnerability listings, gold standard of 52,590 labelled pairs
+    headline_result: >-
+      P@1 of 78.40% for web application exploits, exceeding the strongest non-deep baseline by
+      20.74-41.83 points and the strongest deep baseline by 4.24-10.84; its recency-decayed
+      severity metric was rated significantly more useful than a DSSM+CVSS baseline by 45
+      professionals (p < 0.05).
+    limitation: >-
+      Cannot link undisclosed exploits; no internal-control modelling; Russian and Middle
+      Eastern hacker forums identified as unexamined.
+    survey: false
+    capabilities:
+      decision_theoretic_target: partial
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: has
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: partial
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: lacks
+      non_cvss_ground_truth: has
+      time_ordered_evaluation: unknown
+      component_level_ablation: has
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: partial
+    caveats:
+      - dimension: web_application_native_evidence
+        note: >-
+          Coded partial: P@1 is reported for the web application exploit *category*, but the
+          evidence is dark-web exploit text, not application requests and responses.
+      - dimension: untrusted_evidence_containment
+        note: >-
+          Ingests dark-web forum text - adversary-authored by definition - directly into a
+          learned model. The review reports no containment of any kind.
+
+  - key: kuhn2023
+    authors: "Kuhn, Relke & Reuter"
+    year: 2023
+    venue: Computers & Security
+    reference: "[47]"
+    paradigm: deep_learning
+    description: >-
+      Tests whether scraped open-source intelligence reference pages improve CVSS v3 vector
+      prediction over NVD descriptions alone.
+    dataset: 12,802 scraped OSINT reference pages and 88,979 NVD entries
+    headline_result: >-
+      DistilBERT achieved MSE 1.44 with 75% of scores within +/-1, improving on the prior
+      benchmark of MSE 1.79, but the added OSINT text gave no consistent gain over
+      description-only training.
+    limitation: >-
+      Added OSINT text yielded no consistent gain; scrapers not generalisable; attack complexity
+      and privileges required perform poorly on rare classes.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: partial
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: lacks
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: has
+      minority_class_cost_sensitive: partial
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: partial
+    caveats:
+      - dimension: untrusted_evidence_containment
+        note: >-
+          The closest architectural precedent for this framework's reference-page ingestion:
+          12,802 pages scraped from the open internet, fed to a model that produces a score,
+          with nothing between. The review reports no sanitisation, no provenance weighting and
+          no injection consideration. This is the specific prior work the containment claim is
+          measured against.
+      - dimension: component_level_ablation
+        note: >-
+          Description-only against description-plus-OSINT is a genuine input ablation, and its
+          negative result is one of the more useful findings in the corpus.
+
+  - key: ullman2024
+    authors: "Ullman, Samtani, Zhu, Lazarine, Chen & Nunamaker"
+    year: 2024
+    venue: Journal of Management Information Systems
+    reference: "[48]"
+    paradigm: deep_learning
+    description: >-
+      Multi-view combinatorial-attentive autoencoder over package-dependency, vulnerability and
+      file-system graphs, clustering cloud virtual machines by risk without labels.
+    dataset: 215 cloud VMs
+    headline_result: >-
+      V-measure scores 8-48% above benchmarks with no labels required; the highest-risk of
+      eleven clusters averaged 3,452 vulnerable packages per VM.
+    limitation: >-
+      Does not indicate which cluster to fix first; scanner-limited.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: has
+      context_without_manual_tagging: has
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: partial
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: lacks
+      non_cvss_ground_truth: partial
+      time_ordered_evaluation: unknown
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: context_without_manual_tagging
+        note: >-
+          One of only two studies in the corpus that derive asset context from observed artefacts
+          with no manual tagging, and it does so with no labels at all. Directly relevant prior
+          work for Research Goal 1.
+      - dimension: learning_to_rank_combined_evidence
+        note: >-
+          Coded lacks despite being a learned model: the review states it does not indicate which
+          cluster to fix first, so it produces no ordering.
+
+  - key: gao2025
+    authors: "Gao, Chen, Wang, Wang & Yang"
+    year: 2025
+    venue: Engineering Applications of Artificial Intelligence
+    reference: "[49]"
+    paradigm: deep_learning
+    description: >-
+      Particle-swarm architecture search with knowledge distillation to compress CodeBERT for
+      severity assessment from source code.
+    dataset: source-code vulnerability corpora (C/C++ dominated)
+    headline_result: >-
+      Compressed to 0.63% of teacher size (3 MB against 476 MB) while retaining 89.3% of teacher
+      accuracy and cutting inference latency by 96.4%; MCC fell 37.99% against a 10.73% accuracy
+      fall.
+    limitation: >-
+      MCC falls 37.99%: minority severity classes degrade sharply under compression.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: lacks
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: has
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: minority_class_cost_sensitive
+        note: >-
+          Reports MCC alongside accuracy and shows the two diverge sharply. This is the evidence
+          behind Gap 7 and it is prior art for the framework's minority reporting.
+
+  - key: sheng2025
+    authors: "Sheng, Chen, Gu, Huang, Gu & Huang"
+    year: 2025
+    venue: ACM Computing Surveys
+    reference: "[50]"
+    paradigm: survey
+    description: >-
+      Survey of 33 large language models across roughly 58-80 primary studies of LLM-based
+      vulnerability detection and assessment.
+    dataset: roughly 58-80 primary studies
+    headline_result: >-
+      Decoder-only architectures in 67.1% of usage and parameter-efficient fine-tuning above 10B
+      parameters reaching F1 near 0.9, while 83% of studies test isolated functions and about
+      60% of the literature remains unrefereed preprints.
+    limitation: >-
+      Secondary synthesis; 83% of surveyed studies use isolated snippets; about 60% unrefereed
+      preprints.
+    survey: true
+    capabilities:
+      decision_theoretic_target: unknown
+      explicit_attacker_model: unknown
+      monetary_business_impact: unknown
+      exploitation_evidence_grounding: unknown
+      application_context_awareness: unknown
+      context_without_manual_tagging: unknown
+      web_application_native_evidence: unknown
+      applicability_version_reasoning: unknown
+      multi_hop_directed_chain: unknown
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: unknown
+      per_item_explainability: unknown
+      non_cvss_ground_truth: unknown
+      time_ordered_evaluation: unknown
+      component_level_ablation: unknown
+      minority_class_cost_sensitive: unknown
+      calibrated_probabilities: unknown
+      resource_constrained_selection: unknown
+      longitudinal_outcome_evaluation: unknown
+      prioritizer_adversarial_robustness: unknown
+      untrusted_evidence_containment: unknown
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: unknown
+    caveats:
+      - dimension: prioritizer_adversarial_robustness
+        note: >-
+          A secondary study has no method of its own, so every dimension is coded unknown. Its
+          surveyed corpus is not this corpus and may contain counterexamples to any claim here.
+
+  - key: chen2026
+    authors: "Chen, Liang, Shen, Li & Chen"
+    year: 2026
+    venue: Software Quality Journal
+    reference: "[51]"
+    paradigm: deep_learning
+    description: >-
+      Attention-guided hierarchical code simplification feeding a pre-trained language model for
+      four-class severity assessment of long C/C++ functions.
+    dataset: 14,235 MegaVul functions, replicated on BigVul
+    headline_result: >-
+      Raised CodeT5 F1 from 0.27 to 0.50 at 12.34 GFLOPs against Qwen's 94.42; the low-severity
+      class reached only F1 0.29 on 32 test samples.
+    limitation: >-
+      Function-level only; no interprocedural or alias-aware analysis.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: lacks
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: has
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+
+  - key: jain2026
+    authors: "Jain & Mukhopadhyay"
+    year: 2026
+    venue: Information Systems Frontiers
+    reference: "[52]"
+    paradigm: deep_learning
+    description: >-
+      LDA topic modelling with LSTM and CNN classifiers over national CERT advisories, adding
+      expected-loss quantification and co-occurrence analysis of correlated vendor risk.
+    dataset: 390 CERT-In notes mapped to 2,417 CVEs
+    headline_result: >-
+      79.49% accuracy for LSTM against 75.64% for CNN, with expected-loss quantification and
+      co-occurrence analysis showing single CVEs propagating correlated risk across Apple, Red
+      Hat, OpenSSL, IBM and Dell simultaneously.
+    limitation: >-
+      Single-country, single-year CERT-In dataset limits generalisability.
+    survey: false
+    capabilities:
+      decision_theoretic_target: has
+      explicit_attacker_model: lacks
+      monetary_business_impact: has
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: partial
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: lacks
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: monetary_business_impact
+        note: >-
+          Gap 9 names this study as the single exception in the corpus: business impact is
+          quantified monetarily here and almost nowhere else. It is the prior art the framework's
+          expected-loss construct is built on, not a gap the framework discovered.
+      - dimension: multi_hop_directed_chain
+        note: >-
+          Coded partial: correlated risk propagating across vendors is relational reasoning, but
+          it is co-occurrence, not a directed multi-step attack path.
+
+  # ------------------------------------------------------- hybrid / integrated frameworks
+  - key: jung2022
+    authors: "Jung, Li & Bechor"
+    year: 2022
+    venue: Computers & Security
+    reference: "[53]"
+    paradigm: hybrid
+    description: >-
+      CAVP derives Exploit Code Maturity, Remediation Level and Report Confidence from NVD
+      reference URLs and tags via expert-validated heuristics, combined with an environmental
+      scan.
+    dataset: deployment in two organisations
+    headline_result: >-
+      Adjusted 86% of scores relative to the base score and reduced the investigation set to
+      20-30% of known CVEs.
+    limitation: >-
+      Temporal scores unvalidated (no gold standard); tacit SOC knowledge not captured.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: has
+      application_context_awareness: has
+      context_without_manual_tagging: partial
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: partial
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: partial
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: partial
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: partial
+    caveats:
+      - dimension: exploitation_evidence_grounding
+        note: >-
+          Derives temporal exploitation metrics automatically from reference URLs and tags - the
+          same evidence source this framework reads, four years earlier, with rules instead of a
+          model.
+      - dimension: longitudinal_outcome_evaluation
+        note: >-
+          Coded partial: deployed in two organisations, but the review reports no outcome
+          measurement over time.
+
+  - key: zeng2022_licality
+    authors: "Zeng, Yang, Huang & Chung"
+    year: 2022
+    venue: IEEE Transactions on Network and Service Management
+    reference: "[30]"
+    paradigm: hybrid
+    description: >-
+      LICALITY pairs a neural network over 150-dimensional latent-semantic features with
+      probabilistic logic programming over CVSS criticality vectors.
+    dataset: 155,176 NVD vulnerabilities
+    headline_result: >-
+      AUC 0.926 and a 2.89-fold workload reduction against a CVSS-based expert solution, ranking
+      70% of target vulnerabilities within the top 4.97% against CVSS's top 18.58%.
+    limitation: >-
+      Single-step reasoning only; needs network-specific historical threat data.
+    survey: false
+    capabilities:
+      decision_theoretic_target: partial
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: partial
+      application_context_awareness: partial
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: has
+      per_item_explainability: partial
+      non_cvss_ground_truth: partial
+      time_ordered_evaluation: unknown
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: partial
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: application_context_awareness
+        note: >-
+          Coded partial: the "criticality" vectors are derived from CVSS sub-metrics, not from
+          the deployment, so the context is intrinsic rather than organisational.
+
+  - key: hore2023
+    authors: "Hore, Moomtaheen, Shah & Ou"
+    year: 2023
+    venue: IEEE Transactions on Dependable and Secure Computing
+    reference: "[15]"
+    paradigm: hybrid
+    description: >-
+      A random-forest Vulnerability Priority Scoring System over relevance, protection level and
+      asset criticality alongside CVSS, coupled to a two-stage mixed-integer program that
+      allocates vulnerabilities to analysts by skill type.
+    dataset: 90,000 training instances; 8,031 real instances across 184 hosts over 52 weeks
+    headline_result: >-
+      Largest cumulative exposure reduction against three baselines over a 52-week simulation,
+      matching 92% of type-1 vulnerabilities to the correct skill type, solving in under a
+      minute.
+    limitation: >-
+      Weights elicited from a single CSOC; vulnerability correlation ignored.
+    survey: false
+    capabilities:
+      decision_theoretic_target: has
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: has
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: partial
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: has
+      per_item_explainability: lacks
+      non_cvss_ground_truth: partial
+      time_ordered_evaluation: partial
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: has
+      longitudinal_outcome_evaluation: has
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: longitudinal_outcome_evaluation
+        note: >-
+          The only study in the corpus coded has on this dimension, and it is stronger than this
+          framework's simulation in the way that matters: 52 weeks over 8,031 real instances on
+          184 real hosts, against this framework's 26 weeks over a synthetic world.
+      - dimension: resource_constrained_selection
+        note: >-
+          Allocates to analysts by skill under capacity - a richer constraint than this
+          framework's single remediation-hour budget.
+
+  - key: lee2024
+    authors: "Lee, Shieh & Tsai"
+    year: 2024
+    venue: Computer
+    reference: "[54]"
+    paradigm: hybrid
+    description: >-
+      PrioriC combines LLM abstraction, heuristic rules and graph-edit-distance clustering to
+      reduce cyber-threat-intelligence reports to enterprise-relevant instances.
+    dataset: 116 CTI reports
+    headline_result: >-
+      Reduced 116 CTI reports to 22 enterprise-relevant instances, an 81% reduction.
+    limitation: >-
+      LLM outputs are non-deterministic across models and parameters.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: partial
+      application_context_awareness: has
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: partial
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: lacks
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: unknown
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: lacks
+      offline_reproducible_execution: lacks
+    caveats:
+      - dimension: untrusted_evidence_containment
+        note: >-
+          Feeds third-party CTI reports to an LLM whose output drives the filter, with no
+          containment reported. The review's recorded caution is non-determinism, not
+          manipulation - which is itself evidence that the threat is unaddressed in this corpus.
+      - dimension: offline_reproducible_execution
+        note: >-
+          Coded lacks on the review's own limitation: LLM outputs vary across models and
+          parameters, so the result is not reproducible by re-running.
+
+  - key: paul2024
+    authors: "Paul, Sharma & Olukoya"
+    year: 2024
+    venue: Journal of Information Security and Applications
+    reference: "[55]"
+    paradigm: hybrid
+    description: >-
+      SQLR34P3R, a proxy-based system performing multi-class SQL injection classification and
+      integrated risk scoring over CVSS, EPSS and exploit evidence.
+    dataset: 70,023 payload samples; 457,233 NetFlow samples; 317 CVEs
+    headline_result: >-
+      LSTM reached F1 96.67% on payload samples and a hybrid CNN+LSTM averaged F1 97.64% on
+      NetFlow samples; the RISK R34P3R formula recommended patching 153 of 317 CVEs against
+      CVSS's 259 and EPSS's 19.
+    limitation: >-
+      HTTP requests only; IP blocking causes collateral impact; one attack class.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: has
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: has
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: lacks
+      non_cvss_ground_truth: partial
+      time_ordered_evaluation: unknown
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: partial
+    caveats:
+      - dimension: prioritizer_adversarial_robustness
+        note: >-
+          This study is adversarially aware, but in the other direction: it defends the scanned
+          application against SQL injection. The robustness of its own prioritization to
+          manipulation is not examined, which is what this dimension tests.
+      - dimension: web_application_native_evidence
+        note: >-
+          Operates on live HTTP requests through a proxy - the closest prior work to this
+          framework's endpoint-level evidence, limited to a single attack class.
+
+  - key: zeng2024_illation
+    authors: "Zeng, Huang, Xue, Deng, Vadnere & Xie"
+    year: 2024
+    venue: IEEE Transactions on Dependable and Secure Computing
+    reference: "[56]"
+    paradigm: hybrid
+    description: >-
+      ILLATION extends neuro-symbolic prioritization with logic constraints for host-service
+      status and host-to-host reachability, making risk scores network-specific without building
+      full attack graphs.
+    dataset: 10,000-host network
+    headline_result: >-
+      AUC 0.93 at 0.19 seconds per vulnerability across a 10,000-host network.
+    limitation: >-
+      Single-hop exploitation only; assumes no conflicting firewall rules.
+    survey: false
+    capabilities:
+      decision_theoretic_target: partial
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: partial
+      application_context_awareness: has
+      context_without_manual_tagging: partial
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: partial
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: has
+      per_item_explainability: partial
+      non_cvss_ground_truth: partial
+      time_ordered_evaluation: unknown
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: partial
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: multi_hop_directed_chain
+        note: >-
+          Gap 9 cites this study for modelling only single-hop exploitation despite carrying
+          reachability logic. Coded lacks on the review's own statement.
+      - dimension: explicit_attacker_model
+        note: >-
+          Gap 2 cites this study for arguing that CVSS correlates poorly with exploitation
+          because adversary motivation and ability are unmodelled - a diagnosis it does not act
+          on.
+
+  - key: bennouk2025
+    authors: "Bennouk, Mahouachi, Ait Aali, El Bouzekri El Idrissi, Sebai & Faroukhi"
+    year: 2025
+    venue: IEEE Access
+    reference: "[57]"
+    paradigm: hybrid
+    description: >-
+      Optimises the weights of a Final Exploitability Score over multi-source vulnerability data
+      with dynamic data updates.
+    dataset: 674,935 rows from five sources
+    headline_result: >-
+      82.9% accuracy, with Exploit Code Maturity the dominant factor at AHP weight 0.4427.
+    limitation: >-
+      Predicts exploitability alone; no asset context or chaining.
+    survey: false
+    capabilities:
+      decision_theoretic_target: has
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: has
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: has
+      per_item_explainability: partial
+      non_cvss_ground_truth: partial
+      time_ordered_evaluation: partial
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: partial
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: decision_theoretic_target
+        note: >-
+          Gap 1 names this study as the "probability of exploitation" operationalisation of
+          priority: a well-defined target quantity, though a probability without an impact term
+          is half of an expectation.
+
+  - key: farghaly2025
+    authors: "Farghaly, Aslan & Abdel Halim"
+    year: 2025
+    venue: Future Internet
+    reference: "[58]"
+    paradigm: hybrid
+    description: >-
+      Fuses expert CVSS v4.0 scoring with an LLM ensemble and classical machine learning for
+      vehicle sensor systems.
+    dataset: vehicle sensor system vulnerabilities scored on eight CVSS v4.0 attributes
+    headline_result: >-
+      70% average agreement with expert labels across eight attributes, from 93.3% on User
+      Interaction down to 46.7% on Privileges Required; ChatGPT scored F1 0% and Gemini 15.38%
+      on HIGH attack complexity.
+    limitation: >-
+      Systematic divergence between expert and AI assessments, interpreted as evidence that CVSS
+      scoring is negotiated rather than ground truth.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: partial
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: lacks
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: unknown
+      component_level_ablation: partial
+      minority_class_cost_sensitive: has
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: lacks
+    caveats:
+      - dimension: minority_class_cost_sensitive
+        note: >-
+          The F1 = 0% on HIGH attack complexity is the single starkest minority-class failure in
+          the corpus and is cited in Gap 7. Reporting it is exactly what this dimension tests.
+
+  - key: parente2025
+    authors: "Parente, Rodrigues & Mattos"
+    year: 2025
+    venue: Journal of Information Security and Applications
+    reference: "[31]"
+    paradigm: hybrid
+    description: >-
+      FRAPE combines active learning, gradient boosting and SHAP explanation for risk
+      assessment, prioritization and explainability.
+    dataset: simulated context distributions; three expert labellers
+    headline_result: >-
+      Classified 88% of critical vulnerabilities correctly and reduced simulated attack surface
+      by up to 21% (static) and 28% (dynamic) against CVSS-only prioritization, remediating in
+      iteration 1 two high-context CVEs that CVSS ordering left outstanding for roughly twenty.
+    limitation: >-
+      Simulated context distributions; only three expert labellers.
+    survey: false
+    capabilities:
+      decision_theoretic_target: partial
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: has
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: has
+      per_item_explainability: has
+      non_cvss_ground_truth: partial
+      time_ordered_evaluation: unknown
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: partial
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: per_item_explainability
+        note: >-
+          Gradient boosting plus SHAP over context features is the same explanation mechanism
+          this framework uses, published first. No novelty is claimed over it.
+
+  - key: wang2025
+    authors: "Wang, Yu, Liang & Huang"
+    year: 2025
+    venue: Information and Software Technology
+    reference: "[59]"
+    paradigm: hybrid
+    description: >-
+      FVulPri moves prioritization from CVE to function granularity using a BERT-BGRU severity
+      model, graph-neural-network function importance and fourteen indicators.
+    dataset: 1,101 CVEs and 43,655 functions
+    headline_result: >-
+      Matched expert judgement 72% of the time against CVSS's 54%, flagged 6.11% of functions as
+      high risk against CVSS's 28.64%, and correlated with the CWE Top-25 at r = 0.38 against
+      CVSS's r = -0.05.
+    limitation: >-
+      C/C++ only; single dataset; retains manual CVSS-derived indicators; no workflow study to
+      confirm SOC efficiency gains.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: partial
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: partial
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: has
+      per_item_explainability: partial
+      non_cvss_ground_truth: partial
+      time_ordered_evaluation: unknown
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: has
+
+  - key: alqahtani2026
+    authors: "Alqahtani & Almukaynizi"
+    year: 2026
+    venue: International Journal of Information Security
+    reference: "[60]"
+    paradigm: hybrid
+    description: >-
+      VulnScore, deployed inside the Reconmap platform, matches analyst-entered descriptions to
+      NVD CVEs by sentence-transformer embeddings and combines EPSS percentile, a commercial AI
+      rating, CVSS and user-defined asset criticality.
+    dataset: practitioner evaluation with 25 professionals
+    headline_result: >-
+      25 professionals rated customisation at 92% agreement and contextual accuracy at 88%,
+      while transparency of the scoring process drew the lowest agreement at 84%; about 0.0002 s
+      API latency.
+    limitation: >-
+      Perception-based evaluation only (n = 25); no exploitation ground truth.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: has
+      application_context_awareness: has
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: partial
+      per_item_explainability: partial
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: unknown
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: partial
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: lacks
+    caveats:
+      - dimension: longitudinal_outcome_evaluation
+        note: >-
+          A genuinely deployed system, which this framework is not. Coded partial because the
+          evaluation is practitioner perception rather than breach or exposure outcomes.
+
+  - key: gavali2026
+    authors: "Gavali, Borawake, Kureshi, Badole & Kamde"
+    year: 2026
+    venue: International Scientific Journal of Engineering and Management
+    reference: "[61]"
+    paradigm: hybrid
+    description: >-
+      CyberVision chains seven scanning tools with an LLM risk analyser and a remediation
+      generator for automated web penetration testing.
+    dataset: eight functional test cases
+    headline_result: >-
+      All eight functional test cases passed; no accuracy metrics against ground truth were
+      reported.
+    limitation: >-
+      Unbenchmarked prototype; no accuracy metrics against ground truth.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: has
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: partial
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: lacks
+      offline_reproducible_execution: lacks
+    caveats:
+      - dimension: untrusted_evidence_containment
+        note: >-
+          The closest architectural analogue to this framework in the corpus - scanner output
+          from a live target passed to an LLM that produces risk analysis and remediation - and
+          it has no containment of any kind. Gap 6 names it as an unbenchmarked prototype.
+
+  - key: shimizu2026
+    authors: "Shimizu & Hashimoto"
+    year: 2026
+    venue: IEEE Access
+    reference: "[32]"
+    paradigm: hybrid
+    description: >-
+      Vulnerability Management Chaining formalises threat-first triage as a two-stage decision
+      tree: a threat filter (KEV membership or EPSS >= 0.088) followed by a severity filter
+      (CVSS >= 7.0).
+    dataset: 28,377 CVEs against 90 confirmed-exploited vulnerabilities over a 13-month window
+    headline_result: >-
+      9.1% efficiency against 0.5% for CVSS alone while retaining 85.6% coverage, cutting the
+      candidate set from 16,182 to roughly 850-893, a 96.9% workload reduction; KEV and EPSS
+      together captured 48 exploited vulnerabilities (53.3% of the ground truth) that neither
+      source captured alone.
+    limitation: >-
+      Static thresholds; 13-month window; conservative ground truth of 90 CVEs.
+    survey: false
+    capabilities:
+      decision_theoretic_target: partial
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: has
+      application_context_awareness: lacks
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: lacks
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: has
+      non_cvss_ground_truth: has
+      time_ordered_evaluation: partial
+      component_level_ablation: has
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: non_cvss_ground_truth
+        note: >-
+          90 confirmed-exploited vulnerabilities: real field ground truth, which this framework
+          does not yet have. Its efficiency and coverage metrics are reimplemented here as the
+          VMC chain baseline, so this study is a baseline to beat, not a gap to fill.
+      - dimension: component_level_ablation
+        note: >-
+          Reports KEV-only, EPSS-only and CVSS-only baselines separately; one of three ablation
+          exceptions the review names.
+
+  # ------------------------------------------------------ graph and attack-path modelling
+  - key: zhao2011
+    authors: "Zhao, Huang, Jin & Zhang"
+    year: 2011
+    venue: Computers and Mathematics with Applications
+    reference: "[62]"
+    paradigm: graph
+    description: >-
+      Couples CVSS-derived impact and exploitability rates to a Markov mean-expenditure model
+      over an adapted attack graph.
+    dataset: four-host synthetic network
+    headline_result: >-
+      Promoted an IIS buffer overflow from CVSS rank six to rank one because it acted as a
+      prerequisite chokepoint, and separated two vulnerabilities sharing an identical CVSS score
+      of 7.8.
+    limitation: >-
+      Four-host synthetic network; simplified one-step attacker model.
+    survey: false
+    capabilities:
+      decision_theoretic_target: has
+      explicit_attacker_model: partial
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: has
+      context_without_manual_tagging: partial
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: has
+      monotonicity_under_patching: lacks
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: has
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: partial
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: multi_hop_directed_chain
+        note: >-
+          The chokepoint result this framework's own chokepoint test reproduces: a low-severity
+          finding that is a prerequisite for everything else outranks a high-severity leaf. Prior
+          art from 2011.
+      - dimension: explicit_attacker_model
+        note: >-
+          Coded partial on the review's own words: an attacker model exists but is a simplified
+          one-step one.
+
+  - key: stergiopoulos2022
+    authors: "Stergiopoulos, Dedousis & Gritzalis"
+    year: 2022
+    venue: International Journal of Information Security
+    reference: "[63]"
+    paradigm: graph
+    description: >-
+      Automated analysis of already-generated attack graphs for multi-cloud and Docker
+      microservice environments using cascading dependency-risk chains, Edmonds' maximum
+      arborescence and closeness centrality.
+    dataset: 152-node NetflixOSS graph; two testbeds
+    headline_result: >-
+      Analysed a 152-node graph in roughly 45 seconds and identified CVE-2005-2541 as carrying
+      cumulative dependency risk of 42 despite unremarkable individual severity.
+    limitation: >-
+      Requires labour-intensive white-box path mapping; worst-case paths only.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: has
+      context_without_manual_tagging: lacks
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: has
+      monotonicity_under_patching: lacks
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: has
+      non_cvss_ground_truth: partial
+      time_ordered_evaluation: lacks
+      component_level_ablation: lacks
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: decision_theoretic_target
+        note: >-
+          Cumulative dependency risk of 42 is a dimensionless quantity: it cannot be multiplied
+          by a cost or traded against a budget, which is what this dimension tests.
+
+  - key: tchimwabouom2024
+    authors: "Tchimwa Bouom, Lienou, Geh, Nelson, Shetty & Kamhoua"
+    year: 2024
+    venue: IEEE Transactions on Information Forensics and Security
+    reference: "[64]"
+    paradigm: graph
+    description: >-
+      TriAssetRank generalises PageRank to a tripartite graph over MulVAL-generated logical
+      attack graphs, jointly ranking vulnerabilities, exploits and privileges with type-specific
+      damping factors and a Behavioural Influence Coefficient.
+    dataset: simulations including a 67-node enterprise graph
+    headline_result: >-
+      Ranked a mail server and a workstation as significant despite their carrying no CVEs at
+      all; a risky-behaviour setting raised one vulnerability's score by 45%; all simulations
+      completed in under a second with complexity linear in the number of links.
+    limitation: >-
+      Heuristic damping factors; the Behavioural Influence Coefficient is not validated on real
+      behavioural data.
+    survey: false
+    capabilities:
+      decision_theoretic_target: lacks
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: partial
+      application_context_awareness: has
+      context_without_manual_tagging: partial
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: has
+      monotonicity_under_patching: lacks
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: has
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: lacks
+      resource_constrained_selection: lacks
+      longitudinal_outcome_evaluation: lacks
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: explicit_attacker_model
+        note: >-
+          The Behavioural Influence Coefficient models *user* behaviour on the defending side,
+          not adversary capability, so it does not satisfy this dimension despite being the
+          corpus's most explicit behavioural parameter.
+      - dimension: context_without_manual_tagging
+        note: >-
+          Asset significance emerges from graph position rather than from tagging - CVE-free
+          assets rank as significant - but the topology itself must be modelled by hand.
+
+  - key: jyoti2025
+    authors: "Jyoti, Bansal, Sikka, Awasthi & Verma"
+    year: 2025
+    venue: Journal of Network and Systems Management
+    reference: "[65]"
+    paradigm: graph
+    description: >-
+      Combines probabilistic time-to-compromise modelling with a modified CVSS v3.1 and a cost
+      function over attack paths, moving the unit of analysis from vulnerability to host.
+    dataset: 9-host and 25-host testbeds
+    headline_result: >-
+      Remediating 33% of vulnerabilities materially improved network security; a host with one
+      of the lowest severity scores (4.0) carried the highest cost function (18.42);
+      exploitability and time-to-exploit proved strongly inversely related (Pearson r = -0.864,
+      p < 0.001).
+    limitation: >-
+      O(N-squared) graph construction; time constants drawn from older empirical studies.
+    survey: false
+    capabilities:
+      decision_theoretic_target: has
+      explicit_attacker_model: partial
+      monetary_business_impact: partial
+      exploitation_evidence_grounding: lacks
+      application_context_awareness: has
+      context_without_manual_tagging: partial
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: lacks
+      multi_hop_directed_chain: has
+      monotonicity_under_patching: lacks
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: partial
+      non_cvss_ground_truth: lacks
+      time_ordered_evaluation: lacks
+      component_level_ablation: partial
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: partial
+      resource_constrained_selection: partial
+      longitudinal_outcome_evaluation: partial
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: monetary_business_impact
+        note: >-
+          The cost function is quantitative but dimensionless - the reported value 18.42 is not
+          currency - so it is coded partial rather than has.
+      - dimension: explicit_attacker_model
+        note: >-
+          Time-to-compromise is an attacker-process model, hence partial, but the review does not
+          report adversary parameters that reorder the queue.
+
+  - key: tita2026
+    authors: "Tita, Coratu, Cujba & Tapus"
+    year: 2026
+    venue: Future Internet
+    reference: "[66]"
+    paradigm: graph
+    description: >-
+      Constructs attack graphs automatically from Infrastructure-as-Code files and ranks
+      vulnerabilities by Kirchhoff effective resistance with EPSS-weighted edge conductances.
+    dataset: nine topologies containing 895 version-relevant vulnerability nodes
+    headline_result: >-
+      Graph-aware prioritization reduced structural risk 4.4-fold over EPSS-only ranking after
+      ten patches, and on four of eight heterogeneous topologies EPSS-only prioritization
+      produced no structural improvement at all; Monte Carlo simulation drove simulated attack
+      success from 3.4% to 0.0% after three patches against 1.9% for EPSS-only; version-aware
+      CVE filtering removed 75-97% of version-irrelevant candidates and improved ranking
+      effectiveness a further two- to four-fold.
+    limitation: >-
+      Undirected relaxation loses attack directionality; author-constructed topologies.
+    survey: false
+    capabilities:
+      decision_theoretic_target: has
+      explicit_attacker_model: lacks
+      monetary_business_impact: lacks
+      exploitation_evidence_grounding: has
+      application_context_awareness: has
+      context_without_manual_tagging: has
+      web_application_native_evidence: lacks
+      applicability_version_reasoning: has
+      multi_hop_directed_chain: partial
+      monotonicity_under_patching: has
+      learning_to_rank_combined_evidence: lacks
+      per_item_explainability: partial
+      non_cvss_ground_truth: partial
+      time_ordered_evaluation: lacks
+      component_level_ablation: has
+      minority_class_cost_sensitive: lacks
+      calibrated_probabilities: partial
+      resource_constrained_selection: partial
+      longitudinal_outcome_evaluation: partial
+      prioritizer_adversarial_robustness: lacks
+      untrusted_evidence_containment: lacks
+      reproducibility_artefacts: partial
+      offline_reproducible_execution: has
+    caveats:
+      - dimension: monotonicity_under_patching
+        note: >-
+          The only study in the corpus that states and argues the monotonicity guarantee, and it
+          makes the same argument this framework makes - that Bayesian attack-graph propagation
+          does not provide it. This framework's contribution is a different route to the same
+          property (maximum-probability paths rather than effective resistance) that keeps
+          directionality, which effective resistance discards.
+      - dimension: applicability_version_reasoning
+        note: >-
+          The only study in the corpus with version-aware filtering, and it reports a larger
+          effect (two- to four-fold) than most modelling choices in the literature. Prior art for
+          Research Goal 3.
+      - dimension: multi_hop_directed_chain
+        note: >-
+          Coded partial on the review's own limitation: the undirected relaxation loses attack
+          directionality. This is the specific weakness this framework's directed formulation
+          addresses.
+
+  # -------------------------------------------------------------------- systematic surveys
+  - key: le2022
+    authors: "Le, Chen & Babar"
+    year: 2022
+    venue: ACM Computing Surveys
+    reference: "[67]"
+    paradigm: survey
+    description: >-
+      Survey of data-driven software vulnerability assessment and prioritization across 84
+      primary studies.
+    dataset: 84 primary studies
+    headline_result: >-
+      Only 2 of 84 reviewed studies provided interpretability analysis and only 3 of 84 tested
+      adversarial robustness; random rather than time-ordered splits predominate; real-world
+      exploit prediction underperforms proof-of-concept prediction because of label scarcity.
+    limitation: >-
+      Secondary synthesis; its 84 studies are a different corpus from this one.
+    survey: true
+    capabilities:
+      decision_theoretic_target: unknown
+      explicit_attacker_model: unknown
+      monetary_business_impact: unknown
+      exploitation_evidence_grounding: unknown
+      application_context_awareness: unknown
+      context_without_manual_tagging: unknown
+      web_application_native_evidence: unknown
+      applicability_version_reasoning: unknown
+      multi_hop_directed_chain: unknown
+      monotonicity_under_patching: unknown
+      learning_to_rank_combined_evidence: unknown
+      per_item_explainability: unknown
+      non_cvss_ground_truth: unknown
+      time_ordered_evaluation: unknown
+      component_level_ablation: unknown
+      minority_class_cost_sensitive: unknown
+      calibrated_probabilities: unknown
+      resource_constrained_selection: unknown
+      longitudinal_outcome_evaluation: unknown
+      prioritizer_adversarial_robustness: unknown
+      untrusted_evidence_containment: unknown
+      reproducibility_artefacts: unknown
+      offline_reproducible_execution: unknown
+    caveats:
+      - dimension: prioritizer_adversarial_robustness
+        note: >-
+          This survey is the single most important threat to the robustness novelty claim: it
+          reports that 3 of its 84 studies did test adversarial robustness. Those three are not
+          in this corpus and were not examined here.
+      - dimension: time_ordered_evaluation
+        note: >-
+          The source of the finding that random rather than time-ordered splits predominate,
+          which is why no study in this corpus is coded has on that dimension.
