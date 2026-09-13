@@ -1,4 +1,4 @@
-# vulnprio
+# VulnPriority
 
 **AI-driven automated web application vulnerability prioritization.**
 
@@ -65,8 +65,8 @@ python -m pip install -e .
 Optional extras: `pip install -e ".[gemini]"` for the free-tier backend, `".[llm]"` for
 Anthropic, `".[web]"` for the interactive site, `".[dev]"` for pytest.
 
-Every command below also works as `python -m vulnprio ...`. On Windows the console script
-lands in Python's user scripts directory, which is often not on `PATH`, so `vulnprio serve`
+Every command below also works as `python -m vulnpriority ...`. On Windows the console script
+lands in Python's user scripts directory, which is often not on `PATH`, so `vulnpriority serve`
 can fail with "not recognized as a name of a cmdlet" even though the install succeeded. The
 module form needs nothing but the interpreter that already imported the package.
 
@@ -75,27 +75,27 @@ module form needs nothing but the interpreter that already imported the package.
 Generate a synthetic world, run the whole pipeline on it, and write the report:
 
 ```bash
-vulnprio run-all --config configs/default.yaml --synthetic
+vulnpriority run-all --config configs/default.yaml --synthetic
 ```
 
 Rank a real OWASP ZAP report:
 
 ```bash
-vulnprio ingest --input scan.json --scanner zap --output runs/myapp
-vulnprio run-all --config configs/default.yaml --scan runs/myapp/scan.json
+vulnpriority ingest --input scan.json --scanner zap --output runs/myapp
+vulnpriority run-all --config configs/default.yaml --scan runs/myapp/scan.json
 ```
 
 Use live feeds and the Anthropic backend:
 
 ```bash
 export ANTHROPIC_API_KEY=...        # Windows: setx ANTHROPIC_API_KEY ...
-vulnprio run-all --config configs/live.yaml --scan runs/myapp/scan.json
+vulnpriority run-all --config configs/live.yaml --scan runs/myapp/scan.json
 ```
 
 Re-prioritise the same scan for a different adversary:
 
 ```bash
-vulnprio rank --config configs/default.yaml --attacker insider
+vulnpriority rank --config configs/default.yaml --attacker insider
 ```
 
 ## The results website
@@ -114,7 +114,7 @@ chains, the generated report and the novelty analysis.
 
 ```bash
 pip install -e ".[web]"
-vulnprio serve
+vulnpriority serve
 ```
 
 Assessing a target requires an explicit authorization attestation: you state that you are
@@ -149,8 +149,8 @@ stylesheet, one script and one data document. It opens from disk with no server 
 network, which matters because offline reproducibility is the framework's own claim.
 
 ```bash
-vulnprio web --run runs/<run_id> --output site
-python -m vulnprio.web --demo --serve      # see the page before running anything
+vulnpriority web --run runs/<run_id> --output site
+python -m vulnpriority.web --demo --serve      # see the page before running anything
 ```
 
 ## Commands

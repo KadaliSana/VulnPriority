@@ -15,14 +15,14 @@ from datetime import date
 
 import pytest
 
-from vulnprio.core.enums import HttpMethod, ScannerSeverity
-from vulnprio.scan.checks import (
+from vulnpriority.core.enums import HttpMethod, ScannerSeverity
+from vulnpriority.scan.checks import (
     CHECKS,
     CheckContext,
     checks_for_profile,
     run_checks,
 )
-from vulnprio.scan.models import (
+from vulnpriority.scan.models import (
     CheckFinding,
     FormField,
     FormInfo,
@@ -31,8 +31,8 @@ from vulnprio.scan.models import (
     ProbeResult,
     ScanProfile,
 )
-from vulnprio.scan.passive import PASSIVE_CHECKS
-from vulnprio.scan.active import ACTIVE_CHECKS
+from vulnpriority.scan.passive import PASSIVE_CHECKS
+from vulnpriority.scan.active import ACTIVE_CHECKS
 
 URL = "https://shop.example.com/page"
 
@@ -559,10 +559,10 @@ def test_reflected_marker_finding_requires_a_reflected_probe():
         kind=ProbeKind.REFLECTED_MARKER,
         url=URL,
         param="q",
-        marker="vulnprioabc123",
+        marker="vulnpriorityabc123",
         status=200,
         reflected=True,
-        evidence="you said vulnprioabc123",
+        evidence="you said vulnpriorityabc123",
     )
     not_reflected = reflected.model_copy(update={"reflected": False, "evidence": ""})
 

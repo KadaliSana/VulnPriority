@@ -10,21 +10,21 @@ from datetime import date
 
 import pytest
 
-from vulnprio.core.config import SandboxConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import SandboxConfig
+from vulnpriority.core.enums import (
     ExploitMaturity,
     ExploitSource,
     Provenance,
     TrustTier,
 )
-from vulnprio.core.errors import InfluenceBudgetExceeded
-from vulnprio.core.models import (
+from vulnpriority.core.errors import InfluenceBudgetExceeded
+from vulnpriority.core.models import (
     ExploitEvidence,
     KevRecord,
     UntrustedText,
     VulnIntel,
 )
-from vulnprio.enrich.trust import (
+from vulnpriority.enrich.trust import (
     KEV_FLOOR_P,
     KEV_RANSOMWARE_FLOOR_P,
     VERIFIED_FUNCTIONAL_FLOOR_P,

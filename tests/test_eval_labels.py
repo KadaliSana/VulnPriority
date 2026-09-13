@@ -12,7 +12,7 @@ from datetime import date, datetime
 import pytest
 from pydantic import ValidationError
 
-from vulnprio.core.enums import (
+from vulnpriority.core.enums import (
     CvssVersion,
     ExploitMaturity,
     ExploitSource,
@@ -22,8 +22,8 @@ from vulnprio.core.enums import (
     ScoreSource,
     VersionMatch,
 )
-from vulnprio.core.errors import LabelPolicyError
-from vulnprio.core.models import (
+from vulnpriority.core.errors import LabelPolicyError
+from vulnpriority.core.models import (
     CvssRecord,
     EpssRecord,
     ExploitEvidence,
@@ -35,7 +35,7 @@ from vulnprio.core.models import (
     UntrustedText,
     VulnIntel,
 )
-from vulnprio.eval.labels import LabelBuilder, assert_not_cvss_derived, resolve_label_source
+from vulnpriority.eval.labels import LabelBuilder, assert_not_cvss_derived, resolve_label_source
 
 CUTOFF = date(2024, 6, 1)
 OBSERVED = datetime(2024, 3, 1, 9, 0, 0)

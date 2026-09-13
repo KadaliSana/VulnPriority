@@ -1,10 +1,10 @@
-# vulnprio instruction-pattern library.
+# vulnpriority instruction-pattern library.
 
 #
 
 # Every entry is applied case-insensitively to text that has already been through
 
-# vulnprio.sandbox.normalize, so patterns may assume single-space separators, no
+# vulnpriority.sandbox.normalize, so patterns may assume single-space separators, no
 
 # zero-width characters and folded homoglyphs. They are still written with \s+ between
 
@@ -24,7 +24,7 @@
 
 version: 1
 
-name: vulnprio-instruction-patterns
+name: vulnpriority-instruction-patterns
 
 updated: '2024-06-01'
 

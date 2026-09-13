@@ -6,7 +6,7 @@ chain scoring, ranking and selection over a fixture report - because the thing w
 asserting is that the endpoint produces a payload the dashboard can actually render, not
 that a mock was called.
 
-``vulnprio.scan`` is stubbed throughout. It is developed in parallel, and more importantly
+``vulnpriority.scan`` is stubbed throughout. It is developed in parallel, and more importantly
 the test that matters most here is that an unauthorised request never reaches it at all,
 which can only be asserted against something that records whether it was called.
 """
@@ -25,14 +25,14 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
-from vulnprio.core.config import PROJECT_ROOT
-from vulnprio.web.app import (
+from vulnpriority.core.config import PROJECT_ROOT
+from vulnpriority.web.app import (
     ACCEPTED_REPORT_SUFFIXES,
     TOKEN_HEADER,
     AppSettings,
     create_app,
 )
-from vulnprio.web.schema import DashboardData
+from vulnpriority.web.schema import DashboardData
 
 ZAP_FIXTURE = PROJECT_ROOT / "data" / "fixtures" / "scans" / "zap_sample.json"
 TERMINAL = {"done", "failed", "cancelled"}
@@ -43,17 +43,23 @@ TERMINAL = {"done", "failed", "cancelled"}
 # ---------------------------------------------------------------------------
 
 
+#: What a browser reaching this server actually puts in the Host header. TestClient's
+#: default is ``http://testserver``, which the Host check refuses on purpose: accepting an
+#: arbitrary name would have meant weakening the very control these tests exist to keep.
+LOCAL_BASE = "http://127.0.0.1:8765"
+
+
 @pytest.fixture
 def app_and_token(tmp_path: Path):
     api = create_app(AppSettings())
-    yield api, api.state.vulnprio.token
-    api.state.vulnprio.close()
+    yield api, api.state.vulnpriority.token
+    api.state.vulnpriority.close()
 
 
 @pytest.fixture
 def client(app_and_token):
     api, _token = app_and_token
-    with TestClient(api) as test_client:
+    with TestClient(api, base_url=LOCAL_BASE) as test_client:
         yield test_client
 
 
@@ -82,7 +88,7 @@ def wait_for_job(client: TestClient, job_id: str, timeout: float = 180.0) -> dic
 
 
 class FakeScan:
-    """A stand-in for ``vulnprio.scan`` that records whether it was asked to do anything."""
+    """A stand-in for ``vulnpriority.scan`` that records whether it was asked to do anything."""
 
     def __init__(self) -> None:
         self.calls: list[Any] = []
@@ -90,12 +96,12 @@ class FakeScan:
 
 @pytest.fixture
 def fake_scan(monkeypatch: pytest.MonkeyPatch) -> FakeScan:
-    """Install a stub ``vulnprio.scan`` and reset the capability cache around it."""
-    from vulnprio.web import app as app_module
-    from vulnprio.core.models import Scan
+    """Install a stub ``vulnpriority.scan`` and reset the capability cache around it."""
+    from vulnpriority.web import app as app_module
+    from vulnpriority.core.models import Scan
 
     recorder = FakeScan()
-    module = types.ModuleType("vulnprio.scan")
+    module = types.ModuleType("vulnpriority.scan")
 
     class ScanProfile(str):
         pass
@@ -118,7 +124,7 @@ def fake_scan(monkeypatch: pytest.MonkeyPatch) -> FakeScan:
     module.ScanRequest = ScanRequest
     module.assess_target = assess_target
     module.Scan = Scan
-    monkeypatch.setitem(sys.modules, "vulnprio.scan", module)
+    monkeypatch.setitem(sys.modules, "vulnpriority.scan", module)
     app_module.probe_capabilities(refresh=True)
     yield recorder
     app_module.probe_capabilities(refresh=True)
@@ -145,23 +151,23 @@ def test_health_reflects_a_missing_sibling_package(monkeypatch: pytest.MonkeyPat
     """An absent package is reported false, with the reason, rather than silently assumed."""
     import importlib
 
-    from vulnprio.web import app as app_module
+    from vulnpriority.web import app as app_module
 
     real_import = importlib.import_module
 
     def refuse(name: str, *args: Any, **kwargs: Any) -> Any:
-        if name == "vulnprio.novelty":
-            raise ImportError("no module named vulnprio.novelty")
+        if name == "vulnpriority.novelty":
+            raise ImportError("no module named vulnpriority.novelty")
         return real_import(name, *args, **kwargs)
 
     monkeypatch.setattr(app_module.importlib, "import_module", refuse)
     app_module.probe_capabilities(refresh=True)
     try:
         api = create_app(AppSettings())
-        with TestClient(api) as test_client:
+        with TestClient(api, base_url=LOCAL_BASE) as test_client:
             capabilities = test_client.get("/api/health").json()["capabilities"]
             assert capabilities["novelty"] is False
-            assert "vulnprio.novelty" in capabilities["detail"]["novelty"]
+            assert "vulnpriority.novelty" in capabilities["detail"]["novelty"]
 
             novelty = test_client.get("/api/novelty").json()
             assert novelty["available"] is False
@@ -241,16 +247,16 @@ def test_reading_endpoints_do_not_need_the_token(client: TestClient) -> None:
 def test_two_applications_do_not_share_a_token() -> None:
     first, second = create_app(AppSettings()), create_app(AppSettings())
     try:
-        assert first.state.vulnprio.token != second.state.vulnprio.token
-        with TestClient(second) as client:
+        assert first.state.vulnpriority.token != second.state.vulnpriority.token
+        with TestClient(second, base_url=LOCAL_BASE) as client:
             response = client.post(
                 "/api/analyze", json={"mode": "demo"},
-                headers={TOKEN_HEADER: first.state.vulnprio.token},
+                headers={TOKEN_HEADER: first.state.vulnpriority.token},
             )
             assert response.status_code == 403
     finally:
-        first.state.vulnprio.close()
-        second.state.vulnprio.close()
+        first.state.vulnpriority.close()
+        second.state.vulnpriority.close()
 
 
 # ---------------------------------------------------------------------------
@@ -450,7 +456,7 @@ def test_the_builtin_fallback_is_reported_when_nothing_is_installed(
 
 def test_the_scanner_choice_is_part_of_the_request_contract() -> None:
     """The page can pin a scanner, and an unknown field would be a 400 rather than ignored."""
-    from vulnprio.web.schema import AnalyzeRequest
+    from vulnpriority.web.schema import AnalyzeRequest
 
     assert AnalyzeRequest().scanner == "", "the default lets the scan package choose"
     assert AnalyzeRequest(scanner="builtin").scanner == "builtin"
@@ -654,7 +660,7 @@ def test_a_bare_host_is_normalised_rather_than_refused(
 def test_scanning_can_be_disabled_at_startup(fake_scan: FakeScan) -> None:
     api = create_app(AppSettings(allow_scan=False))
     try:
-        with TestClient(api) as client:
+        with TestClient(api, base_url=LOCAL_BASE) as client:
             response = client.post(
                 "/api/analyze",
                 json={
@@ -663,13 +669,13 @@ def test_scanning_can_be_disabled_at_startup(fake_scan: FakeScan) -> None:
                     "authorized": True,
                     "authorization_note": "Authorised by the system owner, staging only.",
                 },
-                headers={TOKEN_HEADER: api.state.vulnprio.token},
+                headers={TOKEN_HEADER: api.state.vulnpriority.token},
             )
             assert response.status_code == 403
             assert response.json()["error"] == "scanning_disabled"
             assert fake_scan.calls == []
     finally:
-        api.state.vulnprio.close()
+        api.state.vulnpriority.close()
 
 
 def test_an_unknown_preset_is_refused_before_a_job_is_created(
@@ -690,8 +696,8 @@ def test_an_unknown_preset_is_refused_before_a_job_is_created(
 def test_body_size_cap_refuses_an_oversized_request(auth: dict[str, str]) -> None:
     api = create_app(AppSettings(max_body_bytes=2048))
     try:
-        with TestClient(api) as client:
-            headers = {TOKEN_HEADER: api.state.vulnprio.token}
+        with TestClient(api, base_url=LOCAL_BASE) as client:
+            headers = {TOKEN_HEADER: api.state.vulnpriority.token}
             payload = {
                 "mode": "upload",
                 "report": {"filename": "big.json", "content_base64": "A" * 8000},
@@ -705,22 +711,22 @@ def test_body_size_cap_refuses_an_oversized_request(auth: dict[str, str]) -> Non
             # A small body on the same server still works.
             assert client.post("/api/analyze", json={"mode": "demo"}, headers=headers).status_code == 202
     finally:
-        api.state.vulnprio.close()
+        api.state.vulnpriority.close()
 
 
 def test_multipart_upload_is_capped_while_streaming() -> None:
     api = create_app(AppSettings(max_body_bytes=4096))
     try:
-        with TestClient(api) as client:
+        with TestClient(api, base_url=LOCAL_BASE) as client:
             response = client.post(
                 "/api/analyze/upload",
-                headers={TOKEN_HEADER: api.state.vulnprio.token},
+                headers={TOKEN_HEADER: api.state.vulnpriority.token},
                 files={"file": ("big.json", b"x" * 200_000, "application/json")},
             )
             assert response.status_code == 413
             assert response.json()["error"] == "body_too_large"
     finally:
-        api.state.vulnprio.close()
+        api.state.vulnpriority.close()
 
 
 def test_a_malformed_body_is_a_400_with_the_standard_error_shape(
@@ -883,7 +889,7 @@ def test_reports_are_served_in_three_formats(client: TestClient, auth: dict[str,
 
     download = client.get(f"/api/jobs/{job_id}/report.md?download=1")
     assert "attachment" in download.headers["content-disposition"]
-    assert "vulnprio-report.md" in download.headers["content-disposition"]
+    assert "vulnpriority-report.md" in download.headers["content-disposition"]
 
 
 def test_the_embedded_report_is_dressed_for_the_page_and_the_download_is_not(
@@ -925,25 +931,25 @@ def test_an_unknown_report_format_is_a_404(client: TestClient, auth: dict[str, s
 def test_the_builtin_summary_is_written_when_the_report_package_is_absent(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """A build without vulnprio.report still hands the operator a usable document."""
+    """A build without vulnpriority.report still hands the operator a usable document."""
     import importlib
 
-    from vulnprio.web import app as app_module
-    from vulnprio.web.demo import demo_dashboard
+    from vulnpriority.web import app as app_module
+    from vulnpriority.web.demo import demo_dashboard
 
     real_import = importlib.import_module
 
     def refuse(name: str, *args: Any, **kwargs: Any) -> Any:
-        if name == "vulnprio.report":
-            raise ImportError("no module named vulnprio.report")
+        if name == "vulnpriority.report":
+            raise ImportError("no module named vulnpriority.report")
         return real_import(name, *args, **kwargs)
 
     monkeypatch.setattr(app_module.importlib, "import_module", refuse)
     data = demo_dashboard()
 
     markdown = app_module.build_report_document(data, "md")
-    assert markdown.startswith("# vulnprio")
-    assert "vulnprio.report is not available" in markdown
+    assert markdown.startswith("# vulnpriority")
+    assert "vulnpriority.report is not available" in markdown
     assert "Remediation queue" in markdown
     assert data.findings[0].name in markdown
 
@@ -984,29 +990,29 @@ def test_static_assets_are_served_with_the_right_content_type(
 
 def test_the_index_carries_this_process_session_token(client: TestClient, token: str) -> None:
     body = client.get("/").text
-    assert "window.VULNPRIO_SESSION" in body
+    assert "window.VULNPRIORITY_SESSION" in body
     assert token in body
-    assert "window.VULNPRIO_SESSION = null;" not in body, "the marker should be replaced"
+    assert "window.VULNPRIORITY_SESSION = null;" not in body, "the marker should be replaced"
 
 
 def test_the_bundled_payload_is_empty_without_a_run(client: TestClient) -> None:
-    assert client.get("/data.js").text.strip() == "window.VULNPRIO_DATA = {};"
+    assert client.get("/data.js").text.strip() == "window.VULNPRIORITY_DATA = {};"
     assert client.get("/data.json").json() == {}
 
 
 def test_a_bundled_run_is_served_as_data_js() -> None:
-    from vulnprio.web.demo import demo_dashboard
+    from vulnpriority.web.demo import demo_dashboard
 
     data = demo_dashboard()
     api = create_app(AppSettings(data=data))
     try:
-        with TestClient(api) as client:
+        with TestClient(api, base_url=LOCAL_BASE) as client:
             assert client.get("/api/health").json()["has_bundled_run"] is True
             payload = client.get("/data.json").json()
             assert payload["summary"]["n_findings"] == len(data.findings)
-            assert client.get("/data.js").text.startswith("window.VULNPRIO_DATA = {")
+            assert client.get("/data.js").text.startswith("window.VULNPRIORITY_DATA = {")
     finally:
-        api.state.vulnprio.close()
+        api.state.vulnpriority.close()
 
 
 def test_unknown_api_endpoints_return_the_standard_error_shape(client: TestClient) -> None:
@@ -1030,3 +1036,113 @@ def test_openapi_documents_the_contract(client: TestClient) -> None:
         "/api/jobs/{job_id}", "/api/jobs/{job_id}/result", "/api/jobs/{job_id}/events",
         "/api/jobs/{job_id}/cancel", "/api/novelty",
     } <= paths, sorted(paths)
+
+
+# ---------------------------------------------------------------------------
+# Who the server answers to
+#
+# The session token is only a control while a foreign origin cannot read it. DNS rebinding
+# is the technique that breaks that: an attacker points their own hostname at 127.0.0.1, so
+# the browser treats this server's response as same-origin and their script reads the token
+# straight out of the served HTML. With it they can drive /api/analyze, which accepts
+# target_url, authorized and allow_private_target as request fields - turning the operator's
+# machine into an internal port scanner, with the attestation supplied by the attacker.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("host", ["evil.example.com", "attacker.test:8765", "rebind.local"])
+def test_a_foreign_host_header_is_refused_before_anything_is_served(
+    client: TestClient, host: str
+) -> None:
+    response = client.get("/", headers={"Host": host})
+    assert response.status_code == 421
+    assert response.json()["error"] == "wrong_host"
+    # The point of the check: the token must not travel to an origin that is not ours.
+    assert "token" not in response.text.lower() or "VULNPRIORITY_SESSION" not in response.text
+
+
+@pytest.mark.parametrize("host", ["127.0.0.1:8765", "127.0.0.1", "localhost", "localhost:8765",
+                                  "[::1]:8765", "[::1]"])
+def test_every_way_of_naming_this_machine_is_accepted(client: TestClient, host: str) -> None:
+    assert client.get("/", headers={"Host": host}).status_code == 200
+
+
+def test_the_api_is_refused_from_a_foreign_host_even_with_a_valid_token(
+    app_and_token,
+) -> None:
+    """Belt and braces: the token alone must not be enough if the Host is wrong.
+
+    An attacker who obtained the token some other way still cannot reach the API from their
+    own origin, and an attacker who has not cannot read it in the first place.
+    """
+    api, token = app_and_token
+    with TestClient(api, base_url=LOCAL_BASE) as caller:
+        response = caller.post(
+            "/api/analyze",
+            headers={"Host": "evil.example.com", TOKEN_HEADER: token},
+            json={"mode": "demo"},
+        )
+    assert response.status_code == 421
+
+
+def test_an_operator_can_name_a_host_they_meant_to_expose() -> None:
+    api = create_app(AppSettings(allowed_hosts=("vulnpriority.internal",)))
+    try:
+        with TestClient(api, base_url=LOCAL_BASE) as caller:
+            assert caller.get("/", headers={"Host": "vulnpriority.internal"}).status_code == 200
+            assert caller.get("/", headers={"Host": "other.internal"}).status_code == 421
+    finally:
+        api.state.vulnpriority.close()
+
+
+def test_a_wildcard_bind_switches_the_check_off_rather_than_guessing() -> None:
+    """Binding every interface is a deliberate choice to be reachable by many names.
+
+    Which names is not knowable from inside the process, so enforcing a list assembled here
+    would break the setup while protecting nothing the operator had not already given up.
+    """
+    api = create_app(AppSettings(host="0.0.0.0"))
+    try:
+        with TestClient(api, base_url=LOCAL_BASE) as caller:
+            assert caller.get("/", headers={"Host": "anything.example"}).status_code == 200
+    finally:
+        api.state.vulnpriority.close()
+
+
+def test_an_empty_host_header_is_refused(app_and_token) -> None:
+    """``Host`` is mandatory in HTTP/1.1, so an empty one is malformed, not permissive.
+
+    The middleware distinguishes it from a genuinely absent header: absent means an
+    HTTP/1.0 client typed by hand, which is not the attack this check exists for; empty
+    means somebody is trying something.
+    """
+    api, _ = app_and_token
+    with TestClient(api, base_url=LOCAL_BASE) as caller:
+        response = caller.get("/", headers={"Host": ""})
+    assert response.status_code == 421
+
+
+def test_the_host_header_is_read_the_way_browsers_write_it() -> None:
+    """Port, IPv6 brackets and case are all things a real Host header carries."""
+    from vulnpriority.web.app import _request_hostname
+
+    assert _request_hostname("127.0.0.1:8765") == "127.0.0.1"
+    assert _request_hostname("LocalHost") == "localhost"
+    assert _request_hostname("[::1]:8765") == "::1"
+    assert _request_hostname("[::1]") == "::1"
+    assert _request_hostname("example.com") == "example.com"
+    assert _request_hostname("") == ""
+    assert _request_hostname(None) == ""
+
+
+def test_the_token_is_not_accepted_as_a_query_parameter(client: TestClient, auth) -> None:
+    """A credential in a URL lands in request logs, browser history and every proxy.
+
+    Nothing in the page ever used this path; it existed only as a convenience.
+    """
+    token = auth[TOKEN_HEADER]
+    refused = client.post(f"/api/analyze?token={token}", json={"mode": "demo"})
+    assert refused.status_code == 403
+    assert refused.json()["error"] == "bad_token"
+    # ...and the header still works, so the convenience was the only thing removed.
+    assert client.post("/api/analyze", json={"mode": "demo"}, headers=auth).status_code == 202

@@ -7,7 +7,7 @@ to end - argv, timeout, report parsing, identifier construction, fallback - on a
 with no scanner installed, which is what this machine is.
 
 What these tests cannot cover is stated plainly in the module docstring of
-:mod:`vulnprio.scan.adapters`: the exact flag spellings are taken from each tool's
+:mod:`vulnpriority.scan.adapters`: the exact flag spellings are taken from each tool's
 documentation and have not been run against a real binary here.
 """
 
@@ -19,17 +19,17 @@ from pathlib import Path
 
 import pytest
 
-from vulnprio.core.models import Scan
-from vulnprio.ingest.nikto import NiktoParser
-from vulnprio.ingest.wapiti import WapitiParser
-from vulnprio.scan import (
+from vulnpriority.core.models import Scan
+from vulnpriority.ingest.nikto import NiktoParser
+from vulnpriority.ingest.wapiti import WapitiParser
+from vulnpriority.scan import (
     NotAuthorizedError,
     OutOfScopeError,
     ScanProfile,
     ScanRequest,
     assess_target,
 )
-from vulnprio.scan.adapters import (
+from vulnpriority.scan.adapters import (
     TOOL_PREFERENCE,
     TOOL_SPECS,
     ZAP_DOCKER_IMAGE,
@@ -478,7 +478,7 @@ def test_tool_version_failure_is_not_fatal():
 
 
 # ---------------------------------------------------------------------------
-# Ingestion: every tool's report reaches a vulnprio parser
+# Ingestion: every tool's report reaches a vulnpriority parser
 # ---------------------------------------------------------------------------
 
 
@@ -555,7 +555,7 @@ def test_nikto_https_port_yields_https_endpoints():
 def test_ingest_report_rejects_an_unrecognised_file(tmp_path):
     path = tmp_path / "junk.txt"
     path.write_text("not a scanner report", encoding="utf-8")
-    with pytest.raises(ExternalToolError, match="no vulnprio parser"):
+    with pytest.raises(ExternalToolError, match="no vulnpriority parser"):
         ingest_report(path)
 
 
@@ -637,7 +637,7 @@ def _offline_client(request: ScanRequest):
     """An HttpClient wired to a trivial fake site, so the built-in path needs no network."""
     import httpx
 
-    from vulnprio.scan import HttpClient
+    from vulnpriority.scan import HttpClient
 
     class Clock:
         def __init__(self) -> None:
@@ -686,8 +686,8 @@ def test_the_builtin_scanner_can_still_be_forced(tmp_path):
         client=_offline_client(request),
     )
 
-    assert outcome.tool == "vulnprio-scan"
-    assert outcome.scan.scanner_name == "vulnprio-scan"
+    assert outcome.tool == "vulnpriority-scan"
+    assert outcome.scan.scanner_name == "vulnpriority-scan"
     assert runner.calls == [], "force_builtin must not launch an external tool"
     assert "requested explicitly" in outcome.tool_selection
 
@@ -703,7 +703,7 @@ def test_prefer_external_false_also_forces_the_builtin(tmp_path):
         out_dir=tmp_path,
         client=_offline_client(request),
     )
-    assert outcome.tool == "vulnprio-scan"
+    assert outcome.tool == "vulnpriority-scan"
     assert runner.calls == []
 
 
@@ -757,7 +757,7 @@ def test_falls_back_to_the_builtin_when_no_tool_is_installed():
     request = make_request()
     outcome = assess_target(request, tools=(), client=_offline_client(request))
 
-    assert outcome.tool == "vulnprio-scan"
+    assert outcome.tool == "vulnpriority-scan"
     assert outcome.scan.findings
     assert "No external scanner was found" in outcome.tool_selection
     assert "install" in outcome.tool_selection.lower()
@@ -776,7 +776,7 @@ def test_falls_back_to_the_builtin_when_every_tool_fails(tmp_path):
         client=_offline_client(request),
     )
 
-    assert outcome.tool == "vulnprio-scan"
+    assert outcome.tool == "vulnpriority-scan"
     assert len(outcome.external_attempts) == 2
     assert all("failed" in note for note in outcome.external_attempts)
 
@@ -794,7 +794,7 @@ def test_falls_back_when_the_only_tool_cannot_serve_the_profile(tmp_path):
         client=_offline_client(request),
     )
 
-    assert outcome.tool == "vulnprio-scan"
+    assert outcome.tool == "vulnpriority-scan"
     assert runner.calls == [], "a tool that cannot be passive must not be run for a passive scan"
     assert any("nuclei" in note and "passive" in note for note in outcome.external_attempts)
 
@@ -812,7 +812,7 @@ def test_tool_attempts_are_bounded(tmp_path):
         client=_offline_client(request),
     )
 
-    assert outcome.tool == "vulnprio-scan"
+    assert outcome.tool == "vulnpriority-scan"
     assert len(runner.calls) == 1, "only one tool should have been tried"
 
 

@@ -4,7 +4,7 @@ The headline test here is ``test_low_cvss_chokepoint_outranks_high_cvss_leaf``: 
 result the literature review claims Component C delivers, and it is the reason the
 framework models states rather than findings.
 
-Components A and B are faked with plain ``vulnprio.core.models`` objects rather than
+Components A and B are faked with plain ``vulnpriority.core.models`` objects rather than
 imported, so these tests exercise the graph and nothing else.
 """
 
@@ -14,8 +14,8 @@ from datetime import date, datetime
 
 import pytest
 
-from vulnprio.core.config import ComponentCConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import ComponentCConfig
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     AttackComplexity,
     EndpointFunction,
@@ -27,8 +27,8 @@ from vulnprio.core.enums import (
     TrustTier,
     UserInteraction,
 )
-from vulnprio.core.errors import GraphError
-from vulnprio.core.models import (
+from vulnpriority.core.errors import GraphError
+from vulnpriority.core.models import (
     ApplicabilityAssessment,
     AssetCriticality,
     AttackGraphSummary,
@@ -44,16 +44,16 @@ from vulnprio.core.models import (
     TrustSummary,
     UntrustedText,
 )
-from vulnprio.decision.expected_loss import chain_adjusted_loss
-from vulnprio.graph.attack_graph import (
+from vulnpriority.decision.expected_loss import chain_adjusted_loss
+from vulnpriority.graph.attack_graph import (
     AttackGraphBuilder,
     admits_edge,
     edge_evidence_tier,
     parse_state_node,
     state_node,
 )
-from vulnprio.graph.chain_scorer import ReachabilityChainScorer
-from vulnprio.graph.privilege_map import privileges_for
+from vulnpriority.graph.chain_scorer import ReachabilityChainScorer
+from vulnpriority.graph.privilege_map import privileges_for
 
 AS_OF = date(2024, 6, 1)
 SCANNED_AT = datetime(2024, 5, 1, 9, 0, 0)
@@ -556,7 +556,7 @@ def test_scanner_tier_evidence_is_allowed_to_create_the_same_edge() -> None:
 def test_operator_cwe_table_is_not_hostage_to_an_untrusted_assessment() -> None:
     """A covered CWE does not need the model's word for its privilege transition.
 
-    SQL injection escalates because :mod:`vulnprio.graph.privilege_map` says so - operator
+    SQL injection escalates because :mod:`vulnpriority.graph.privilege_map` says so - operator
     code keyed by an identifier the scanner reported - so an assessment authored over
     target content does not make the edge untrusted. What untrusted text *can* still do is
     bounded elsewhere, by the enricher's influence budget on ``p_exploit``.

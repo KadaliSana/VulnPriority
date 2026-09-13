@@ -1,8 +1,8 @@
-# vulnprio - framework design
+# vulnpriority - framework design
 
 This is the implementation specification for the framework proposed in the literature
 review *AI-Driven Automated Web Application Vulnerability Prioritization*. It is binding:
-the shared contracts in `src/vulnprio/core/` are frozen, and every module below codes
+the shared contracts in `src/vulnpriority/core/` are frozen, and every module below codes
 against them.
 
 The framework takes web application scanner output, enriches each finding with

@@ -1,4 +1,4 @@
-"""How a money figure is written down (``vulnprio.core.money``).
+"""How a money figure is written down (``vulnpriority.core.money``).
 
 The framework's claim is that its money figures order remediation work, so a figure a
 reader misreads is a figure that cannot do its job. Two things have to be right: the
@@ -14,9 +14,9 @@ import math
 
 import pytest
 
-from vulnprio.core.config import PipelineConfig
-from vulnprio.core.models import ImpactModel
-from vulnprio.core.money import (
+from vulnpriority.core.config import PipelineConfig
+from vulnpriority.core.models import ImpactModel
+from vulnpriority.core.money import (
     ASCII_FALLBACK_CHARS,
     CURRENCY_SYMBOLS,
     CRORE,

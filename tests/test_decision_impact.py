@@ -6,8 +6,8 @@ from datetime import datetime
 
 import pytest
 
-from vulnprio.core.config import ComponentBConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import ComponentBConfig
+from vulnpriority.core.enums import (
     AttackComplexity,
     EndpointFunction,
     ExploitMaturity,
@@ -17,7 +17,7 @@ from vulnprio.core.enums import (
     ScannerSeverity,
     UserInteraction,
 )
-from vulnprio.core.models import (
+from vulnpriority.core.models import (
     AssetCriticality,
     Endpoint,
     ExploitabilityAssessment,
@@ -25,8 +25,8 @@ from vulnprio.core.models import (
     ImpactModel,
     UntrustedText,
 )
-from vulnprio.decision.impact import estimate_impact, impact_components, lookup
-from vulnprio.decision.remediation_cost import (
+from vulnpriority.decision.impact import estimate_impact, impact_components, lookup
+from vulnpriority.decision.remediation_cost import (
     ARCHITECTURAL_CHANGE_HOURS,
     CODE_CHANGE_HOURS,
     CONFIGURATION_FIX_HOURS,
@@ -221,7 +221,7 @@ def test_lookup_tolerates_string_and_enum_keys() -> None:
 
 def test_shipped_impact_presets_load_and_price_a_finding(endpoint, asset, exploitability) -> None:
     """The healthcare preset must cost more than the ecommerce one for the same finding."""
-    from vulnprio.core.config import load_impact_preset
+    from vulnpriority.core.config import load_impact_preset
 
     pii_asset = asset.model_copy(update={"function": EndpointFunction.PII_DATA, "data_sensitivity": 1.0})
     ecommerce = estimate_impact(

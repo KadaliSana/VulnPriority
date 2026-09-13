@@ -233,7 +233,7 @@
   "package_versions": {
     "python": "3.12.2",
     "platform": "Windows-11",
-    "vulnprio": "0.1.0",
+    "vulnpriority": "0.1.0",
     "numpy": "2.2.6",
     "pandas": "3.0.1",
     "scipy": "1.17.1",
@@ -252,5 +252,5 @@
   "llm_model": "claude-sonnet-5",
   "feed_mode": "offline",
   "as_of": "2024-06-28",
-  "command": "vulnprio adversarial --dataset data/synthetic/317e07a9bc9147ce --output-dir runs-adv"
+  "command": "vulnpriority adversarial --dataset data/synthetic/317e07a9bc9147ce --output-dir runs-adv"
 }

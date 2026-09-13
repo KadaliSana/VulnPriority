@@ -1,8 +1,8 @@
 """Goal 1 tests: criticality is inferred from structure, and a model cannot overrule it.
 
-These tests deliberately avoid importing ``vulnprio.llm`` and ``vulnprio.sandbox``: those
+These tests deliberately avoid importing ``vulnpriority.llm`` and ``vulnpriority.sandbox``: those
 packages are written in parallel. The collaborators Component A needs are both defined by
-abstract contracts in ``vulnprio.core.interfaces``, so the fakes below implement those
+abstract contracts in ``vulnpriority.core.interfaces``, so the fakes below implement those
 contracts directly and the tests stay honest about what they are exercising.
 """
 
@@ -12,8 +12,8 @@ from typing import Any
 
 import pytest
 
-from vulnprio.core.config import PipelineConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import PipelineConfig
+from vulnpriority.core.enums import (
     EndpointFunction,
     HttpMethod,
     InjectionCategory,
@@ -22,8 +22,8 @@ from vulnprio.core.enums import (
     Provenance,
     TrustTier,
 )
-from vulnprio.core.interfaces import LLMBackend, LLMResult, SandboxedPrompt
-from vulnprio.core.models import (
+from vulnpriority.core.interfaces import LLMBackend, LLMResult, SandboxedPrompt
+from vulnpriority.core.models import (
     Endpoint,
     InjectionSignal,
     LLMAudit,
@@ -31,12 +31,12 @@ from vulnprio.core.models import (
     Scan,
     UntrustedText,
 )
-from vulnprio.semantic.criticality import (
+from vulnpriority.semantic.criticality import (
     AssetCriticalityOut,
     assess_asset_criticality,
     structural_criticality,
 )
-from vulnprio.semantic.lexicon import (
+from vulnpriority.semantic.lexicon import (
     classify_function,
     find_pii_markers,
     find_secret_markers,

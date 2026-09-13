@@ -18,9 +18,9 @@ from pathlib import Path
 
 import pytest
 
-from vulnprio.core import resolve
-from vulnprio.core.config import PROJECT_ROOT, PipelineConfig, load_config
-from vulnprio.core.enums import (
+from vulnpriority.core import resolve
+from vulnpriority.core.config import PROJECT_ROOT, PipelineConfig, load_config
+from vulnpriority.core.enums import (
     EndpointFunction,
     ExploitMaturity,
     ExploitSource,
@@ -31,7 +31,7 @@ from vulnprio.core.enums import (
     ScoreSource,
     CvssVersion,
 )
-from vulnprio.core.models import (
+from vulnpriority.core.models import (
     CvssRecord,
     Endpoint,
     EpssRecord,

@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from vulnprio.report import (
+from vulnpriority.report import (
     AssessmentReport,
     ReportOptions,
     build_report,
@@ -24,8 +24,8 @@ from vulnprio.report import (
     render_html,
     render_markdown,
 )
-from vulnprio.report.render_md import markdown_table
-from vulnprio.web.schema import (
+from vulnpriority.report.render_md import markdown_table
+from vulnpriority.web.schema import (
     DashboardData,
     WebAdversarial,
     WebContribution,

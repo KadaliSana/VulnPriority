@@ -17,21 +17,21 @@ from pathlib import Path
 
 import pytest
 
-from vulnprio.core.config import FeedsConfig, SyntheticConfig
-from vulnprio.core.enums import ExploitMaturity, PrivilegeLevel
-from vulnprio.core.models import Scan
-from vulnprio.feeds.base import clear_fixture_cache
-from vulnprio.feeds.bundle import DefaultIntelAssembler, build_fixture_bundle
-from vulnprio.ingest.generic import parse_scan
-from vulnprio.synth.generator import SyntheticDataset
-from vulnprio.synth.oracle import HAZARD_WEIGHTS
-from vulnprio.synth.pages import (
+from vulnpriority.core.config import FeedsConfig, SyntheticConfig
+from vulnpriority.core.enums import ExploitMaturity, PrivilegeLevel
+from vulnpriority.core.models import Scan
+from vulnpriority.feeds.base import clear_fixture_cache
+from vulnpriority.feeds.bundle import DefaultIntelAssembler, build_fixture_bundle
+from vulnpriority.ingest.generic import parse_scan
+from vulnpriority.synth.generator import SyntheticDataset
+from vulnpriority.synth.oracle import HAZARD_WEIGHTS
+from vulnpriority.synth.pages import (
     generate_reference_pages,
     injected_page_urls,
     load_injection_payloads,
 )
-from vulnprio.synth.topology import SECTOR_TECH, generate_app_specs, generate_endpoints
-from vulnprio.synth.world import build_world
+from vulnpriority.synth.topology import SECTOR_TECH, generate_app_specs, generate_endpoints
+from vulnpriority.synth.world import build_world
 
 SMALL = SyntheticConfig(
     seed=1234,
@@ -408,7 +408,7 @@ def test_epss_is_correlated_with_latent_exploitability_but_not_equal_to_it() -> 
 
 
 def test_fixtures_are_read_by_the_real_feed_readers(dataset: SyntheticDataset) -> None:
-    """The generated feeds go through ``vulnprio.feeds``, not through a synthetic shortcut."""
+    """The generated feeds go through ``vulnpriority.feeds``, not through a synthetic shortcut."""
     clear_fixture_cache()
     config = FeedsConfig(fixture_dir=dataset.fixture_dir)
     assembler = DefaultIntelAssembler(build_fixture_bundle(config), config)

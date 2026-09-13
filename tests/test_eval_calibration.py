@@ -12,8 +12,8 @@ import numpy as np
 import pytest
 from sklearn.metrics import brier_score_loss
 
-from vulnprio.core.models import CalibrationReport
-from vulnprio.eval.calibration import (
+from vulnpriority.core.models import CalibrationReport
+from vulnpriority.eval.calibration import (
     bin_indices,
     brier_score,
     expected_calibration_error,
@@ -83,7 +83,7 @@ def test_an_overconfident_model_is_caught_by_ece_at_identical_discrimination() -
     their ROC-AUC - are identical, but the overconfident model would misprice every
     expected-loss calculation it touches, and only ECE sees it.
     """
-    from vulnprio.eval.metrics import roc_auc
+    from vulnpriority.eval.metrics import roc_auc
 
     truth = np.concatenate([np.repeat([1.0, 0.0], [240, 60]), np.repeat([1.0, 0.0], [60, 240])])
     group_high = np.arange(600) < 300

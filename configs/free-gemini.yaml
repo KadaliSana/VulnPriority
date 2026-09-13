@@ -2,7 +2,7 @@
 #
 #   Get a key:  https://aistudio.google.com/apikey       (no card, no billing account)
 #   Install:    pip install -e ".[gemini]"
-#   Run:        vulnprio run-all --config configs/free-gemini.yaml
+#   Run:        vulnpriority run-all --config configs/free-gemini.yaml
 #
 # gemini-3.5-flash-lite carries a no-cost request quota and free Google Search grounding, which
 # is why this is the only free configuration that gets the exploit-intelligence layer as

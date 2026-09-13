@@ -1,7 +1,7 @@
 """The guarded backend: what happens when a model misbehaves.
 
 The sandbox package is written in parallel, so nothing here imports it. Fake inner
-backends implement :class:`vulnprio.core.interfaces.LLMBackend` directly and
+backends implement :class:`vulnpriority.core.interfaces.LLMBackend` directly and
 :class:`SandboxedPrompt` objects are constructed by hand, which is also the honest way
 to test a guard: by feeding it exactly the outputs it exists to reject.
 """
@@ -10,15 +10,15 @@ from __future__ import annotations
 
 import pytest
 
-from vulnprio.core.config import LLMConfig
-from vulnprio.core.enums import EndpointFunction, LLMBackendKind, Provenance
-from vulnprio.core.errors import CanaryLeakError, SchemaRejectedError
-from vulnprio.core.interfaces import LLMBackend, LLMResult, SandboxedPrompt
-from vulnprio.core.models import LLMAudit
-from vulnprio.llm.guarded import STRICT_RETRY_INSTRUCTION, GuardedBackend
-from vulnprio.llm.heuristic import HeuristicBackend
-from vulnprio.llm.prompts import format_operator_context, prompt_hash, system_prompt
-from vulnprio.llm.schemas import AssetCriticalityOut
+from vulnpriority.core.config import LLMConfig
+from vulnpriority.core.enums import EndpointFunction, LLMBackendKind, Provenance
+from vulnpriority.core.errors import CanaryLeakError, SchemaRejectedError
+from vulnpriority.core.interfaces import LLMBackend, LLMResult, SandboxedPrompt
+from vulnpriority.core.models import LLMAudit
+from vulnpriority.llm.guarded import STRICT_RETRY_INSTRUCTION, GuardedBackend
+from vulnpriority.llm.heuristic import HeuristicBackend
+from vulnpriority.llm.prompts import format_operator_context, prompt_hash, system_prompt
+from vulnpriority.llm.schemas import AssetCriticalityOut
 
 CANARY = "CANARY-9f2b-TEST"
 NONCE = "NONCE-abc123"
@@ -261,7 +261,7 @@ def test_a_wrong_nonce_closing_tag_marks_the_envelope_broken(prompt: SandboxedPr
 
 
 def test_an_external_output_guard_is_consulted_and_its_rejection_is_honoured(prompt: SandboxedPrompt) -> None:
-    """Stands in for vulnprio.sandbox.output_guard.OutputGuard, which is written in parallel."""
+    """Stands in for vulnpriority.sandbox.output_guard.OutputGuard, which is written in parallel."""
 
     class FakeOutputGuard:
         def __init__(self) -> None:

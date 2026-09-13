@@ -22,8 +22,8 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from vulnprio import cli
-from vulnprio.cli import app
+from vulnpriority import cli
+from vulnpriority.cli import app
 
 #: Exactly the command list in DESIGN.md 3.11.
 EXPECTED_COMMANDS: tuple[str, ...] = (
@@ -81,8 +81,8 @@ def test_no_undocumented_commands_were_added() -> None:
     assert extra == [], f"commands not in DESIGN.md sections 3.11 or 6: {extra}"
 
 
-def test_the_application_is_named_vulnprio() -> None:
-    assert app.info.name == "vulnprio"
+def test_the_application_is_named_vulnpriority() -> None:
+    assert app.info.name == "vulnpriority"
 
 
 # ---------------------------------------------------------------------------
@@ -164,7 +164,7 @@ def test_an_unknown_command_fails_cleanly(runner: CliRunner) -> None:
 
 
 def test_synth_generates_a_dataset_offline(runner: CliRunner, tmp_path: Path) -> None:
-    """``vulnprio synth`` is the root of ``run-all --synthetic`` and must work on its own."""
+    """``vulnpriority synth`` is the root of ``run-all --synthetic`` and must work on its own."""
     result = runner.invoke(
         app,
         [
@@ -212,7 +212,7 @@ def test_synth_generates_a_dataset_offline(runner: CliRunner, tmp_path: Path) ->
 
 
 def test_set_overrides_are_parsed_as_json() -> None:
-    from vulnprio.cli import _parse_overrides
+    from vulnpriority.cli import _parse_overrides
 
     parsed = _parse_overrides(
         ["ranking.n_estimators=500", "component_c.enabled=false", "llm.model=claude-sonnet-5"]
@@ -251,8 +251,8 @@ def test_help_does_not_import_the_pipeline(runner: CliRunner) -> None:
     import sys
 
     probe = (
-        "import sys; from vulnprio.cli import app;"
-        "loaded=[name for name in sys.modules if name.startswith('vulnprio.')];"
+        "import sys; from vulnpriority.cli import app;"
+        "loaded=[name for name in sys.modules if name.startswith('vulnpriority.')];"
         "print(','.join(sorted(loaded)))"
     )
     completed = subprocess.run(
@@ -260,12 +260,12 @@ def test_help_does_not_import_the_pipeline(runner: CliRunner) -> None:
     )
     loaded = set(completed.stdout.strip().split(","))
     for forbidden in (
-        "vulnprio.pipeline",
-        "vulnprio.pipeline.runner",
-        "vulnprio.synth.generator",
-        "vulnprio.rank",
-        "vulnprio.eval",
-        "vulnprio.graph",
+        "vulnpriority.pipeline",
+        "vulnpriority.pipeline.runner",
+        "vulnpriority.synth.generator",
+        "vulnpriority.rank",
+        "vulnpriority.eval",
+        "vulnpriority.graph",
     ):
         assert forbidden not in loaded, f"importing the CLI pulled in {forbidden}"
 
@@ -286,7 +286,7 @@ def test_help_does_not_import_the_pipeline(runner: CliRunner) -> None:
 
 CONSOLE_PROBE = """
 import sys
-from vulnprio import cli
+from vulnpriority import cli
 cli._harden_streams()
 import typer
 typer.echo("risk captured " + cli._money(195636364, "INR"))

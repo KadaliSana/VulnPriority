@@ -14,16 +14,16 @@ from pathlib import Path
 import httpx
 import pytest
 
-from vulnprio.core.config import PROJECT_ROOT, FeedsConfig, PipelineConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import PROJECT_ROOT, FeedsConfig, PipelineConfig
+from vulnpriority.core.enums import (
     ExploitMaturity,
     ExploitSource,
     FeedMode,
     Provenance,
     TrustTier,
 )
-from vulnprio.core.errors import FeedUnavailableError, OfflineViolationError
-from vulnprio.feeds import (
+from vulnpriority.core.errors import FeedUnavailableError, OfflineViolationError
+from vulnpriority.feeds import (
     DefaultIntelAssembler,
     EpssFixtureFeed,
     ExploitFixtureFeed,

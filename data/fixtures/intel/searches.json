@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "note": "Recorded exploit-intelligence sessions, keyed by CVE. Written by vulnprio.intel.offline.RecordingProvider from live phase-1 calls, then trimmed. Four cases are covered deliberately: a CVE with a public proof of concept (CVE-2024-0001), one with active exploitation reporting (CVE-2021-44228), one where nothing was found (CVE-2025-1234), and one where a retrieved page carries a prompt-injection attempt (CVE-2017-5638), so the sandbox path is exercised against real-shaped data rather than a synthetic payload. Document text is untrusted by construction: nothing here is a statement the framework endorses.",
+  "note": "Recorded exploit-intelligence sessions, keyed by CVE. Written by vulnpriority.intel.offline.RecordingProvider from live phase-1 calls, then trimmed. Four cases are covered deliberately: a CVE with a public proof of concept (CVE-2024-0001), one with active exploitation reporting (CVE-2021-44228), one where nothing was found (CVE-2025-1234), and one where a retrieved page carries a prompt-injection attempt (CVE-2017-5638), so the sandbox path is exercised against real-shaped data rather than a synthetic payload. Document text is untrusted by construction: nothing here is a statement the framework endorses.",
   "entries": {
     "CVE-2021-44228": {
       "recorded_at": "2024-05-24T09:15:00+00:00",

@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "vulnprio"
+name = "vulnpriority"
 version = "0.1.0"
 description = "AI-driven automated web application vulnerability prioritization framework"
 readme = "README.md"
@@ -51,7 +51,7 @@ web = [
 ]
 
 [project.scripts]
-vulnprio = "vulnprio.cli:app"
+vulnpriority = "vulnpriority.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -59,7 +59,7 @@ where = ["src"]
 [tool.setuptools.package-data]
 # The trained ranker ships with the code. Without it an install has no model to score
 # a single-scan run with, and the ranking silently degrades to expected-loss ordering.
-vulnprio = ["py.typed", "rank/models/*.ubj", "rank/models/*.meta.json"]
+vulnpriority = ["py.typed", "rank/models/*.ubj", "rank/models/*.meta.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

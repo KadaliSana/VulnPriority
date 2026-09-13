@@ -13,9 +13,9 @@ from pathlib import Path
 
 import pytest
 
-from vulnprio.core.config import PROJECT_ROOT
-from vulnprio.core.enums import Provenance, TrustTier
-from vulnprio.intel.models import (
+from vulnpriority.core.config import PROJECT_ROOT
+from vulnpriority.core.enums import Provenance, TrustTier
+from vulnpriority.intel.models import (
     IntelCitation,
     IntelConfig,
     IntelGather,
@@ -24,14 +24,14 @@ from vulnprio.intel.models import (
     IntelSourceKind,
     IntelUsage,
 )
-from vulnprio.intel.offline import (
+from vulnpriority.intel.offline import (
     FIXTURE_VERSION,
     FixtureSearchProvider,
     RecordingProvider,
     fixture_key_for,
     load_fixture,
 )
-from vulnprio.intel.provider import BaseSearchProvider, NullSearchProvider, make_document
+from vulnpriority.intel.provider import BaseSearchProvider, NullSearchProvider, make_document
 
 FIXTURE = PROJECT_ROOT / "data" / "fixtures" / "intel" / "searches.json"
 

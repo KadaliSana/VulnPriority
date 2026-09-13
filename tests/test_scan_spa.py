@@ -20,9 +20,9 @@ from datetime import datetime
 import httpx
 import pytest
 
-from vulnprio.scan import Crawler, HttpClient, ScanRequest, run_scan
-from vulnprio.scan.crawler import visit_key
-from vulnprio.scan.spa import (
+from vulnpriority.scan import Crawler, HttpClient, ScanRequest, run_scan
+from vulnpriority.scan.crawler import visit_key
+from vulnpriority.scan.spa import (
     detect_spa,
     directory_ancestors,
     extract_script_paths,
@@ -135,7 +135,7 @@ def test_a_page_full_of_links_is_not_a_shell() -> None:
     Without this the detector would fire on any page containing a ``<div id="app">``, and
     the coverage note would start telling operators their ordinary site was unscannable.
     """
-    from vulnprio.scan.models import Page
+    from vulnpriority.scan.models import Page
 
     page = Page(
         url=f"{ORIGIN}/",
@@ -151,7 +151,7 @@ def test_a_page_full_of_links_is_not_a_shell() -> None:
 
 
 def test_a_page_with_no_script_is_not_a_shell() -> None:
-    from vulnprio.scan.models import Page
+    from vulnpriority.scan.models import Page
 
     page = Page(
         url=f"{ORIGIN}/",

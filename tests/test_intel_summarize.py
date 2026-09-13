@@ -7,8 +7,8 @@ from datetime import datetime, timezone
 import pytest
 from pydantic import ValidationError
 
-from vulnprio.core.enums import AttackComplexity, ExploitMaturity
-from vulnprio.intel.models import (
+from vulnpriority.core.enums import AttackComplexity, ExploitMaturity
+from vulnpriority.intel.models import (
     EXPLOIT_INTEL_JSON_SCHEMA,
     MAX_SUMMARY_CHARS,
     ExploitIntelOut,
@@ -18,8 +18,8 @@ from vulnprio.intel.models import (
     IntelSummary,
     IntelUsage,
 )
-from vulnprio.intel.provider import make_document
-from vulnprio.intel.summarize import select_citations, split_sentences, summarize_intel
+from vulnpriority.intel.provider import make_document
+from vulnpriority.intel.summarize import select_citations, split_sentences, summarize_intel
 
 URL = "https://github.com/example/poc"
 NOW = datetime(2024, 6, 1, tzinfo=timezone.utc)

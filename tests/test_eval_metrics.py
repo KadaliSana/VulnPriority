@@ -15,9 +15,9 @@ import pytest
 from scipy import stats as scipy_stats
 from sklearn import metrics as sk
 
-from vulnprio.core.enums import MetricName
-from vulnprio.core.interfaces import RankMetric
-from vulnprio.eval.metrics import (
+from vulnpriority.core.enums import MetricName
+from vulnpriority.core.interfaces import RankMetric
+from vulnpriority.eval.metrics import (
     RANK_METRICS,
     average_precision_at_k,
     balanced_accuracy,
@@ -39,7 +39,7 @@ from vulnprio.eval.metrics import (
     roc_auc,
     workload_reduction,
 )
-from vulnprio.eval.minority import minority_report, per_class_scores
+from vulnpriority.eval.minority import minority_report, per_class_scores
 
 IDS = ["f1", "f2", "f3", "f4", "f5", "f6"]
 GRADES = [3, 2, 3, 0, 1, 2]
@@ -412,7 +412,7 @@ def test_rank_metric_registry_conforms_to_the_frozen_protocol() -> None:
 
 def test_metric_value_key_spelling_matches_the_registry() -> None:
     """``MetricValue.key`` is what the report and the bootstrap index on."""
-    from vulnprio.core.models import MetricValue
+    from vulnpriority.core.models import MetricValue
 
     assert MetricValue(name=MetricName.NDCG_AT_K, k=10, value=0.5).key == "ndcg@10"
     assert MetricValue(name=MetricName.MCC, value=0.5).key == "mcc"

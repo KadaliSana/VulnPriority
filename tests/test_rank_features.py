@@ -1,6 +1,6 @@
 """``FeatureBuilder``: the feature matrix and the ablation contract (DESIGN.md 3.8).
 
-Everything here is built directly from ``vulnprio.core.models`` rather than by running
+Everything here is built directly from ``vulnpriority.core.models`` rather than by running
 Components A, B and C, because those are written in parallel and the feature contract has
 to hold independently of them.
 """
@@ -12,7 +12,7 @@ from datetime import date, datetime
 
 import pytest
 
-from vulnprio.core.enums import (
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     AttackComplexity,
     Component,
@@ -28,7 +28,7 @@ from vulnprio.core.enums import (
     UserInteraction,
     VersionMatch,
 )
-from vulnprio.core.models import (
+from vulnpriority.core.models import (
     FEATURE_GROUPS,
     FEATURE_NAMES,
     ApplicabilityAssessment,
@@ -52,7 +52,7 @@ from vulnprio.core.models import (
     VulnIntel,
     feature_names_for,
 )
-from vulnprio.intel.models import (
+from vulnpriority.intel.models import (
     INTEL_FEATURE_NAMES,
     ExploitIntelOut,
     FeedAgreement,
@@ -60,7 +60,7 @@ from vulnprio.intel.models import (
     IntelResult,
     IntelSourceKind,
 )
-from vulnprio.rank.features import (
+from vulnpriority.rank.features import (
     FEATURE_DOC,
     INTEL_FEATURES,
     NEUTRAL,
@@ -535,7 +535,7 @@ def test_component_c_features_are_log_scaled_where_they_are_monetary(builder, on
 
 
 # ---------------------------------------------------------------------------
-# Retrieved exploit intelligence (vulnprio.intel) reaching the ranker
+# Retrieved exploit intelligence (vulnpriority.intel) reaching the ranker
 # ---------------------------------------------------------------------------
 
 

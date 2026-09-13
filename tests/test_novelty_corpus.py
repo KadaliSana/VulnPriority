@@ -18,9 +18,9 @@ import re
 
 import pytest
 
-from vulnprio.core.config import PROJECT_ROOT
-from vulnprio.core.errors import ConfigError
-from vulnprio.novelty.capabilities import (
+from vulnpriority.core.config import PROJECT_ROOT
+from vulnpriority.core.errors import ConfigError
+from vulnpriority.novelty.capabilities import (
     CAPABILITIES,
     CAPABILITY_KEYS,
     CapabilityLevel,
@@ -30,7 +30,7 @@ from vulnprio.novelty.capabilities import (
     framework_partial_capabilities,
     framework_vector,
 )
-from vulnprio.novelty.corpus import (
+from vulnpriority.novelty.corpus import (
     MIN_STUDIES,
     Paradigm,
     corpus_caveats,

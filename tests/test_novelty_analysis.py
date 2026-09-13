@@ -18,7 +18,7 @@ import json
 
 import pytest
 
-from vulnprio.novelty import (
+from vulnpriority.novelty import (
     CAPABILITY_KEYS,
     CapabilityLevel,
     CapabilityNature,
@@ -36,7 +36,7 @@ from vulnprio.novelty import (
     shared_capabilities,
     unique_capabilities,
 )
-from vulnprio.novelty.analysis import _narrative  # noqa: PLC2701 - narrative is derived output
+from vulnpriority.novelty.analysis import _narrative  # noqa: PLC2701 - narrative is derived output
 
 
 def _clear_caches() -> None:

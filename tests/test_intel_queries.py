@@ -9,13 +9,13 @@ from datetime import date, datetime
 
 import pytest
 
-from vulnprio.core.enums import (
+from vulnpriority.core.enums import (
     ExploitMaturity,
     ExploitSource,
     Provenance,
     ScannerSeverity,
 )
-from vulnprio.core.models import (
+from vulnpriority.core.models import (
     AffectedProduct,
     ExploitEvidence,
     Finding,
@@ -24,9 +24,9 @@ from vulnprio.core.models import (
     UntrustedText,
     VulnIntel,
 )
-from vulnprio.intel.models import IntelConfig, IntelSourceKind
-from vulnprio.intel.provider import make_document
-from vulnprio.intel.queries import (
+from vulnpriority.intel.models import IntelConfig, IntelSourceKind
+from vulnpriority.intel.provider import make_document
+from vulnpriority.intel.queries import (
     build_queries,
     classify_source,
     dedupe_documents,

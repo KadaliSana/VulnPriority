@@ -9,11 +9,11 @@ from __future__ import annotations
 
 import pytest
 
-from vulnprio.core.config import load_config
-from vulnprio.core.enums import InjectionCategory, TrustTier
-from vulnprio.core.errors import CanaryLeakError, SchemaRejectedError
-from vulnprio.llm.schemas import AssetCriticalityOut, ExploitabilityOut
-from vulnprio.sandbox.output_guard import OutputGuard, clamp_influence, span_matches
+from vulnpriority.core.config import load_config
+from vulnpriority.core.enums import InjectionCategory, TrustTier
+from vulnpriority.core.errors import CanaryLeakError, SchemaRejectedError
+from vulnpriority.llm.schemas import AssetCriticalityOut, ExploitabilityOut
+from vulnpriority.sandbox.output_guard import OutputGuard, clamp_influence, span_matches
 
 SANITIZED = [
     "A proof-of-concept exploit is published and the vendor confirms remote code execution.",

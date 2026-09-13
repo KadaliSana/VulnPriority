@@ -193,7 +193,7 @@ incomparable number is not worth building.
 
 ## Action Items
 
-1. [x] Freeze shared contracts in `src/vulnprio/core/` before any parallel implementation.
+1. [x] Freeze shared contracts in `src/vulnpriority/core/` before any parallel implementation.
 2. [x] Implement Components A, B and C behind the interfaces, with an offline deterministic
        backend so the pipeline runs with no API key.
 3. [x] Implement the evaluation stack: time-ordered splits, confirmed-exploitation labels,

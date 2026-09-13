@@ -20,8 +20,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from vulnprio.core.config import PipelineConfig, SyntheticConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import PipelineConfig, SyntheticConfig
+from vulnpriority.core.enums import (
     DetectorName,
     FeedMode,
     InjectionCategory,
@@ -34,7 +34,7 @@ from vulnprio.core.enums import (
     SplitKind,
     TrustTier,
 )
-from vulnprio.core.models import (
+from vulnpriority.core.models import (
     AblationCell,
     AblationTable,
     AdversarialOutcome,
@@ -62,7 +62,7 @@ from vulnprio.core.models import (
     Split,
     feature_names_for,
 )
-from vulnprio.pipeline.artifacts import (
+from vulnpriority.pipeline.artifacts import (
     ARTIFACT_FILES,
     RunArtifacts,
     artifact_path,
@@ -98,9 +98,9 @@ from vulnprio.pipeline.artifacts import (
     save_selection,
     save_simulation,
 )
-from vulnprio.pipeline.runner import build_manifest, package_versions
-from vulnprio.pipeline.stages import assess_stage, enrich_stage, ingest_stage
-from vulnprio.synth.generator import SyntheticDataset
+from vulnpriority.pipeline.runner import build_manifest, package_versions
+from vulnpriority.pipeline.stages import assess_stage, enrich_stage, ingest_stage
+from vulnpriority.synth.generator import SyntheticDataset
 
 TINY = SyntheticConfig(
     seed=808,
@@ -143,7 +143,7 @@ def _require(*modules: str) -> None:
     """Skip when a component package written by another group is not importable.
 
     ``pytest.importorskip`` only skips a module that is genuinely *absent*; an ``ImportError``
-    raised from *inside* a module that exists is re-raised. ``vulnprio.rank.features``
+    raised from *inside* a module that exists is re-raised. ``vulnpriority.rank.features``
     validates itself against ``FEATURE_SPECS`` at import time, which is the right behaviour
     for the ranking group's own tests and the wrong one here: these tests are about the
     pipeline wiring, and a component package mid-edit is not a failure of it.
@@ -164,13 +164,13 @@ def _require_ranking_stack(enriched) -> None:
     An empty frame is not enough of a probe: a feature the builder declares but cannot
     populate only fails once there is a row to populate.
     """
-    _require("vulnprio.rank", "vulnprio.select.knapsack")
-    from vulnprio.rank.features import FeatureBuilder
+    _require("vulnpriority.rank", "vulnpriority.select.knapsack")
+    from vulnpriority.rank.features import FeatureBuilder
 
     try:
         FeatureBuilder().build(list(enriched)[:1], {}, ComponentFlags())
     except Exception as error:  # noqa: BLE001 - any failure here is a missing precondition
-        pytest.skip(f"vulnprio.rank cannot build a feature frame yet: {type(error).__name__}: {error}")
+        pytest.skip(f"vulnpriority.rank cannot build a feature frame yet: {type(error).__name__}: {error}")
 
 
 # ---------------------------------------------------------------------------
@@ -613,7 +613,7 @@ def test_manifest_records_everything_needed_to_reproduce(
         "run_test",
         scans=scans,
         dataset_digest=dataset.dataset_hash,
-        command="vulnprio run-all --synthetic",
+        command="vulnpriority run-all --synthetic",
         created_at=datetime(2024, 7, 1, 12, 0, 0),
     )
     save_manifest(manifest, tmp_path)
@@ -623,7 +623,7 @@ def test_manifest_records_everything_needed_to_reproduce(
     assert reloaded.config_hash == config.hash()
     assert reloaded.dataset_hash == dataset.dataset_hash
     assert config.seed in reloaded.seeds and config.ranking.seed in reloaded.seeds
-    assert reloaded.command == "vulnprio run-all --synthetic"
+    assert reloaded.command == "vulnpriority run-all --synthetic"
     # The manifest records what the run *resolved* to, not the switch position. A config
     # left on ``auto`` used to be written down as "auto (claude-sonnet-5)" on machines with
     # no Anthropic key, naming a model that was never called - the one thing a provenance
@@ -633,7 +633,7 @@ def test_manifest_records_everything_needed_to_reproduce(
     assert reloaded.as_of == max(scan.scanned_at.date() for scan in scans)
 
     versions = reloaded.package_versions
-    for name in ("python", "vulnprio", "numpy", "pandas", "pydantic", "xgboost"):
+    for name in ("python", "vulnpriority", "numpy", "pandas", "pydantic", "xgboost"):
         assert name in versions and versions[name]
     assert package_versions(("definitely-not-a-real-distribution",))[
         "definitely-not-a-real-distribution"
@@ -821,7 +821,7 @@ def test_selection_table_groups_by_policy_and_mode() -> None:
     The pooled denominator matters: averaging per-scan fractions would give a scan with
     three findings the same weight as one with three hundred.
     """
-    from vulnprio.pipeline.stages import selection_table
+    from vulnpriority.pipeline.stages import selection_table
 
     def result(scan: str, ranker: RankerName, method: SelectionMethod, captured: float,
                fraction: float, caught: int) -> SelectionResult:
@@ -877,7 +877,7 @@ def test_selection_table_groups_by_policy_and_mode() -> None:
 
 def test_selection_table_survives_a_zero_value_scan() -> None:
     """A scan where nothing has value must not divide by zero or poison the pool."""
-    from vulnprio.pipeline.stages import selection_table
+    from vulnpriority.pipeline.stages import selection_table
 
     rows = selection_table(
         [
@@ -908,7 +908,7 @@ def test_select_stage_scores_every_baseline_on_identical_items(
     """
     scans, enriched = pipeline_state
     _require_ranking_stack(enriched)
-    from vulnprio.pipeline.stages import rank_stage, select_stage, selection_policies
+    from vulnpriority.pipeline.stages import rank_stage, select_stage, selection_policies
 
     _frame, ranking, _explanations = rank_stage(
         config, enriched, {}, ranker=RankerName.EXPECTED_LOSS
@@ -956,7 +956,7 @@ def test_selection_results_round_trip_per_policy(tmp_path: Path, config: Pipelin
     """Every policy's row survives the artifact round trip, not just the first."""
     _scans, enriched = pipeline_state
     _require_ranking_stack(enriched)
-    from vulnprio.pipeline.stages import rank_stage, select_stage
+    from vulnpriority.pipeline.stages import rank_stage, select_stage
 
     _frame, ranking, _explanations = rank_stage(
         config, enriched, {}, ranker=RankerName.EXPECTED_LOSS
@@ -983,11 +983,11 @@ def test_capacity_round_trips_through_the_simulation_artifact(tmp_path: Path) ->
     only ever reach a few percent of the backlog, so the context has to survive to the
     report - including across a resumed run, where it comes back off disk.
     """
-    from vulnprio.pipeline.artifacts import load_simulation_capacity, save_simulation
-    from vulnprio.pipeline.stages import CAPACITY_FIELDS, capacity_from_payload, capacity_payload
+    from vulnpriority.pipeline.artifacts import load_simulation_capacity, save_simulation
+    from vulnpriority.pipeline.stages import CAPACITY_FIELDS, capacity_from_payload, capacity_payload
 
-    _require("vulnprio.eval.simulation")
-    simulation = importlib.import_module("vulnprio.eval.simulation")
+    _require("vulnpriority.eval.simulation")
+    simulation = importlib.import_module("vulnpriority.eval.simulation")
     context = simulation.CapacityContext(
         weeks=26,
         capacity_hours_per_week=20.0,
@@ -1017,7 +1017,7 @@ def test_capacity_round_trips_through_the_simulation_artifact(tmp_path: Path) ->
 
 def test_capacity_helpers_degrade_rather_than_fabricate() -> None:
     """A missing or unrecognisable context yields ``None``, never a half-filled object."""
-    from vulnprio.pipeline.stages import capacity_from_payload, capacity_payload
+    from vulnpriority.pipeline.stages import capacity_from_payload, capacity_payload
 
     assert capacity_payload(None) is None
     assert capacity_payload(object()) is None
@@ -1065,7 +1065,7 @@ def test_the_runner_reports_what_it_recomputed_and_what_it_reused(
     numbers - it lands in a different directory. A *code* change can, and silently. This is
     the signal that stops someone quoting a cached result as a fresh measurement.
     """
-    from vulnprio.pipeline.runner import PipelineRunner
+    from vulnpriority.pipeline.runner import PipelineRunner
 
     settings = config.model_copy(update={"output_dir": tmp_path / "runs"})
     stages = ["enrich"]
@@ -1090,7 +1090,7 @@ def test_assess_is_skipped_when_the_enrichment_is_already_on_disk(
     config: PipelineConfig, dataset: SyntheticDataset, tmp_path: Path
 ) -> None:
     """Component A has no artifact of its own, so recomputing it on resume is pure waste."""
-    from vulnprio.pipeline.runner import PipelineRunner
+    from vulnpriority.pipeline.runner import PipelineRunner
 
     settings = config.model_copy(update={"output_dir": tmp_path / "runs-assess"})
     PipelineRunner(config=settings, dataset=dataset).run(settings, stages=["enrich"])
@@ -1107,7 +1107,7 @@ def test_a_stage_runs_its_dependencies_not_its_predecessors() -> None:
     to fail on a small dataset with "no usable time-ordered fold" - a message about a stage
     the user never asked for. Dependency closure, not positional prefix.
     """
-    from vulnprio.pipeline.runner import STAGE_DEPENDENCIES, STAGE_ORDER, stage_closure
+    from vulnpriority.pipeline.runner import STAGE_DEPENDENCIES, STAGE_ORDER, stage_closure
 
     assert set(STAGE_DEPENDENCIES) == set(STAGE_ORDER)
 

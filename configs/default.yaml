@@ -1,6 +1,6 @@
 # Default: prefer the real thing, degrade to offline, and say which one ran.
 #
-# Every switch below says `auto`, which resolves once per run (vulnprio/core/resolve.py):
+# Every switch below says `auto`, which resolves once per run (vulnpriority/core/resolve.py):
 #   feeds   -> live_with_cache when the network is reachable, else the fixture corpus
 #   llm     -> the first backend whose credentials are present, cost-ascending:
 #              a configured llm.base_url (Groq, OpenRouter, a local Ollama), then

@@ -1,7 +1,7 @@
 # Live on any OpenAI-compatible provider. As shipped: Groq's free tier.
 #
 #   Get a key:  https://console.groq.com/keys
-#   Run:        GROQ_API_KEY=gsk_... vulnprio run-all --config configs/free-openai.yaml
+#   Run:        GROQ_API_KEY=gsk_... vulnpriority run-all --config configs/free-openai.yaml
 #
 # No extra package is needed -- this speaks plain HTTP over the httpx the framework
 # already depends on. Change base_url and model to reach a different provider:

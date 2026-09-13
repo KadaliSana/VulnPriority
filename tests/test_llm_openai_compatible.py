@@ -16,13 +16,13 @@ import json
 
 import pytest
 
-from vulnprio.core.config import LLMConfig
-from vulnprio.core.enums import EndpointFunction, LLMBackendKind, Provenance
-from vulnprio.core.errors import ConfigError
-from vulnprio.core.interfaces import SandboxedPrompt
-from vulnprio.llm.guarded import GuardedBackend
-from vulnprio.llm.heuristic import HeuristicBackend
-from vulnprio.llm.openai_compatible import (
+from vulnpriority.core.config import LLMConfig
+from vulnpriority.core.enums import EndpointFunction, LLMBackendKind, Provenance
+from vulnpriority.core.errors import ConfigError
+from vulnpriority.core.interfaces import SandboxedPrompt
+from vulnpriority.llm.guarded import GuardedBackend
+from vulnpriority.llm.heuristic import HeuristicBackend
+from vulnpriority.llm.openai_compatible import (
     DEFAULT_KEY_ENV,
     OpenAICompatibleBackend,
     backoff_delay,
@@ -31,8 +31,8 @@ from vulnprio.llm.openai_compatible import (
     openai_json_schema,
     retry_after_seconds,
 )
-from vulnprio.llm.prompts import format_operator_context, prompt_hash, system_prompt
-from vulnprio.llm.schemas import ApplicabilityOut, AssetCriticalityOut, ExploitabilityOut
+from vulnpriority.llm.prompts import format_operator_context, prompt_hash, system_prompt
+from vulnpriority.llm.schemas import ApplicabilityOut, AssetCriticalityOut, ExploitabilityOut
 
 CANARY = "CANARY-oai-4d20"
 NONCE = "NONCE-oai-01"

@@ -16,8 +16,8 @@ from datetime import date, datetime
 import numpy as np
 import pytest
 
-from vulnprio.core.config import PipelineConfig, RankingConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import PipelineConfig, RankingConfig
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     Component,
     CvssVersion,
@@ -32,8 +32,8 @@ from vulnprio.core.enums import (
     TrustTier,
     VersionMatch,
 )
-from vulnprio.core.errors import RankerNotFittedError
-from vulnprio.core.models import (
+from vulnpriority.core.errors import RankerNotFittedError
+from vulnpriority.core.models import (
     FEATURE_GROUPS,
     FEATURE_NAMES,
     ApplicabilityAssessment,
@@ -58,9 +58,9 @@ from vulnprio.core.models import (
     UntrustedText,
     VulnIntel,
 )
-from vulnprio.rank.compose import rank_scan
-from vulnprio.rank.baselines import CvssOnlyRanker
-from vulnprio.rank.explain import (
+from vulnpriority.rank.compose import rank_scan
+from vulnpriority.rank.baselines import CvssOnlyRanker
+from vulnpriority.rank.explain import (
     FEATURE_TIER,
     REASON_TEMPLATES,
     EvidenceExplainer,
@@ -70,8 +70,8 @@ from vulnprio.rank.explain import (
     feature_tier,
     safe_token,
 )
-from vulnprio.rank.features import FeatureBuilder
-from vulnprio.rank.lambdamart import LambdaMartRanker
+from vulnpriority.rank.features import FeatureBuilder
+from vulnpriority.rank.lambdamart import LambdaMartRanker
 
 AS_OF = date(2024, 6, 1)
 OBSERVED_AT = datetime(2024, 5, 1, 9, 0, 0)

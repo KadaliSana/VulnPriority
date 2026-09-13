@@ -5,7 +5,7 @@
 the framework would be reporting negative contributions as zero and quietly lying about
 every chain-adjusted figure downstream.
 
-The proof is in :mod:`vulnprio.graph.reachability`; this module is the evidence. A
+The proof is in :mod:`vulnpriority.graph.reachability`; this module is the evidence. A
 randomised world of several hosts and a few dozen findings is patched under 200 random
 remediation plans, seeded so a failure can be replayed exactly.
 """
@@ -17,8 +17,8 @@ from datetime import date, datetime
 import numpy as np
 import pytest
 
-from vulnprio.core.config import ComponentCConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import ComponentCConfig
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     EndpointFunction,
     HttpMethod,
@@ -26,9 +26,9 @@ from vulnprio.core.enums import (
     Provenance,
     ScannerSeverity,
 )
-from vulnprio.core.errors import MonotonicityViolationError
-from vulnprio.core.interfaces import ChainScorer
-from vulnprio.core.models import (
+from vulnpriority.core.errors import MonotonicityViolationError
+from vulnpriority.core.interfaces import ChainScorer
+from vulnpriority.core.models import (
     ApplicabilityAssessment,
     AssetCriticality,
     AttackGraphSummary,
@@ -43,8 +43,8 @@ from vulnprio.core.models import (
     Scan,
     UntrustedText,
 )
-from vulnprio.graph.chain_scorer import ReachabilityChainScorer
-from vulnprio.graph.monotone import (
+from vulnpriority.graph.chain_scorer import ReachabilityChainScorer
+from vulnpriority.graph.monotone import (
     assert_monotone_under_patching,
     random_patch_subsets,
 )

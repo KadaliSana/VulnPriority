@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from vulnprio.core.enums import (
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     AttackComplexity,
     EndpointFunction,
@@ -21,12 +21,12 @@ from vulnprio.core.enums import (
     TrustTier,
     UserInteraction,
 )
-from vulnprio.core.errors import ConfigError
-from vulnprio.core.interfaces import LLMBackend, SandboxedPrompt
-from vulnprio.core.models import InjectionSignal, SanitizationReport
-from vulnprio.core.enums import InjectionCategory
-from vulnprio.llm.heuristic import HeuristicBackend, is_imperative, strip_imperative_sentences
-from vulnprio.llm.prompts import (
+from vulnpriority.core.errors import ConfigError
+from vulnpriority.core.interfaces import LLMBackend, SandboxedPrompt
+from vulnpriority.core.models import InjectionSignal, SanitizationReport
+from vulnpriority.core.enums import InjectionCategory
+from vulnpriority.llm.heuristic import HeuristicBackend, is_imperative, strip_imperative_sentences
+from vulnpriority.llm.prompts import (
     SYSTEM_PROMPTS,
     TASKS,
     format_operator_context,
@@ -35,7 +35,7 @@ from vulnprio.llm.prompts import (
     render_task,
     system_prompt,
 )
-from vulnprio.llm.schemas import ApplicabilityOut, AssetCriticalityOut, ExploitabilityOut
+from vulnpriority.llm.schemas import ApplicabilityOut, AssetCriticalityOut, ExploitabilityOut
 
 
 def build_prompt(task: str, facts: dict, text: str, provenance: Provenance = Provenance.REFERENCE_PAGE) -> SandboxedPrompt:
@@ -130,7 +130,7 @@ def test_backend_implements_the_interface(backend: HeuristicBackend) -> None:
 
 
 def test_registry_registers_the_heuristic_backend() -> None:
-    from vulnprio.core.registry import get_backend
+    from vulnpriority.core.registry import get_backend
 
     assert get_backend(LLMBackendKind.HEURISTIC) is HeuristicBackend
 

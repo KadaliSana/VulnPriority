@@ -10,11 +10,11 @@ from datetime import date
 
 import pytest
 
-from vulnprio.attacker.likelihood import build_evidence
-from vulnprio.attacker.model import p_exploit
-from vulnprio.attacker.presets import load_preset
-from vulnprio.core.config import PipelineConfig, SandboxConfig
-from vulnprio.core.enums import (
+from vulnpriority.attacker.likelihood import build_evidence
+from vulnpriority.attacker.model import p_exploit
+from vulnpriority.attacker.presets import load_preset
+from vulnpriority.core.config import PipelineConfig, SandboxConfig
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     AttackComplexity,
     EndpointFunction,
@@ -25,8 +25,8 @@ from vulnprio.core.enums import (
     TrustTier,
     UserInteraction,
 )
-from vulnprio.core.interfaces import Enricher
-from vulnprio.core.models import (
+from vulnpriority.core.interfaces import Enricher
+from vulnpriority.core.models import (
     ApplicabilityAssessment,
     AssetCriticality,
     ComponentFlags,
@@ -36,17 +36,17 @@ from vulnprio.core.models import (
     InjectionSignal,
     LLMAudit,
 )
-from vulnprio.core.enums import InjectionCategory
-from vulnprio.decision.impact import estimate_impact
-from vulnprio.decision.remediation_cost import estimate_cost
-from vulnprio.enrich.enricher import (
+from vulnpriority.core.enums import InjectionCategory
+from vulnpriority.decision.impact import estimate_impact
+from vulnpriority.decision.remediation_cost import estimate_cost
+from vulnpriority.enrich.enricher import (
     DISABLED_IMPACT,
     DISABLED_P_EXPLOIT,
     INFLUENCED_FEATURES,
     ContextualEnricher,
     baseline_evidence,
 )
-from vulnprio.enrich.trust import KEV_FLOOR_P
+from vulnpriority.enrich.trust import KEV_FLOOR_P
 
 AS_OF = date(2024, 6, 1)
 
