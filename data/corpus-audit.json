@@ -6,7 +6,7 @@
     "endpoints": 228675,
     "cves": 28000,
     "rows": 432067,
-    "features": 60,
+    "features": 61,
     "query_groups": 10000,
     "shards": 20
   },
@@ -63,7 +63,7 @@
     "test_first": "2027-04-14"
   },
   "held_out_ndcg_at_10": {
-    "lambdamart": 0.4514997346377759,
+    "lambdamart": 0.4503404608242143,
     "b_epss": 0.09356167352722798,
     "b_kev": 0.1454521426712381,
     "cvss_base_max": 0.08938582481305889,
@@ -73,8 +73,8 @@
     "random": 0.12681727691859127
   },
   "circularity": {
-    "ndcg_at_10_against_leaky_labels": 0.4773810367729635,
-    "delta": 0.025881302135187634,
+    "ndcg_at_10_against_leaky_labels": 0.4824692150577092,
+    "delta": 0.03212875423349487,
     "note": "The headline metric excludes positives justified only by KEV or exploit evidence, both of which the ranker reads as features. This line is the same model scored with those positives included, and is not a result. A model trained on the honest labels should score worse here, because it was not taught to restate its own b_kev column."
   },
   "checks": [
@@ -101,7 +101,7 @@
     {
       "check": "every feature carries signal",
       "pass": true,
-      "detail": "all 60 features vary"
+      "detail": "all 61 features vary"
     },
     {
       "check": "no NaN or infinity in the matrix",
@@ -121,7 +121,7 @@
     {
       "check": "the learned ranker beats the best single signal",
       "pass": true,
-      "detail": "lambdamart 0.451 vs b_expected_loss_log 0.294 (+0.157, want +0.03)"
+      "detail": "lambdamart 0.450 vs b_expected_loss_log 0.294 (+0.156, want +0.03)"
     }
   ],
   "passed": true

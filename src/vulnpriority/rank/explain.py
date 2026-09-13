@@ -94,6 +94,9 @@ __all__ = [
 #: tier above it. The Component B features split: feed facts are ``CURATED_FEED``, while
 #: the attacker, impact and cost models are operator configuration.
 FEATURE_TIER: dict[str, TrustTier] = {
+    # SCANNER, not CURATED_FEED: whether a finding carries a CVE identifier is the
+    # scanner's own output, decided before any feed is consulted.
+    "cve_present": TrustTier.SCANNER,
     "cvss_base_max": TrustTier.CURATED_FEED,
     "cvss_version_ord": TrustTier.CURATED_FEED,
     "cvss_source_agreement": TrustTier.CURATED_FEED,

@@ -98,7 +98,7 @@ MIN_INDEPENDENT_POSITIVES = 500
 #: On-disk shard format. Bump it whenever the feature layer, the label policy or anything
 #: else that changes a shard's contents changes, so that a resumed build rebuilds rather
 #: than silently mixing two generations of matrix.
-SHARD_FORMAT = 2
+SHARD_FORMAT = 3
 
 
 def ndcg_at_k(order: list[int], k: int) -> float:

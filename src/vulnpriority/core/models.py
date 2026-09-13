@@ -1055,6 +1055,17 @@ class AttackGraphSummary(Frozen):
 #: is disabled in an ablation cell.
 FEATURE_SPECS: tuple[tuple[str, Component | None], ...] = (
     # --- BASE: scanner and curated-feed facts that never depend on A, B or C ---
+    #
+    # ``cve_present`` comes first because it qualifies everything under it. Every CVE-derived
+    # column neutralises to 0.0 when a finding names no CVE, which is the right neutral - a
+    # finding is never promoted by ignorance - but it makes "no CVE" and "a CVE scoring zero"
+    # the same row. Those point opposite ways: on the shipped corpus, findings with a CVE are
+    # exploited at 3.07% and findings without at 7.34%, because the classes a scanner names a
+    # CVE for are mostly stale libraries while the ones it does not are injections it actually
+    # found. Pooled over everything that made ``b_epss`` read AUC 0.424 - anti-predictive -
+    # while within CVE-bearing rows it reads 0.632 and works fine. This column is what lets a
+    # tree split the two populations and use the feed columns on the one they describe.
+    ("cve_present", None),
     ("cvss_base_max", None),
     ("cvss_version_ord", None),
     ("cvss_source_agreement", None),
