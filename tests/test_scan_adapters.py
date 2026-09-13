@@ -429,15 +429,11 @@ def test_the_zap_container_cannot_eat_the_machine_that_hosts_it(tmp_path):
     # Equal to --memory, so the container cannot swap its way to the same exhaustion.
     assert argv[argv.index("--memory-swap") + 1] == "6g"
 
-    # Measured: with no limit the JVM took a 1.92GB heap and the container still reached
-    # 4.94GB, so ZAP's non-heap footprint is around 3GB. The heap must leave room for it.
-    heap = next(v for v in argv if v.startswith("ZAP_JVM_OPTS="))
-    megabytes = int(heap.split("-Xmx")[1].rstrip("m"))
-    assert megabytes <= 6 * 1024 * 0.5, (
-        "the JVM heap must leave room for the part of ZAP that -Xmx cannot see: thread "
-        "stacks, direct buffers and the in-memory session. A container OOM-killed while "
-        "the JVM still believes it has room writes no report at all"
-    )
+    # No -Xmx of our own, deliberately. ``zap.sh`` reads the cgroup limit and takes a
+    # quarter of it for the heap (6144MB -> 1536m, measured), so the container limit sizes
+    # the JVM correctly on its own. An -Xmx we passed would be overridden by zap.sh anyway,
+    # and if it were not it could only make the total larger.
+    assert not any("Xmx" in item for item in argv)
 
 
 def test_the_memory_ceiling_is_configurable(tmp_path):
@@ -445,7 +441,7 @@ def test_the_memory_ceiling_is_configurable(tmp_path):
                       make_request(external_memory_gb=2.0, profile=ScanProfile.ACTIVE),
                       tmp_path / "r.json")[0]
     assert argv[argv.index("--memory") + 1] == "2g"
-    assert "ZAP_JVM_OPTS=-Xmx1024m" in argv
+    assert argv[argv.index("--memory-swap") + 1] == "2g"
 
 
 def test_zap_cli_is_two_argv_steps(tmp_path):
