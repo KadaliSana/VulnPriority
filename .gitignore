@@ -4,6 +4,9 @@ __pycache__/
 .pytest_cache/
 .cache/
 runs/
+# Adversarial-evaluation output, same reasoning as the training corpora below: what is
+# worth committing is the command that regenerates the run, not the ~14MB it emits.
+runs-adv/
 data/synthetic/
 # Generated training corpora. Determined entirely by the seed and the config in
 # scripts/build_training_corpus.py, so the reproducible artefact is that command,
