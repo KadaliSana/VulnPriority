@@ -408,7 +408,8 @@ def concrete_intel(
 
     ``search_provider`` follows the resolved backend, so a run that found only a Gemini key
     searches with Google Search grounding rather than trying the Anthropic server tools it
-    has no key for. An explicitly configured provider is left alone.
+    has no key for -- unless a Parallel key is also present, in which case the dedicated
+    Search API wins. An explicitly configured provider is left alone.
     """
     update: dict[str, object] = {}
     if intel.enabled == "auto":
@@ -417,8 +418,13 @@ def concrete_intel(
         update["mode"] = "live" if resolution.live else "offline"
     if backend is LLMBackendKind.GEMINI and intel.search_provider == "anthropic":
         # "anthropic" is the field default rather than a stated preference; a run that
-        # resolved to Gemini has no Anthropic key to search with.
-        update["search_provider"] = "gemini"
+        # resolved to Gemini has no Anthropic key to search with. Prefer Parallel when its
+        # key is there: it is pure retrieval, so phase 1 is search and nothing else, and it
+        # spends no part of the free tier's per-model request budget, which the extraction
+        # step needs. Without that key, Google Search grounding needs no second credential.
+        update["search_provider"] = (
+            "parallel" if _key_present(intel.parallel_api_key_env) else "gemini"
+        )
     return intel.model_copy(update=update) if update else intel
 
 
