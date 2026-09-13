@@ -520,13 +520,20 @@ class FeatureBuilder:
     ) -> "IntelResult | None":
         """Retrieved intelligence for one finding, explicit mapping first.
 
-        Read through ``getattr`` rather than attribute access so this package keeps working
-        against an :class:`EnrichedFinding` from before ``retrieved_intel`` was added, and
-        against one from after it, with no version check at the call site.
+        The attribute is ``intel_result``. It was read as ``retrieved_intel`` through a
+        defensive ``getattr`` that was meant to tolerate an older model and instead
+        swallowed a name that has never existed: every finding carrying intelligence
+        returned ``None`` here, so all seven ``a_intel_*`` columns sat at their neutral no
+        matter what the retrieval layer found. The suite did not catch it because its one
+        test supplies intelligence through the explicit ``intel`` mapping, which is the
+        path this line is not on.
+
+        Accessed directly now. If the field is ever renamed again, that must be an
+        ``AttributeError`` at the first call rather than a column of quiet zeros.
         """
         if intel is not None and enriched.finding_id in intel:
             return intel[enriched.finding_id]
-        return getattr(enriched, "retrieved_intel", None)
+        return enriched.intel_result
 
     # -- internals ----------------------------------------------------------
 

@@ -33,6 +33,7 @@ from vulnpriority.core.enums import (
     IntelRemedy,
     IntelSourceKind,
     LLMBackendKind,
+    FEATURE_VISIBLE_LABEL_SOURCES,
     LabelSource,
     MetricName,
     PrivilegeLevel,
@@ -1320,6 +1321,53 @@ class LabelSet(Frozen):
             if label.finding_id == finding_id:
                 return label
         return None
+
+    # -- scoring the ranker without scoring its own inputs ---------------------
+
+    def circular_labels(self) -> tuple[GroundTruthLabel, ...]:
+        """Positives justified by nothing the ranker cannot already see.
+
+        A label whose every source is in
+        :data:`~vulnpriority.core.enums.FEATURE_VISIBLE_LABEL_SOURCES` says "this was
+        exploited because it is in KEV" to a model that was handed ``b_kev``. One source
+        outside that set is enough to make the label independent evidence, which is why this
+        asks whether *all* of them are inside rather than whether any is.
+        """
+        return tuple(
+            label
+            for label in self.labels
+            if label.relevance_grade > 0
+            and label.sources
+            and not (set(label.sources) - FEATURE_VISIBLE_LABEL_SOURCES)
+        )
+
+    def for_evaluation(self) -> "LabelSet":
+        """The same label set with every circular positive demoted to grade 0.
+
+        Demoted rather than dropped, on purpose: the finding is still a row the ranker has
+        to place, it simply earns no credit for placing it well. Dropping the row instead
+        would quietly shrink the query group and flatter every metric a second way.
+
+        Training should keep using the full set - a leaky label is still signal - and only
+        the numbers reported about the model need this view.
+        """
+        circular = {label.finding_id for label in self.circular_labels()}
+        if not circular:
+            return self
+        return self.model_copy(
+            update={
+                "labels": tuple(
+                    label.model_copy(update={"relevance_grade": 0, "exploited": False})
+                    if label.finding_id in circular
+                    else label
+                    for label in self.labels
+                )
+            }
+        )
+
+    def independent_positive_count(self) -> int:
+        """Positives that survive :meth:`for_evaluation`. Zero means no honest metric exists."""
+        return sum(1 for label in self.for_evaluation().labels if label.relevance_grade > 0)
 
 
 class Split(Frozen):

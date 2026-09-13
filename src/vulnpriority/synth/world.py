@@ -56,6 +56,7 @@ __all__ = [
     "VulnTemplate",
     "VULN_TEMPLATES",
     "TEMPLATE_BY_CWE",
+    "TEMPLATE_BY_NAME",
     "LatentVuln",
     "LatentWorld",
     "EpssPoint",
@@ -117,8 +118,17 @@ class VulnTemplate(BaseModel):
     carries_cve: float = Field(0.6, ge=0.0, le=1.0)
 
 
-#: The defect classes the generated world contains. Sixteen classes is enough to give the
-#: ranker a non-degenerate CWE feature and the graph a mix of privilege transitions.
+#: The defect classes the generated world contains: twenty-seven application defects and a
+#: tail of seven configuration findings. The tail matters as much as the head - see the
+#: comment above it - because a scan made only of serious defects is not a scan, and a
+#: ranking task where every row is a plausible candidate is easier than the real one.
+#:
+#: Templates are keyed by ``name``, not by ``cwe_id``, because three of them are CWE-79.
+#: Reflected, stored and DOM-based cross-site scripting are one CWE and three different
+#: ranking problems: they differ in whether a victim has to be lured, in whose session the
+#: payload lands, and in whether the server is involved at all. Collapsing them into one
+#: row, or inventing distinct CWE ids to keep them apart, would each be a lie in a different
+#: direction - the first to the ranker, the second to ``cwe_owasp_top10``.
 VULN_TEMPLATES: tuple[VulnTemplate, ...] = (
     VulnTemplate(
         cwe_id=89, name="SQL Injection", title="SQL injection in the {param} parameter",
@@ -262,9 +272,225 @@ VULN_TEMPLATES: tuple[VulnTemplate, ...] = (
         functions=(EndpointFunction.SEARCH, EndpointFunction.API_DATA),
         owasp_topic="server-side-template-injection", carries_cve=0.75,
     ),
+
+    # -- classes a scanner reaches that the first sixteen missed -------------------
+    #
+    # The head above was the OWASP Top 10 read literally, which leaves out most of what an
+    # API-shaped application actually gets reported for. Each of these is reachable by an
+    # unauthenticated or lightly-authenticated scan, and each poses a ranking problem the
+    # others do not: smuggling is near-unexploitable and catastrophic, introspection is
+    # trivially exploitable and nearly harmless, and the queue has to separate them.
+    VulnTemplate(
+        cwe_id=79, name="Stored Cross Site Scripting",
+        title="Stored cross-site scripting in the {param} field",
+        # Worse than reflected on every axis that matters: no lure is needed because the
+        # payload fires during ordinary use, and the session it lands in is often staff.
+        exploitability_prior=0.60, impact_prior=0.55, chain_prior=0.55, interest_prior=0.55,
+        privilege_gained=PrivilegeLevel.ADMIN, user_interaction=UserInteraction.NONE,
+        impact_c=0.7, impact_i=0.7, impact_a=0.0,
+        severity=ScannerSeverity.HIGH, plugin_id="40014",
+        functions=(EndpointFunction.API_DATA, EndpointFunction.PII_DATA, EndpointFunction.ADMIN),
+        owasp_topic="cross-site-scripting", carries_cve=0.25,
+    ),
+    VulnTemplate(
+        cwe_id=79, name="DOM Based Cross Site Scripting",
+        title="DOM-based cross-site scripting via the {param} sink",
+        # Never reaches the server, so it carries no server-side impact and nothing in the
+        # backend telemetry will ever corroborate it.
+        exploitability_prior=0.45, impact_prior=0.30, chain_prior=0.25, interest_prior=0.30,
+        privilege_gained=PrivilegeLevel.USER, user_interaction=UserInteraction.REQUIRED,
+        impact_c=0.4, impact_i=0.4, impact_a=0.0,
+        severity=ScannerSeverity.MEDIUM, plugin_id="40026",
+        functions=(EndpointFunction.SEARCH, EndpointFunction.STATIC_CONTENT),
+        owasp_topic="dom-based-attacks", carries_cve=0.20,
+    ),
+    VulnTemplate(
+        cwe_id=943, name="NoSQL Injection",
+        title="NoSQL injection in the {param} parameter",
+        exploitability_prior=0.68, impact_prior=0.75, chain_prior=0.55, interest_prior=0.55,
+        privilege_gained=PrivilegeLevel.ADMIN, impact_c=0.9, impact_i=0.7, impact_a=0.2,
+        severity=ScannerSeverity.HIGH, plugin_id="40033",
+        functions=(EndpointFunction.API_DATA, EndpointFunction.AUTH, EndpointFunction.SEARCH),
+        owasp_topic="nosql-injection", carries_cve=0.25,
+    ),
+    VulnTemplate(
+        cwe_id=90, name="LDAP Injection",
+        title="LDAP injection in the {param} parameter",
+        exploitability_prior=0.50, impact_prior=0.70, chain_prior=0.60, interest_prior=0.45,
+        privilege_gained=PrivilegeLevel.ADMIN, impact_c=0.85, impact_i=0.5, impact_a=0.1,
+        severity=ScannerSeverity.HIGH, plugin_id="40015",
+        functions=(EndpointFunction.AUTH, EndpointFunction.API_DATA),
+        owasp_topic="ldap-injection", carries_cve=0.30,
+    ),
+    VulnTemplate(
+        cwe_id=444, name="HTTP Request Smuggling",
+        title="HTTP request smuggling on {param}",
+        # The extreme of the queue's problem: very hard to exploit, and worth almost
+        # everything when it works. A ranker that only reads exploitability buries it.
+        exploitability_prior=0.30, impact_prior=0.85, chain_prior=0.90, interest_prior=0.60,
+        privilege_gained=PrivilegeLevel.USER, impact_c=0.8, impact_i=0.9, impact_a=0.3,
+        severity=ScannerSeverity.HIGH, plugin_id="90031",
+        functions=(EndpointFunction.API_DATA, EndpointFunction.AUTH),
+        owasp_topic="request-smuggling", carries_cve=0.60,
+    ),
+    VulnTemplate(
+        cwe_id=644, name="Host Header Injection",
+        title="Unvalidated Host header reflected by {param}",
+        exploitability_prior=0.45, impact_prior=0.40, chain_prior=0.55, interest_prior=0.35,
+        privilege_gained=PrivilegeLevel.USER, impact_c=0.4, impact_i=0.6, impact_a=0.0,
+        severity=ScannerSeverity.MEDIUM, plugin_id="90033",
+        functions=(EndpointFunction.AUTH,),
+        owasp_topic="host-header", carries_cve=0.15,
+    ),
+    VulnTemplate(
+        cwe_id=93, name="HTTP Response Splitting",
+        title="CRLF injection in the {param} parameter",
+        exploitability_prior=0.40, impact_prior=0.35, chain_prior=0.45, interest_prior=0.30,
+        privilege_gained=PrivilegeLevel.USER, impact_c=0.3, impact_i=0.6, impact_a=0.0,
+        severity=ScannerSeverity.MEDIUM, plugin_id="40003",
+        functions=(EndpointFunction.API_DATA, EndpointFunction.STATIC_CONTENT),
+        owasp_topic="http-response-splitting", carries_cve=0.20,
+    ),
+    VulnTemplate(
+        cwe_id=1321, name="Prototype Pollution",
+        title="Prototype pollution via the {param} property",
+        # Outside the 2021 Top 10 mapping, which is the point: ``cwe_owasp_top10`` needs
+        # more than one class on the false side to be a feature rather than a constant.
+        exploitability_prior=0.42, impact_prior=0.55, chain_prior=0.70, interest_prior=0.40,
+        privilege_gained=PrivilegeLevel.USER, impact_c=0.5, impact_i=0.7, impact_a=0.3,
+        severity=ScannerSeverity.MEDIUM, plugin_id="10108",
+        functions=(EndpointFunction.API_DATA,),
+        owasp_topic="prototype-pollution", carries_cve=0.70,
+    ),
+    VulnTemplate(
+        cwe_id=915, name="Mass Assignment",
+        title="Mass assignment of the {param} attribute",
+        exploitability_prior=0.55, impact_prior=0.65, chain_prior=0.60, interest_prior=0.45,
+        privilege_gained=PrivilegeLevel.ADMIN, impact_c=0.5, impact_i=0.9, impact_a=0.0,
+        severity=ScannerSeverity.HIGH, plugin_id="90034",
+        functions=(EndpointFunction.API_DATA, EndpointFunction.AUTH),
+        owasp_topic="mass-assignment", carries_cve=0.10,
+    ),
+    VulnTemplate(
+        cwe_id=347, name="JWT Signature Not Verified",
+        title="JWT algorithm confusion on {param}",
+        exploitability_prior=0.50, impact_prior=0.90, chain_prior=0.75, interest_prior=0.65,
+        privilege_gained=PrivilegeLevel.ADMIN, impact_c=0.9, impact_i=0.9, impact_a=0.1,
+        severity=ScannerSeverity.CRITICAL, plugin_id="10118",
+        functions=(EndpointFunction.AUTH, EndpointFunction.API_DATA),
+        owasp_topic="jwt", carries_cve=0.35,
+    ),
+    VulnTemplate(
+        cwe_id=350, name="Subdomain Takeover",
+        title="Dangling DNS record for {param}",
+        # No CVE will ever exist for this: it is a defect in a deployment, not in a product,
+        # which is exactly the population a CVE-keyed corpus cannot label.
+        exploitability_prior=0.35, impact_prior=0.70, chain_prior=0.65, interest_prior=0.50,
+        privilege_gained=PrivilegeLevel.USER, impact_c=0.6, impact_i=0.8, impact_a=0.2,
+        severity=ScannerSeverity.HIGH, plugin_id="90035",
+        functions=(EndpointFunction.STATIC_CONTENT, EndpointFunction.API_DATA),
+        owasp_topic="subdomain-takeover", carries_cve=0.0,
+    ),
+
+    # -- the configuration tail -------------------------------------------------
+    #
+    # Everything above is a serious application defect, and a world made only of those is
+    # not the world a scanner reports on. A real scan of a real application is mostly this:
+    # headers that were never turned on, a cookie missing a flag, an error page that says
+    # too much. On OWASP Juice Shop the built-in scanner returned nineteen findings and not
+    # one of them was an injection.
+    #
+    # Leaving them out cost two things. The ranking task was too easy, because every finding
+    # in a scan was a plausible candidate and the model never had to push a mass of
+    # near-worthless rows down. And ``cwe_owasp_top10`` was constant 1.0 - every one of the
+    # sixteen classes above is in the 2021 mapping - so the feature taught the model nothing
+    # at all. CWE-693 below is genuinely outside it, which is what gives that column variance.
+    #
+    # These carry low exploitability and low impact priors *and* low attacker interest, so
+    # the oracle rarely fires on them. That is the point: they are the noise a queue has to
+    # be good at ignoring.
+    VulnTemplate(
+        cwe_id=693, name="Missing Security Header",
+        title="Missing or weak security header on {param}",
+        exploitability_prior=0.10, impact_prior=0.08, chain_prior=0.06, interest_prior=0.05,
+        privilege_gained=PrivilegeLevel.NONE, impact_c=0.05, impact_i=0.05, impact_a=0.0,
+        severity=ScannerSeverity.LOW, plugin_id="10038",
+        functions=(EndpointFunction.STATIC_CONTENT, EndpointFunction.API_DATA),
+        owasp_topic="security-misconfiguration", carries_cve=0.0,
+    ),
+    VulnTemplate(
+        cwe_id=1004, name="Cookie Without HttpOnly",
+        title="Session cookie set without the HttpOnly flag",
+        exploitability_prior=0.18, impact_prior=0.22, chain_prior=0.20, interest_prior=0.12,
+        privilege_gained=PrivilegeLevel.NONE, impact_c=0.3, impact_i=0.0, impact_a=0.0,
+        severity=ScannerSeverity.LOW, plugin_id="10010",
+        functions=(EndpointFunction.AUTH, EndpointFunction.STATIC_CONTENT),
+        owasp_topic="security-misconfiguration", carries_cve=0.0,
+    ),
+    VulnTemplate(
+        cwe_id=319, name="Cleartext Transport",
+        title="Content served over plaintext HTTP",
+        exploitability_prior=0.22, impact_prior=0.30, chain_prior=0.18, interest_prior=0.15,
+        privilege_gained=PrivilegeLevel.NONE, impact_c=0.4, impact_i=0.2, impact_a=0.0,
+        severity=ScannerSeverity.MEDIUM, plugin_id="10035",
+        functions=(EndpointFunction.AUTH, EndpointFunction.STATIC_CONTENT),
+        owasp_topic="cryptographic-failure", carries_cve=0.0,
+    ),
+    VulnTemplate(
+        cwe_id=942, name="Permissive CORS Policy",
+        title="Access-Control-Allow-Origin permits any origin",
+        exploitability_prior=0.20, impact_prior=0.25, chain_prior=0.24, interest_prior=0.14,
+        privilege_gained=PrivilegeLevel.NONE, impact_c=0.35, impact_i=0.1, impact_a=0.0,
+        severity=ScannerSeverity.MEDIUM, plugin_id="10098",
+        functions=(EndpointFunction.API_DATA,),
+        owasp_topic="security-misconfiguration", carries_cve=0.0,
+    ),
+    VulnTemplate(
+        cwe_id=209, name="Verbose Error Message",
+        title="Stack trace or framework error returned to an anonymous request",
+        exploitability_prior=0.15, impact_prior=0.18, chain_prior=0.28, interest_prior=0.16,
+        privilege_gained=PrivilegeLevel.NONE, impact_c=0.25, impact_i=0.0, impact_a=0.0,
+        severity=ScannerSeverity.LOW, plugin_id="90022",
+        functions=(EndpointFunction.API_DATA, EndpointFunction.SEARCH),
+        owasp_topic="information-disclosure", carries_cve=0.0,
+    ),
+    VulnTemplate(
+        cwe_id=16, name="GraphQL Introspection Enabled",
+        title="GraphQL introspection enabled on {param}",
+        exploitability_prior=0.20, impact_prior=0.15, chain_prior=0.35, interest_prior=0.15,
+        privilege_gained=PrivilegeLevel.NONE, impact_c=0.2, impact_i=0.0, impact_a=0.0,
+        severity=ScannerSeverity.LOW, plugin_id="10120",
+        functions=(EndpointFunction.API_DATA,),
+        owasp_topic="security-misconfiguration", carries_cve=0.0,
+    ),
+    VulnTemplate(
+        cwe_id=1104, name="Outdated JavaScript Library",
+        title="Third-party component pinned to an unmaintained version",
+        exploitability_prior=0.30, impact_prior=0.35, chain_prior=0.30, interest_prior=0.28,
+        privilege_gained=PrivilegeLevel.USER, impact_c=0.4, impact_i=0.3, impact_a=0.1,
+        severity=ScannerSeverity.MEDIUM, plugin_id="10003",
+        functions=(EndpointFunction.STATIC_CONTENT,),
+        owasp_topic="vulnerable-component", carries_cve=0.85,
+    ),
 )
 
-TEMPLATE_BY_CWE: dict[int, VulnTemplate] = {item.cwe_id: item for item in VULN_TEMPLATES}
+TEMPLATE_BY_NAME: dict[str, VulnTemplate] = {item.name: item for item in VULN_TEMPLATES}
+
+#: First template per CWE. Lossy where a CWE has several templates (CWE-79 has three), which
+#: is why ``LatentVuln.template`` resolves by name; this index is for callers that genuinely
+#: only have a CWE to go on.
+TEMPLATE_BY_CWE: dict[int, VulnTemplate] = {}
+for _item in VULN_TEMPLATES:
+    TEMPLATE_BY_CWE.setdefault(_item.cwe_id, _item)
+del _item
+
+if len(TEMPLATE_BY_NAME) != len(VULN_TEMPLATES):  # pragma: no cover - a typo guard
+    _seen: set[str] = set()
+    _duplicates = sorted({t.name for t in VULN_TEMPLATES if t.name in _seen or _seen.add(t.name)})
+    raise RuntimeError(
+        f"VULN_TEMPLATES has duplicate names {_duplicates}: templates are keyed by name, so a "
+        "repeat would make one of them unreachable and silently change every world drawn."
+    )
 
 #: Impact submetric letters for a CVSS v3.1 vector, by impact magnitude.
 def _impact_letter(value: float) -> str:
@@ -358,7 +584,11 @@ class LatentVuln(BaseModel):
 
     @property
     def template(self) -> VulnTemplate:
-        return TEMPLATE_BY_CWE[self.cwe_id]
+        # By name, because CWE-79 covers reflected, stored and DOM-based XSS and they are
+        # three different templates. Falling back to the CWE index keeps a world written
+        # before the split readable.
+        found = TEMPLATE_BY_NAME.get(self.name)
+        return found if found is not None else TEMPLATE_BY_CWE[self.cwe_id]
 
     @property
     def cpe(self) -> str:
@@ -524,7 +754,7 @@ def _make_vuln(
     # the median CVE well under 1%, and a synthetic feed centred near 0.5 would make an
     # EPSS-only baseline trivially strong.
     epss_anchor = clamp01(
-        sigmoid(-9.8 + 6.6 * true_exploitability + 1.4 * true_attacker_interest
+        sigmoid(-14.0 + 10.6 * true_exploitability + 2.2 * true_attacker_interest
                 + rng.normalvariate(0.0, 1.15))
     )
     epss_drift = rng.normalvariate(0.05, 0.20)
@@ -663,8 +893,8 @@ def build_world(
     *,
     start_date: date,
     epss_dates: Iterable[date],
-    kev_share: float = 0.14,
-    exploit_share: float = 0.32,
+    kev_share: float = 0.02,
+    exploit_share: float = 0.08,
 ) -> LatentWorld:
     """Draw ``n_vulns`` latent vulnerabilities and their observable evidence.
 

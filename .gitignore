@@ -5,6 +5,10 @@ __pycache__/
 .cache/
 runs/
 data/synthetic/
+# Generated training corpora. Determined entirely by the seed and the config in
+# scripts/build_training_corpus.py, so the reproducible artefact is that command,
+# not the ~1GB of scan documents it emits.
+data/synthetic-*/
 build/
 dist/
 .venv/

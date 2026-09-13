@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import importlib
 import inspect
+import logging
 import math
 from dataclasses import dataclass, field
 from datetime import date, datetime
@@ -86,6 +87,7 @@ __all__ = [
     "label_stage",
     "feature_stage",
     "rank_stage",
+    "scoring_labels",
     "train_ranker_stage",
     "policy_rankings",
     "split_stage",
@@ -760,6 +762,48 @@ def _frames_for_splits(
     return frames
 
 
+_LOG = logging.getLogger(__name__)
+
+
+def scoring_labels(config: PipelineConfig, labels: LabelSet) -> LabelSet:
+    """The label set a model may be *graded* against, as opposed to trained on.
+
+    ``KEV`` and ``EXPLOIT_EVIDENCE`` are both accepted ground truth and feature columns, so
+    a positive justified by nothing else tells the ranker the answer in its own input row.
+    Scoring against those measures a lookup. :meth:`LabelSet.for_evaluation` demotes them to
+    grade 0 - demotes, not drops, so the query group keeps its size and the model earns no
+    credit rather than facing an easier ranking.
+
+    Raises when nothing independent survives, because the alternative is emitting a number
+    that looks like a result and is not one. A deployment whose only ground truth is KEV
+    cannot honestly evaluate a ranker that reads KEV, and should be told so.
+    """
+    if not config.evaluation.exclude_circular_labels:
+        return labels
+
+    scoring = labels.for_evaluation()
+    surviving = sum(1 for label in scoring.labels if label.relevance_grade > 0)
+    removed = len(labels.circular_labels())
+    if surviving == 0 and removed > 0:
+        raise ConfigError(
+            f"every one of the {removed} positive label(s) is justified only by KEV or "
+            "exploit evidence, both of which the ranker reads as features. Scoring against "
+            "them would measure a lookup rather than a prediction, so there is no honest "
+            "metric to report here. Add an independent source (an incident record, or the "
+            "synthetic oracle), or set evaluation.exclude_circular_labels=false and treat "
+            "the numbers as optimistic."
+        )
+    if removed:
+        _LOG.info(
+            "evaluation: %d of %d positive label(s) were justified only by feature-visible "
+            "sources and are not being scored; %d independent positive(s) remain",
+            removed,
+            removed + surviving,
+            surviving,
+        )
+    return scoring
+
+
 def evaluate_stage(
     config: PipelineConfig,
     scans: Sequence[Scan],
@@ -781,7 +825,10 @@ def evaluate_stage(
     runner_class = _import("vulnpriority.eval.benchmark", "BenchmarkRunner")
     cell = flags or config.flags()
     chain = _flatten_chain(chain_scores)
+    # Splits are cut on the full label set: which scans land in which fold is a property of
+    # the data, not of what we are allowed to score. Only the grading uses the filtered view.
     folds = list(splits) if splits is not None else split_stage(config, scans, labels)
+    scoring = scoring_labels(config, labels)
     frames = _frames_for_splits(config, enriched, chain, folds, cell)
     if not frames:
         raise ConfigError(
@@ -813,7 +860,7 @@ def evaluate_stage(
                 f"features were built for cell {features.flags.label()} but the evaluation "
                 f"is running cell {cell.label()}"
             )
-    return list(runner.run(frames, labels, resolved, config))
+    return list(runner.run(frames, scoring, resolved, config))
 
 
 def ablate_stage(
@@ -865,7 +912,10 @@ def ablate_stage(
     ]
     if not usable:
         raise ConfigError("no usable fold for the ablation: every split was empty on one side")
-    return ablation.run(build_frame_fn, labels, usable, config)
+    # Same circularity, same fix: the ablation's main effects are NDCG differences, and a
+    # component's apparent contribution would otherwise be measured partly against labels
+    # that Component B's own KEV column defines.
+    return ablation.run(build_frame_fn, scoring_labels(config, labels), usable, config)
 
 
 # ---------------------------------------------------------------------------
