@@ -168,8 +168,9 @@ class ScanRequest(Frozen):
     max_requests: int = Field(DEFAULT_MAX_REQUESTS, ge=1, le=5000)
     requests_per_second: float = Field(DEFAULT_REQUESTS_PER_SECOND, gt=0.0, le=20.0)
     time_budget_s: float = Field(DEFAULT_TIME_BUDGET_S, gt=0.0, le=3600.0)
-    #: Wall clock an *external* scanner is allowed, in seconds. Separate from
-    #: ``time_budget_s`` because the two measure different things for different tools.
+    #: Wall clock an *external* scanner is allowed, in seconds, where that scanner has a
+    #: cap of its own worth spending it on. Separate from ``time_budget_s`` because the two
+    #: measure different things for different tools.
     #:
     #: ``time_budget_s`` bounds the built-in crawler, which fetches pages at a polite rate
     #: and is done in a minute. Handing that same number to ZAP as its ``-T`` cap gave a
@@ -179,8 +180,13 @@ class ScanRequest(Frozen):
     #: findings on every run. That looked like non-determinism in the framework and was
     #: actually a stopwatch set to the wrong tool's budget.
     #:
-    #: Twenty minutes is enough for ZAP to finish a mid-sized application. A scan that still
-    #: hits the cap is reported as truncated rather than presented as complete.
+    #: Raising it to twenty minutes only made that rarer, so ZAP no longer receives it at
+    #: all. ``-T`` bounds ZAP's startup and passive-scan waits and never its active phase,
+    #: so it could not do the job its name implies and could only end the passive wait
+    #: early, discarding findings the scan had already paid for. An unbounded scan that
+    #: returns findings is the trade this package makes over a capped one that returns
+    #: none. Today this reaches ``nikto`` alone, through ``-maxtime``, which caps the thing
+    #: it says it caps.
     external_time_budget_s: float = Field(
         DEFAULT_EXTERNAL_TIME_BUDGET_S, gt=0.0, le=21_600.0
     )

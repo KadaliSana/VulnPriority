@@ -220,10 +220,6 @@ def _zap_docker_argv(tool: ExternalTool, request: ScanRequest, report: Path) -> 
     target = safe_argument(rewritten, what="target URL")
     workdir = Path(report).parent.resolve()
     script = "zap-baseline.py" if request.profile == ScanProfile.PASSIVE else "zap-full-scan.py"
-    # The external scanner's own budget, not the built-in crawler's: see
-    # ``ScanRequest.external_time_budget_s`` for why conflating them made every run
-    # of the same target return different findings.
-    minutes = max(1, int(round(request.external_time_budget_s / 60.0)))
     image = safe_argument(tool.image or ZAP_DOCKER_IMAGE, what="container image")
 
     # A container must not be able to kill the machine that hosts it. Without these an
@@ -267,7 +263,11 @@ def _zap_docker_argv(tool: ExternalTool, request: ScanRequest, report: Path) -> 
             "-t", target,
             "-J", report.name,
             "-I",                       # report warnings without failing the run
-            "-T", str(minutes),         # hard cap on the whole scan, in minutes
+            # No ``-T`` deliberately. It never bounded the active scan -- ZAP's own help
+            # reads "max time in minutes to wait for ZAP to start and the passive scan to
+            # run" -- so all it could do was cut the passive wait short and discard findings
+            # the scan had already paid for. Unset, the passive wait is unbounded and the
+            # startup wait falls back to ZAP's own 600s, which is ample for a container.
             "-z", f"-config spider.maxDepth={request.max_depth}",
         ]
     ]

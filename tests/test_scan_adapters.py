@@ -310,35 +310,6 @@ def test_a_routable_target_is_passed_through_untouched(tmp_path):
         assert not any(item.startswith("http") and "host.docker.internal" in item for item in argv)
 
 
-def test_zap_docker_is_capped_by_the_external_budget_not_the_crawler_budget(tmp_path):
-    """The two budgets measure different things and conflating them truncated every scan.
-
-    ``time_budget_s`` bounds the built-in crawler, which is polite and quick.
-    ``external_time_budget_s`` bounds a real scanner, which is neither. Passing the first
-    to ZAP gave a full active scan two minutes, so it was killed part-way through at a
-    different point on every run and the same target produced different findings each time.
-    """
-    argv = build_argv(
-        tool("zap-docker"),
-        make_request(time_budget_s=60.0, external_time_budget_s=600.0),
-        tmp_path / "r.json",
-    )[0]
-    assert argv[argv.index("-T") + 1] == "10"       # minutes, from the external budget
-
-    # The crawler's budget must not reach it at all.
-    argv = build_argv(
-        tool("zap-docker"),
-        make_request(time_budget_s=3000.0, external_time_budget_s=120.0),
-        tmp_path / "r.json",
-    )[0]
-    assert argv[argv.index("-T") + 1] == "2"
-
-
-# ---------------------------------------------------------------------------
-# argv construction
-# ---------------------------------------------------------------------------
-
-
 def test_argv_is_a_list_of_strings_never_a_shell_string(tmp_path):
     request = make_request(profile=ScanProfile.ACTIVE)
     for name in TOOL_PREFERENCE:
@@ -867,7 +838,7 @@ def test_assess_target_refuses_a_metadata_target_before_launching_a_tool(tmp_pat
     assert runner.calls == []
 
 
-def test_no_outer_kill_switch_by_default(tmp_path):
+def test_a_zap_scan_is_capped_neither_from_outside_nor_from_within(tmp_path):
     """Killing the scanner from out here loses the report it was about to write.
 
     There used to be a derived subprocess timeout, and every outcome it produced was bad:
@@ -875,6 +846,11 @@ def test_no_outer_kill_switch_by_default(tmp_path):
     findings are discarded. A real 20 minute ZAP budget became a 32 minute wait ending in
     "exceeded its 1920s timeout" and a silent fallback to the built-in crawler, which
     reported zero findings for an application that has plenty.
+
+    ``-T`` was the same mistake one layer in. It reads as a scan cap but ZAP's own help
+    calls it "max time in minutes to wait for ZAP to start and the passive scan to run",
+    so it never bounded the active phase and the only thing it could do was end the passive
+    wait early, discarding findings already paid for. Neither budget reaches ZAP now.
 
     The tools carry their own caps on their own argv where they have them, and where they
     do not - zap-full-scan's active phase - an unbounded scan that returns findings is the
@@ -884,7 +860,8 @@ def test_no_outer_kill_switch_by_default(tmp_path):
     runner = RecordingRunner(report_body=fixture("zap_sample.json"))
     run_external(tool("zap-docker"), request, out_dir=tmp_path, runner=runner)
 
-    assert runner.calls[0]["timeout"] is None
+    assert runner.calls[0]["timeout"] is None       # nothing caps it from outside
+    assert "-T" not in runner.calls[0]["argv"]      # nor from within its own argv
 
 
 def test_a_caller_can_still_ask_for_a_ceiling(tmp_path):
