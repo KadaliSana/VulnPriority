@@ -11,8 +11,8 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from vulnprio.core.enums import HttpMethod
-from vulnprio.scan import (
+from vulnpriority.core.enums import HttpMethod
+from vulnpriority.scan import (
     ALLOWED_PROBE_KINDS,
     Budget,
     HttpClient,
@@ -32,9 +32,9 @@ from vulnprio.scan import (
     require_target_allowed,
     run_scan,
 )
-from vulnprio.scan.active import make_marker, probe_options, probe_reflected_marker
-from vulnprio.scan.http import fetch_robots_policy
-from vulnprio.scan.safety import assert_benign_marker
+from vulnpriority.scan.active import make_marker, probe_options, probe_reflected_marker
+from vulnpriority.scan.http import fetch_robots_policy
+from vulnpriority.scan.safety import assert_benign_marker
 
 TARGET = "https://shop.example.com/"
 
@@ -149,9 +149,9 @@ def test_credential_headers_are_refused_at_construction():
 
 
 def test_user_agent_must_identify_the_tool():
-    with pytest.raises(ValueError, match="vulnprio"):
+    with pytest.raises(ValueError, match="vulnpriority"):
         make_request(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
-    assert "vulnprio" in make_request().user_agent.lower()
+    assert "vulnpriority" in make_request().user_agent.lower()
 
 
 def test_user_agent_cannot_be_overridden_through_raw_headers():
@@ -167,7 +167,7 @@ def test_user_agent_cannot_be_overridden_through_raw_headers():
     client.fetch(TARGET)
 
     assert sent == [request.user_agent]
-    assert "vulnprio" in sent[0].lower()
+    assert "vulnpriority" in sent[0].lower()
 
 
 def test_bounds_are_unrepresentable_rather_than_merely_discouraged():
@@ -337,7 +337,7 @@ def test_robots_disallow_is_honoured():
 
 def test_robots_can_be_switched_off_deliberately():
     policy = RobotsPolicy.disabled()
-    assert policy.allows("https://shop.example.com/admin", "vulnprio-scan")
+    assert policy.allows("https://shop.example.com/admin", "vulnpriority-scan")
 
 
 def test_robots_fetch_failure_fails_open_but_is_recorded():
@@ -553,7 +553,7 @@ def test_generated_markers_are_always_benign():
     for _ in range(50):
         marker = make_marker()
         assert marker.isalnum()
-        assert marker.startswith("vulnprio")
+        assert marker.startswith("vulnpriority")
         assert assert_benign_marker(marker) == marker
 
 

@@ -17,12 +17,12 @@ from datetime import datetime
 import httpx
 import pytest
 
-from vulnprio.core.enums import HttpMethod, PrivilegeLevel, ScannerSeverity
-from vulnprio.core.models import Scan
-from vulnprio.ingest.correlate import FindingCorrelator, dedup_key_for
-from vulnprio.ingest.generic import GenericJsonParser, detect_parser
-from vulnprio.ingest.normalize import make_app_id, make_endpoint_id, make_scan_id
-from vulnprio.scan import (
+from vulnpriority.core.enums import HttpMethod, PrivilegeLevel, ScannerSeverity
+from vulnpriority.core.models import Scan
+from vulnpriority.ingest.correlate import FindingCorrelator, dedup_key_for
+from vulnpriority.ingest.generic import GenericJsonParser, detect_parser
+from vulnpriority.ingest.normalize import make_app_id, make_endpoint_id, make_scan_id
+from vulnpriority.scan import (
     Crawler,
     HttpClient,
     ScanPhase,
@@ -34,7 +34,7 @@ from vulnprio.scan import (
     run_scan,
     visit_key,
 )
-from vulnprio.scan.models import SCANNER_NAME
+from vulnpriority.scan.models import SCANNER_NAME
 
 HOST = "shop.example.com"
 ORIGIN = f"https://{HOST}"
@@ -381,7 +381,7 @@ def test_active_profile_sends_only_allowlisted_probe_kinds(site: FakeSite):
     well_known = [url for url in site.urls if url.endswith("/.well-known/security.txt")]
     assert len(well_known) == 1
 
-    markers = [url for url in site.urls if "vulnprio" in url]
+    markers = [url for url in site.urls if "vulnpriority" in url]
     assert markers, "a reflection probe should have been sent"
     for url in markers:
         value = httpx.URL(url).params.get("q", "")
@@ -418,7 +418,7 @@ def test_passive_profile_sends_no_probes(site: FakeSite):
 
     assert outcome.probes_sent == 0
     assert site.methods == {"GET"}
-    assert not any("vulnprio" in url for url in site.urls)
+    assert not any("vulnpriority" in url for url in site.urls)
     assert not any(url.endswith("/.well-known/security.txt") for url in site.urls)
 
 

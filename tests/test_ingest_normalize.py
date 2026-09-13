@@ -1,4 +1,4 @@
-"""Normalisation, identifier and fingerprinting tests for :mod:`vulnprio.ingest`.
+"""Normalisation, identifier and fingerprinting tests for :mod:`vulnpriority.ingest`.
 
 These are the load-bearing invariants of the ingest layer: if templating or identifier
 construction drifts, every downstream join (correlation, labels, splits) silently breaks.
@@ -10,10 +10,10 @@ from datetime import datetime
 
 import pytest
 
-from vulnprio.core.enums import HttpMethod, PrivilegeLevel, Provenance, ScannerSeverity, TrustTier
-from vulnprio.core.hashing import stable_id
-from vulnprio.core.models import TechComponent
-from vulnprio.ingest.normalize import (
+from vulnpriority.core.enums import HttpMethod, PrivilegeLevel, Provenance, ScannerSeverity, TrustTier
+from vulnpriority.core.hashing import stable_id
+from vulnpriority.core.models import TechComponent
+from vulnpriority.ingest.normalize import (
     ID_PLACEHOLDER,
     EndpointAccumulator,
     canonical_url,
@@ -39,7 +39,7 @@ from vulnprio.ingest.normalize import (
     templated_path_of,
     url_host,
 )
-from vulnprio.ingest.tech_fingerprint import (
+from vulnpriority.ingest.tech_fingerprint import (
     fingerprint_library,
     fingerprint_response,
     merge_tech,

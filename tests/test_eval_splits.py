@@ -11,12 +11,12 @@ from datetime import date, datetime, timedelta
 
 import pytest
 
-from vulnprio.core.config import EvaluationConfig
-from vulnprio.core.enums import SplitKind
-from vulnprio.core.errors import ConfigError, TemporalLeakageError
-from vulnprio.core.interfaces import Splitter
-from vulnprio.core.models import LabelPolicy, LabelSet, Scan, Split
-from vulnprio.eval.splits import (
+from vulnpriority.core.config import EvaluationConfig
+from vulnpriority.core.enums import SplitKind
+from vulnpriority.core.errors import ConfigError, TemporalLeakageError
+from vulnpriority.core.interfaces import Splitter
+from vulnpriority.core.models import LabelPolicy, LabelSet, Scan, Split
+from vulnpriority.eval.splits import (
     LeaveOneAppOutSplitter,
     RandomSplitter,
     TimeOrderedSplitter,

@@ -6,7 +6,7 @@ the accounting are the shipped ones -- no test here needs a key, opens a socket,
 the environment.
 
 The response bodies come from ``data/fixtures/intel/parallel_searches.json`` wherever a
-realistic one is wanted, for the reason :mod:`vulnprio.intel.offline` gives: a parser tested
+realistic one is wanted, for the reason :mod:`vulnpriority.intel.offline` gives: a parser tested
 only against dicts written by the person who wrote the parser is tested against its own
 assumptions. The recorded shapes carry the things the documentation does not mention and a
 live key did -- the undocumented ``metadata`` key, ``publish_date: null`` on every result,
@@ -22,9 +22,9 @@ from typing import Any, Callable
 import httpx
 import pytest
 
-from vulnprio.core.enums import IntelQueryKind, IntelSourceKind, Provenance, TrustTier
-from vulnprio.intel.models import IntelConfig, IntelQuery
-from vulnprio.intel.parallel_search import (
+from vulnpriority.core.enums import IntelQueryKind, IntelSourceKind, Provenance, TrustTier
+from vulnpriority.intel.models import IntelConfig, IntelQuery
+from vulnpriority.intel.parallel_search import (
     PARALLEL_ENDPOINT,
     PARALLEL_MODES,
     PARALLEL_PRICE_PER_REQUEST_USD,
@@ -39,7 +39,7 @@ from vulnprio.intel.parallel_search import (
     search_cost_usd,
     usage_of,
 )
-from vulnprio.intel.provider import BaseSearchProvider, build_search_provider
+from vulnpriority.intel.provider import BaseSearchProvider, build_search_provider
 
 API_KEY = "test-key-not-a-real-one"
 
@@ -63,7 +63,7 @@ def config(**overrides: Any) -> IntelConfig:
 
 
 def queries(cve: str = "CVE-2017-5638") -> tuple[IntelQuery, ...]:
-    """A search plan shaped like the one :mod:`vulnprio.intel.queries` builds."""
+    """A search plan shaped like the one :mod:`vulnpriority.intel.queries` builds."""
     return (
         IntelQuery(text=f"{cve} exploit", kind=IntelQueryKind.POC, cve_id=cve, finding_id="f1"),
         IntelQuery(
@@ -706,7 +706,7 @@ def test_without_a_key_the_provider_is_still_built_but_unavailable(monkeypatch) 
 
 
 def test_offline_mode_still_wins_over_a_configured_parallel_provider(monkeypatch) -> None:
-    from vulnprio.intel.offline import FixtureSearchProvider
+    from vulnpriority.intel.offline import FixtureSearchProvider
 
     monkeypatch.setenv("PARALLEL_API_KEY", API_KEY)
     built = build_search_provider(config(mode="offline"))

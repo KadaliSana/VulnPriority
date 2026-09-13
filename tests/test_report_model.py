@@ -1,6 +1,6 @@
 """The assessment report: structure, content discipline and the remediation knowledge base.
 
-These tests build a :class:`~vulnprio.web.schema.DashboardData` directly, so they hold
+These tests build a :class:`~vulnpriority.web.schema.DashboardData` directly, so they hold
 whether or not the pipeline, the demo payload or the website exist. What they are really
 checking is the report's three promises: every section appears when the data is there,
 no section appears when it is not, and no number appears that the payload did not supply.
@@ -15,13 +15,13 @@ from pathlib import Path
 
 import pytest
 
-from vulnprio.core.money import (
+from vulnpriority.core.money import (
     DEFAULT_CURRENCY,
     currency_symbol,
     format_money,
     format_money_compact,
 )
-from vulnprio.report import (
+from vulnpriority.report import (
     GENERIC_REMEDIATION,
     REMEDIATIONS,
     AssessmentReport,
@@ -31,8 +31,8 @@ from vulnprio.report import (
     guidance_for,
     known_cwes,
 )
-from vulnprio.report.model import RESEARCH_SECTIONS
-from vulnprio.web.schema import (
+from vulnpriority.report.model import RESEARCH_SECTIONS
+from vulnpriority.web.schema import (
     DashboardData,
     WebAdversarial,
     WebContribution,
@@ -937,8 +937,8 @@ def test_findings_with_no_reason_codes_fall_back_to_their_own_numbers() -> None:
 
 def test_the_package_imports_no_language_model() -> None:
     """No model authors any part of this document, and the imports prove it."""
-    package = Path(__file__).resolve().parents[1] / "src" / "vulnprio" / "report"
-    forbidden = ("anthropic", "openai", "vulnprio.llm", "vulnprio.sandbox", "vulnprio.semantic")
+    package = Path(__file__).resolve().parents[1] / "src" / "vulnpriority" / "report"
+    forbidden = ("anthropic", "openai", "vulnpriority.llm", "vulnpriority.sandbox", "vulnpriority.semantic")
     pattern = re.compile(r"^\s*(?:from|import)\s+\S+", re.MULTILINE)
     for path in sorted(package.glob("*.py")):
         source = path.read_text(encoding="utf-8")
@@ -954,11 +954,11 @@ def test_the_package_imports_no_language_model() -> None:
     import sys
 
     probe = subprocess.run(
-        [sys.executable, "-c", "import sys, vulnprio.report; print('anthropic' in sys.modules)"],
+        [sys.executable, "-c", "import sys, vulnpriority.report; print('anthropic' in sys.modules)"],
         capture_output=True, text=True, timeout=120,
     )
     assert probe.returncode == 0, probe.stderr
-    assert probe.stdout.strip() == "False", "importing vulnprio.report pulled in a language model SDK"
+    assert probe.stdout.strip() == "False", "importing vulnpriority.report pulled in a language model SDK"
 
 
 # ---------------------------------------------------------------------------

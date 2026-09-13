@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from vulnprio.core.enums import (
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     AttackComplexity,
     EndpointFunction,
@@ -28,7 +28,7 @@ from vulnprio.core.enums import (
     UserInteraction,
     VersionMatch,
 )
-from vulnprio.core.models import (
+from vulnpriority.core.models import (
     AblationCell,
     AblationTable,
     AdversarialReport,
@@ -61,8 +61,8 @@ from vulnprio.core.models import (
     Split,
     TrustSummary,
 )
-from vulnprio.web.exporter import build_dashboard, export_site
-from vulnprio.web.schema import DashboardData
+from vulnpriority.web.exporter import build_dashboard, export_site
+from vulnpriority.web.schema import DashboardData
 
 AS_OF = date(2024, 6, 1)
 
@@ -352,7 +352,7 @@ def test_export_writes_a_self_contained_site(run, tmp_path: Path) -> None:
 
     # data.js is a plain assignment so it loads under file:// where fetch() is blocked.
     js = (out / "data.js").read_text(encoding="utf-8")
-    assert js.startswith("window.VULNPRIO_DATA = ")
+    assert js.startswith("window.VULNPRIORITY_DATA = ")
     payload = json.loads((out / "data.json").read_text(encoding="utf-8"))
     assert payload["summary"]["n_findings"] == 3
     DashboardData.model_validate(payload)

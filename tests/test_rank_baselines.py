@@ -14,7 +14,7 @@ from datetime import date, datetime
 import numpy as np
 import pytest
 
-from vulnprio.core.enums import (
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     CvssVersion,
     EndpointFunction,
@@ -25,8 +25,8 @@ from vulnprio.core.enums import (
     ScannerSeverity,
     ScoreSource,
 )
-from vulnprio.core.interfaces import Ranker
-from vulnprio.core.models import (
+from vulnpriority.core.interfaces import Ranker
+from vulnpriority.core.models import (
     ApplicabilityAssessment,
     AssetCriticality,
     BusinessImpact,
@@ -44,8 +44,8 @@ from vulnprio.core.models import (
     UntrustedText,
     VulnIntel,
 )
-from vulnprio.core.registry import RANKERS, get_ranker
-from vulnprio.rank.baselines import (
+from vulnpriority.core.registry import RANKERS, get_ranker
+from vulnpriority.rank.baselines import (
     VMC_CVSS_THRESHOLD,
     VMC_EPSS_THRESHOLD,
     CvssOnlyRanker,
@@ -56,7 +56,7 @@ from vulnprio.rank.baselines import (
     ScannerSeverityRanker,
     VmcChainRanker,
 )
-from vulnprio.rank.features import NEUTRAL, FeatureBuilder
+from vulnpriority.rank.features import NEUTRAL, FeatureBuilder
 
 AS_OF = date(2024, 6, 1)
 OBSERVED_AT = datetime(2024, 5, 1, 9, 0, 0)

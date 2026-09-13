@@ -12,10 +12,10 @@ from datetime import date
 
 import pytest
 
-from vulnprio.core.config import PROJECT_ROOT
-from vulnprio.core.enums import CvssVersion, ScoreSource
-from vulnprio.core.models import CvssRecord
-from vulnprio.feeds import (
+from vulnpriority.core.config import PROJECT_ROOT
+from vulnpriority.core.enums import CvssVersion, ScoreSource
+from vulnpriority.core.models import CvssRecord
+from vulnpriority.feeds import (
     NvdFixtureFeed,
     cvss_features,
     cvss_version_ordinal,

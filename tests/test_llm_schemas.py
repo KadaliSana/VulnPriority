@@ -10,7 +10,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from vulnprio.core.enums import (
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     AttackComplexity,
     EndpointFunction,
@@ -20,13 +20,13 @@ from vulnprio.core.enums import (
     UserInteraction,
     VersionMatch,
 )
-from vulnprio.core.models import (
+from vulnpriority.core.models import (
     ApplicabilityAssessment,
     AssetCriticality,
     ExploitabilityAssessment,
     LLMAudit,
 )
-from vulnprio.llm.schemas import (
+from vulnpriority.llm.schemas import (
     MAX_EVIDENCE_SPAN_CHARS,
     MAX_EVIDENCE_SPANS,
     MAX_RATIONALE_CHARS,

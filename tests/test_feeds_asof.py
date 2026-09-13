@@ -12,12 +12,12 @@ from datetime import date
 
 import pytest
 
-from vulnprio.core.config import PROJECT_ROOT, FeedsConfig
-from vulnprio.core.enums import FeedMode
-from vulnprio.core.errors import TemporalLeakageError
-from vulnprio.core.interfaces import EpssFeed, FeedBundle, KevFeed
-from vulnprio.core.models import EpssRecord, KevRecord, VulnIntel
-from vulnprio.feeds import (
+from vulnpriority.core.config import PROJECT_ROOT, FeedsConfig
+from vulnpriority.core.enums import FeedMode
+from vulnpriority.core.errors import TemporalLeakageError
+from vulnpriority.core.interfaces import EpssFeed, FeedBundle, KevFeed
+from vulnpriority.core.models import EpssRecord, KevRecord, VulnIntel
+from vulnpriority.feeds import (
     DefaultIntelAssembler,
     EpssFixtureFeed,
     ExploitFixtureFeed,

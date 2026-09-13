@@ -13,10 +13,10 @@ from pathlib import Path
 
 import pytest
 
-from vulnprio.core.enums import HttpMethod, PrivilegeLevel, Provenance, ScannerSeverity
-from vulnprio.core.models import Endpoint, Finding, Scan, UntrustedText
-from vulnprio.ingest.correlate import FindingCorrelator, cluster_sizes, clusters, dedup_key_of
-from vulnprio.ingest.zap import ZapParser
+from vulnpriority.core.enums import HttpMethod, PrivilegeLevel, Provenance, ScannerSeverity
+from vulnpriority.core.models import Endpoint, Finding, Scan, UntrustedText
+from vulnpriority.ingest.correlate import FindingCorrelator, cluster_sizes, clusters, dedup_key_of
+from vulnpriority.ingest.zap import ZapParser
 
 FIXTURES = Path("data/fixtures/scans")
 WHEN = datetime(2024, 5, 1, 9, 0, 0)

@@ -15,7 +15,7 @@ from pathlib import Path
 import matplotlib
 import pytest
 
-from vulnprio.core.enums import (
+from vulnpriority.core.enums import (
     FeedMode,
     InjectionCategory,
     LLMBackendKind,
@@ -24,7 +24,7 @@ from vulnprio.core.enums import (
     SelectionMethod,
     SplitKind,
 )
-from vulnprio.core.models import (
+from vulnpriority.core.models import (
     AblationCell,
     AblationTable,
     AdversarialReport,
@@ -38,7 +38,7 @@ from vulnprio.core.models import (
     SimulationResult,
     Split,
 )
-from vulnprio.eval.report import ReportArtifacts, ReportBuilder
+from vulnpriority.eval.report import ReportArtifacts, ReportBuilder
 
 SPLIT = Split(
     kind=SplitKind.TIME_ORDERED,
@@ -221,7 +221,7 @@ def manifest() -> RunManifest:
         llm_model="heuristic",
         feed_mode=FeedMode.OFFLINE,
         as_of=date(2024, 6, 1),
-        command="vulnprio run-all",
+        command="vulnpriority run-all",
     )
 
 
@@ -336,7 +336,7 @@ def test_report_markdown_holds_the_tables_a_reader_would_cite(
     text = artifacts.report_md.read_text(encoding="utf-8")
 
     for heading in (
-        "# vulnprio evaluation report",
+        "# vulnpriority evaluation report",
         "## Reproducibility",
         "## Protocol",
         "## Ranking quality",
@@ -379,7 +379,7 @@ def test_the_simulation_section_leads_with_prevention_and_labels_the_total(
 
 
 def test_the_capacity_context_is_printed_when_supplied(tmp_path: Path, simulations) -> None:
-    from vulnprio.eval.simulation import CapacityContext
+    from vulnpriority.eval.simulation import CapacityContext
 
     capacity = CapacityContext(
         weeks=26,

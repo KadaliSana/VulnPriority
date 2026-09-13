@@ -14,8 +14,8 @@ from typing import Any
 
 import pytest
 
-from vulnprio.core.config import PROJECT_ROOT, PipelineConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import PROJECT_ROOT, PipelineConfig
+from vulnpriority.core.enums import (
     ExploitMaturity,
     ExploitSource,
     LLMBackendKind,
@@ -23,8 +23,8 @@ from vulnprio.core.enums import (
     ScannerSeverity,
     TrustTier,
 )
-from vulnprio.core.errors import ConfigError
-from vulnprio.core.models import (
+from vulnpriority.core.errors import ConfigError
+from vulnpriority.core.models import (
     AffectedProduct,
     ExploitEvidence,
     Finding,
@@ -33,14 +33,14 @@ from vulnprio.core.models import (
     UntrustedText,
     VulnIntel,
 )
-from vulnprio.intel.agent import (
+from vulnpriority.intel.agent import (
     ExploitIntelAgent,
     IntelBaselineBackend,
     compare_with_feeds,
     judge_as_of,
     scan_age_days,
 )
-from vulnprio.intel.anthropic_search import (
+from vulnpriority.intel.anthropic_search import (
     WEB_FETCH_TOOL_TYPE,
     WEB_SEARCH_TOOL_TYPE,
     AnthropicIntelExtractor,
@@ -49,8 +49,8 @@ from vulnprio.intel.anthropic_search import (
     domain_filter,
     search_tools,
 )
-from vulnprio.intel.cache import IntelCache
-from vulnprio.intel.models import (
+from vulnpriority.intel.cache import IntelCache
+from vulnpriority.intel.models import (
     INTEL_FEATURE_NAMES,
     AgreementAxis,
     AsOfStatus,
@@ -60,8 +60,8 @@ from vulnprio.intel.models import (
     IntelRemedy,
     neutral_intel_features,
 )
-from vulnprio.intel.offline import FixtureSearchProvider
-from vulnprio.intel.provider import BaseSearchProvider, make_document
+from vulnpriority.intel.offline import FixtureSearchProvider
+from vulnpriority.intel.provider import BaseSearchProvider, make_document
 
 FIXTURE = PROJECT_ROOT / "data" / "fixtures" / "intel" / "searches.json"
 AS_OF = date(2024, 6, 1)
@@ -373,7 +373,7 @@ def test_injection_signals_reach_the_feature_vector(tmp_path: Path) -> None:
 def _split_injected_corpus(tmp_path: Path) -> tuple[IntelGather, IntelGather]:
     """The recorded CVE-2017-5638 session, with and without its hostile page."""
     provider = FixtureSearchProvider(FIXTURE)
-    from vulnprio.intel.queries import build_queries
+    from vulnpriority.intel.queries import build_queries
 
     queries = build_queries(make_finding("CVE-2017-5638"), (), enabled())
     full = provider.gather(queries, enabled())
@@ -667,8 +667,8 @@ def test_phase1_request_shape() -> None:
 
 
 def test_phase2_request_shape() -> None:
-    from vulnprio.intel.queries import PHASE2_SYSTEM
-    from vulnprio.sandbox.pipeline import Sandbox, build_sandboxed_prompt
+    from vulnpriority.intel.queries import PHASE2_SYSTEM
+    from vulnpriority.sandbox.pipeline import Sandbox, build_sandboxed_prompt
 
     client = StubClient(phase2_response())
     extractor = AnthropicIntelExtractor(enabled(), client=client, api_key="test")
@@ -796,8 +796,8 @@ def test_a_malformed_structured_reply_is_a_config_error_not_a_crash() -> None:
     extractor = AnthropicIntelExtractor(
         enabled(max_retries=0), client=client, api_key="test"
     )
-    from vulnprio.intel.queries import PHASE2_SYSTEM
-    from vulnprio.sandbox.pipeline import build_sandboxed_prompt
+    from vulnpriority.intel.queries import PHASE2_SYSTEM
+    from vulnpriority.sandbox.pipeline import build_sandboxed_prompt
 
     prompt = build_sandboxed_prompt(
         task="exploit_intel",
@@ -821,8 +821,8 @@ def test_a_canary_leak_discards_the_reply_and_is_recorded(tmp_path: Path) -> Non
                 confidence=1.0,
                 rationale=f"the session marker is {prompt.canary}",
             )
-            from vulnprio.core.interfaces import LLMResult
-            from vulnprio.core.models import LLMAudit
+            from vulnpriority.core.interfaces import LLMResult
+            from vulnpriority.core.models import LLMAudit
 
             return LLMResult(
                 parsed=leaked,
@@ -923,8 +923,8 @@ def test_caching_can_be_switched_off(tmp_path: Path) -> None:
 
 
 def _prompt_over(*texts: str):
-    from vulnprio.intel.queries import PHASE2_SYSTEM
-    from vulnprio.sandbox.pipeline import Sandbox, build_sandboxed_prompt
+    from vulnpriority.intel.queries import PHASE2_SYSTEM
+    from vulnpriority.sandbox.pipeline import Sandbox, build_sandboxed_prompt
 
     return build_sandboxed_prompt(
         task="exploit_intel",
@@ -948,7 +948,7 @@ def test_the_baseline_is_deterministic() -> None:
 
 
 def test_the_baseline_quotes_verbatim_spans() -> None:
-    from vulnprio.llm.heuristic import sanitized_text_of
+    from vulnpriority.llm.heuristic import sanitized_text_of
 
     prompt = _prompt_over(
         "A fully functional exploit is public and the flaw is actively exploited in the wild."
@@ -996,7 +996,7 @@ def test_the_baseline_collects_exploit_urls_and_affected_versions() -> None:
 
 
 def _assessment(**overrides: Any):
-    from vulnprio.core.models import ExploitabilityAssessment
+    from vulnpriority.core.models import ExploitabilityAssessment
 
     base = {
         "finding_id": "f1",
@@ -1010,7 +1010,7 @@ def _assessment(**overrides: Any):
 
 
 def test_fusing_with_no_intel_changes_nothing() -> None:
-    from vulnprio.intel.agent import fuse_into_exploitability
+    from vulnpriority.intel.agent import fuse_into_exploitability
 
     assessment = _assessment()
     assert fuse_into_exploitability(assessment, None) == assessment
@@ -1018,7 +1018,7 @@ def test_fusing_with_no_intel_changes_nothing() -> None:
 
 def test_fusing_respects_the_reference_page_budget(tmp_path: Path) -> None:
     """A second entry point into the score must not be an unbudgeted one."""
-    from vulnprio.intel.agent import fuse_into_exploitability
+    from vulnpriority.intel.agent import fuse_into_exploitability
 
     config = PipelineConfig()
     budget = config.sandbox.influence_budget[TrustTier.REFERENCE_PAGE]
@@ -1032,7 +1032,7 @@ def test_fusing_respects_the_reference_page_budget(tmp_path: Path) -> None:
 
 def test_deflation_gets_less_room_than_inflation(tmp_path: Path) -> None:
     """Talking a real vulnerability down leaves it unpatched; the two are not equal."""
-    from vulnprio.intel.agent import fuse_into_exploitability
+    from vulnpriority.intel.agent import fuse_into_exploitability
 
     config = PipelineConfig()
     budget = config.sandbox.influence_budget[TrustTier.REFERENCE_PAGE]
@@ -1049,7 +1049,7 @@ def test_deflation_gets_less_room_than_inflation(tmp_path: Path) -> None:
 
 
 def test_fusing_cannot_lower_the_curated_maturity(tmp_path: Path) -> None:
-    from vulnprio.intel.agent import fuse_into_exploitability
+    from vulnpriority.intel.agent import fuse_into_exploitability
 
     result = build_agent(tmp_path).gather(make_finding(), (make_intel(),), AS_OF)
     assessment = _assessment(exploit_maturity=ExploitMaturity.WEAPONIZED)
@@ -1058,8 +1058,8 @@ def test_fusing_cannot_lower_the_curated_maturity(tmp_path: Path) -> None:
 
 
 def test_fusing_leaves_graph_structure_and_cvss_facts_alone(tmp_path: Path) -> None:
-    from vulnprio.core.enums import PrivilegeLevel
-    from vulnprio.intel.agent import fuse_into_exploitability
+    from vulnpriority.core.enums import PrivilegeLevel
+    from vulnpriority.intel.agent import fuse_into_exploitability
 
     result = build_agent(tmp_path).gather(make_finding(), (make_intel(),), AS_OF)
     assessment = _assessment(
@@ -1074,6 +1074,6 @@ def test_fusing_leaves_graph_structure_and_cvss_facts_alone(tmp_path: Path) -> N
 
 
 def test_features_for_handles_a_missing_result() -> None:
-    from vulnprio.intel.models import IntelResult
+    from vulnpriority.intel.models import IntelResult
 
     assert IntelResult.features_for(None) == neutral_intel_features()

@@ -10,12 +10,12 @@ from random import Random
 
 import pytest
 
-from vulnprio.core.config import load_config
-from vulnprio.core.enums import InjectionVerdict, Provenance, TrustTier
-from vulnprio.core.models import UntrustedText
-from vulnprio.sandbox.canary import canary_in_output, make_canary
-from vulnprio.sandbox.delimit import closing_tag, envelope_intact, envelope_violations, make_nonce
-from vulnprio.sandbox.pipeline import Sandbox, build_sandboxed_prompt
+from vulnpriority.core.config import load_config
+from vulnpriority.core.enums import InjectionVerdict, Provenance, TrustTier
+from vulnpriority.core.models import UntrustedText
+from vulnpriority.sandbox.canary import canary_in_output, make_canary
+from vulnpriority.sandbox.delimit import closing_tag, envelope_intact, envelope_violations, make_nonce
+from vulnpriority.sandbox.pipeline import Sandbox, build_sandboxed_prompt
 
 
 @pytest.fixture(scope="module")

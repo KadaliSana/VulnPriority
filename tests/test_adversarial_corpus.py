@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from vulnprio.adversarial.corpus import (
+from vulnpriority.adversarial.corpus import (
     ATTACK_CATEGORIES,
     KNOWN_PATTERN_GAPS,
     MIN_ATTACK_CASES,
@@ -29,10 +29,10 @@ from vulnprio.adversarial.corpus import (
     load_corpus,
     validate_corpus,
 )
-from vulnprio.adversarial.detectors import PreLLMPatternDetector, measure_pattern_coverage
-from vulnprio.core.enums import InjectionCategory, Provenance, TrustTier, tier_of
-from vulnprio.core.errors import ConfigError
-from vulnprio.core.models import AdversarialCase, AdversarialExpectation
+from vulnpriority.adversarial.detectors import PreLLMPatternDetector, measure_pattern_coverage
+from vulnpriority.core.enums import InjectionCategory, Provenance, TrustTier, tier_of
+from vulnpriority.core.errors import ConfigError
+from vulnpriority.core.models import AdversarialCase, AdversarialExpectation
 
 pytestmark = pytest.mark.adversarial
 

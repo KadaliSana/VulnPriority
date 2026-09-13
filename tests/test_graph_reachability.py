@@ -23,9 +23,9 @@ import math
 import networkx as nx
 import pytest
 
-from vulnprio.core.errors import GraphError
-from vulnprio.core.models import AttackPath
-from vulnprio.graph.reachability import (
+from vulnpriority.core.errors import GraphError
+from vulnpriority.core.models import AttackPath
+from vulnpriority.graph.reachability import (
     PROBABILITY_ATTR,
     VALUE_ATTR,
     WEIGHT_ATTR,

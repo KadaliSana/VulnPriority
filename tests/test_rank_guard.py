@@ -13,8 +13,8 @@ from datetime import date, datetime
 import numpy as np
 import pytest
 
-from vulnprio.core.config import PipelineConfig, SandboxConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import PipelineConfig, SandboxConfig
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     Component,
     CvssVersion,
@@ -32,8 +32,8 @@ from vulnprio.core.enums import (
     TrustTier,
     VersionMatch,
 )
-from vulnprio.core.interfaces import ManipulationDetector, Ranker
-from vulnprio.core.models import (
+from vulnpriority.core.interfaces import ManipulationDetector, Ranker
+from vulnpriority.core.models import (
     FEATURE_GROUPS,
     ApplicabilityAssessment,
     AssetCriticality,
@@ -56,9 +56,9 @@ from vulnprio.core.models import (
     UntrustedText,
     VulnIntel,
 )
-from vulnprio.rank.compose import rank_scan
-from vulnprio.rank.features import NEUTRAL, FeatureBuilder
-from vulnprio.rank.rank_guard import (
+from vulnpriority.rank.compose import rank_scan
+from vulnpriority.rank.features import NEUTRAL, FeatureBuilder
+from vulnpriority.rank.rank_guard import (
     DEFAULT_DISPLACEMENT_MAD_MULTIPLIER,
     DEFAULT_MIN_RANK_DISPLACEMENT,
     EVIDENCE_SOURCE_PHRASE,
@@ -526,7 +526,7 @@ def test_the_defaults_are_the_documented_ones(detector) -> None:
 
 
 def test_a_cell_without_component_a_has_nothing_to_neutralise(detector) -> None:
-    from vulnprio.core.models import ComponentFlags
+    from vulnpriority.core.models import ComponentFlags
 
     items = ladder()
     frame = FeatureBuilder().build(items, {}, ComponentFlags(a=False, b=True, c=True))
@@ -755,7 +755,7 @@ def test_alerts_reach_the_ranked_queue_through_rank_scan(detector) -> None:
 
 
 def test_alerts_already_on_a_finding_survive_into_the_queue() -> None:
-    from vulnprio.core.models import ManipulationAlert
+    from vulnpriority.core.models import ManipulationAlert
 
     existing = ManipulationAlert(
         finding_id="f_0", detector=DetectorName.PRE_LLM_PATTERN, message="pattern hit"

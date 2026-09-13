@@ -5,7 +5,7 @@ computed on synthetic tables whose answers are known in closed form, so a sign e
 wrong divisor cannot survive.
 
 The end-to-end test uses a deliberately simple linear ranker defined here rather than
-importing ``vulnprio.rank``: the ablation measures what the *components* contribute, and
+importing ``vulnpriority.rank``: the ablation measures what the *components* contribute, and
 a transparent learner makes it possible to assert that the measured effects match the
 signal that was planted in the data.
 """
@@ -18,10 +18,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from vulnprio.core.config import EvaluationConfig, PipelineConfig, RankingConfig
-from vulnprio.core.enums import RankerName, SplitKind
-from vulnprio.core.interfaces import Ranker
-from vulnprio.core.models import (
+from vulnpriority.core.config import EvaluationConfig, PipelineConfig, RankingConfig
+from vulnpriority.core.enums import RankerName, SplitKind
+from vulnpriority.core.interfaces import Ranker
+from vulnpriority.core.models import (
     AblationTable,
     ComponentFlags,
     FeatureFrame,
@@ -30,7 +30,7 @@ from vulnprio.core.models import (
     Split,
     feature_names_for,
 )
-from vulnprio.eval.ablation import (
+from vulnpriority.eval.ablation import (
     COMPONENT_KEYS,
     INTERACTION_KEYS,
     FullFactorialAblation,
@@ -39,7 +39,7 @@ from vulnprio.eval.ablation import (
     interactions,
     main_effects,
 )
-from vulnprio.eval.bootstrap import (
+from vulnpriority.eval.bootstrap import (
     bootstrap_mean_ci,
     paired_bootstrap,
     paired_bootstrap_ci,
@@ -559,7 +559,7 @@ class OracleRanker(Ranker):
 
 @pytest.fixture
 def benchmark_fold(dataset):
-    from vulnprio.eval.benchmark import SplitFrames
+    from vulnpriority.eval.benchmark import SplitFrames
 
     rows, labels = dataset
     split = Split(
@@ -579,7 +579,7 @@ def benchmark_fold(dataset):
 
 def test_benchmark_shows_every_ranker_byte_identical_data(benchmark_fold, ablation_config) -> None:
     """Gap 4's core claim: no ranker gets different rows, columns or preprocessing."""
-    from vulnprio.eval.benchmark import BenchmarkRunner
+    from vulnpriority.eval.benchmark import BenchmarkRunner
 
     fold, labels = benchmark_fold
     first = RecordingRanker(RankerName.LAMBDAMART, "b_epss")
@@ -596,8 +596,8 @@ def test_benchmark_shows_every_ranker_byte_identical_data(benchmark_fold, ablati
 def test_benchmark_produces_one_bundle_per_ranker_with_the_full_metric_battery(
     benchmark_fold, ablation_config
 ) -> None:
-    from vulnprio.core.enums import MetricName
-    from vulnprio.eval.benchmark import BenchmarkRunner
+    from vulnpriority.core.enums import MetricName
+    from vulnpriority.eval.benchmark import BenchmarkRunner
 
     fold, labels = benchmark_fold
     bundles = BenchmarkRunner().run(
@@ -636,8 +636,8 @@ def test_benchmark_produces_one_bundle_per_ranker_with_the_full_metric_battery(
 def test_the_oracle_ranker_beats_a_blind_one_on_every_ranking_metric(
     benchmark_fold, ablation_config
 ) -> None:
-    from vulnprio.core.enums import MetricName
-    from vulnprio.eval.benchmark import BenchmarkRunner
+    from vulnpriority.core.enums import MetricName
+    from vulnpriority.eval.benchmark import BenchmarkRunner
 
     fold, labels = benchmark_fold
     bundles = BenchmarkRunner().run(
@@ -661,7 +661,7 @@ def test_benchmark_retains_per_scan_values_for_the_paired_bootstrap(
     benchmark_fold, ablation_config
 ) -> None:
     """"Better on 2 of 2 scans" needs the pairs, not the fold mean."""
-    from vulnprio.eval.benchmark import BenchmarkRunner
+    from vulnpriority.eval.benchmark import BenchmarkRunner
 
     fold, labels = benchmark_fold
     runner = BenchmarkRunner()
@@ -686,7 +686,7 @@ def test_a_ranker_that_ties_everything_still_gets_a_deterministic_order(
     benchmark_fold, ablation_config
 ) -> None:
     """Baselines tie heavily by design; the tie-break must not favour anyone."""
-    from vulnprio.eval.benchmark import BenchmarkRunner, scan_order
+    from vulnpriority.eval.benchmark import BenchmarkRunner, scan_order
 
     fold, labels = benchmark_fold
     scores = np.zeros(len(fold.test.finding_ids))
@@ -709,7 +709,7 @@ def test_a_ranker_that_ties_everything_still_gets_a_deterministic_order(
 def test_supplied_probabilities_are_what_unlock_calibration_metrics(
     benchmark_fold, ablation_config
 ) -> None:
-    from vulnprio.eval.benchmark import BenchmarkRunner
+    from vulnpriority.eval.benchmark import BenchmarkRunner
 
     fold, labels = benchmark_fold
     positives = labels.positives()
@@ -732,8 +732,8 @@ def test_expected_loss_is_recovered_from_the_feature_matrix_when_not_supplied(
     benchmark_fold, ablation_config
 ) -> None:
     """``b_expected_loss_log`` is log1p of the loss, so risk capture works without a side channel."""
-    from vulnprio.core.enums import MetricName
-    from vulnprio.eval.benchmark import BenchmarkRunner
+    from vulnpriority.core.enums import MetricName
+    from vulnpriority.eval.benchmark import BenchmarkRunner
 
     fold, labels = benchmark_fold
     assert "b_expected_loss_log" in fold.test.feature_names

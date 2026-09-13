@@ -13,15 +13,15 @@ from datetime import date, datetime
 
 import pytest
 
-from vulnprio.core.enums import (
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     LLMBackendKind,
     Provenance,
     ScannerSeverity,
     VersionMatch,
 )
-from vulnprio.core.interfaces import LLMBackend, LLMResult, SandboxedPrompt
-from vulnprio.core.models import (
+from vulnpriority.core.interfaces import LLMBackend, LLMResult, SandboxedPrompt
+from vulnpriority.core.models import (
     AffectedProduct,
     Finding,
     LLMAudit,
@@ -29,10 +29,10 @@ from vulnprio.core.models import (
     UntrustedText,
     VulnIntel,
 )
-from vulnprio.core.config import load_config
-from vulnprio.llm.schemas import ApplicabilityOut
-from vulnprio.sandbox.pipeline import Sandbox
-from vulnprio.semantic.applicability import assess_applicability, baseline_applicability
+from vulnpriority.core.config import load_config
+from vulnpriority.llm.schemas import ApplicabilityOut
+from vulnpriority.sandbox.pipeline import Sandbox
+from vulnpriority.semantic.applicability import assess_applicability, baseline_applicability
 
 AS_OF = date(2024, 6, 1)
 WHEN = datetime(2024, 5, 1, 9, 0, 0)

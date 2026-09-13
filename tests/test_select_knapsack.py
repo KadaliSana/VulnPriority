@@ -14,8 +14,8 @@ from datetime import date, datetime
 import numpy as np
 import pytest
 
-from vulnprio.core.config import PipelineConfig, SelectionConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import PipelineConfig, SelectionConfig
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     EndpointFunction,
     HttpMethod,
@@ -26,8 +26,8 @@ from vulnprio.core.enums import (
     ScannerSeverity,
     SelectionMethod,
 )
-from vulnprio.core.errors import ConfigError
-from vulnprio.core.models import (
+from vulnpriority.core.errors import ConfigError
+from vulnpriority.core.models import (
     ApplicabilityAssessment,
     AssetCriticality,
     BusinessImpact,
@@ -44,7 +44,7 @@ from vulnprio.core.models import (
     SelectionResult,
     UntrustedText,
 )
-from vulnprio.select.knapsack import (
+from vulnpriority.select.knapsack import (
     MIN_HOURS,
     SelectionItem,
     cluster_items,

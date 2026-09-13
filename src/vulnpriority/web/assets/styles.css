@@ -1,0 +1,1306 @@
+/* vulnpriority - stylesheet.
+ *
+ * No framework, no CDN, no webfont: the page has to open from file:// on a machine with no
+ * network, because that is how the framework itself is designed to run.
+ *
+ * Three ideas hold the whole thing together.
+ *
+ * 1. The page is a document, not a dashboard. It sits on paper-white, sections are separated
+ *    by a hairline and whitespace rather than by boxes, and the only things that carry a
+ *    border are the ones where the border is the meaning: a drop target, a mandatory
+ *    authorisation, a panel that genuinely floats. Nothing has a shadow except the drawer,
+ *    because nothing else is above the page.
+ *
+ * 2. Prose and data are different jobs and are not given the same column. Everything shares
+ *    one left edge; running text stops at a reading measure of about seventy characters
+ *    while tables and charts carry on to the full width. Nothing is centred except a
+ *    genuinely centred thing, and no text is centre-aligned at all.
+ *
+ * 3. Components size themselves from the space they are given, not from the window. Panels,
+ *    sections and table wrappers are containment contexts; everything that changes shape does
+ *    it with @container, and the fluid steps are expressed in cqi so a table in a narrow
+ *    column behaves like a table in a narrow window. There are no layout media queries in
+ *    this file - only print, forced colours, and the two user preferences.
+ *
+ * One accent, spent on interaction and on the single most important datum of a view. A fixed
+ * severity ramp that nothing outside severity may borrow. Colour is never the only channel:
+ * every coloured mark is paired with a word or a letter.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* -- type -------------------------------------------------------------
+     Not three sizes applied by rote. Each step exists because something on this page has
+     that job: a secondary label, a note, a row of data, a line of prose, a heading, a
+     figure, and the one number that is the answer. The fluid steps scale with the width of
+     the component that holds them; every maximum is under 2.5x its minimum so browser zoom
+     and a raised default font size still do what they are told. */
+  --t-label: 0.6875rem;    /* 11px - only where a label is genuinely subordinate */
+  --t-small: 0.8125rem;    /* 13px - notes, second lines, captions */
+  --t-data: 0.875rem;      /* 14px - table body */
+  --t-body: 0.9375rem;     /* 15px - running prose */
+  --t-lead: clamp(1rem, 0.94rem + 0.3cqi, 1.1875rem);
+  --t-h: clamp(1.0625rem, 1rem + 0.35cqi, 1.3125rem);
+  --t-h-big: clamp(1.25rem, 1.12rem + 0.7cqi, 1.75rem);
+  --t-figure: clamp(1.375rem, 1.15rem + 1.1cqi, 2rem);
+  --t-answer: clamp(2rem, 1.5rem + 4.4cqi, 4rem);
+
+  --w-regular: 400;
+  --w-medium: 500;
+  --w-bold: 640;
+
+  /* -- space: a 4px scale, plus one fluid gutter ------------------------- */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4.5rem;
+  --gutter: clamp(1rem, 3.5cqi, 2.5rem);
+  /* Height of the two sticky bars at the top of the page: the header's 3rem minimum
+     plus the nav. Anything that sticks below them has to clear this, and one value
+     means it cannot drift out of step with them. */
+  --chrome: 6.5rem;
+
+  /* -- measure: the two column widths the content grid offers ------------ */
+  --w-prose: 34rem;   /* ~70 characters of running text */
+  --w-wide: 82rem;    /* tables, charts, the finding queue */
+
+  /* -- surfaces ---------------------------------------------------------
+     One radius, used on controls and on the things that are genuinely objects. Data grids,
+     section headings and figure runs get none: a rounded corner on a table is a costume. */
+  --r: 6px;
+  --r-sm: 4px;
+  --line: #d8dde4;         /* section rules, control borders */
+  --line-soft: #ebeef2;    /* rules between rows of a table */
+  --shadow: 0 16px 40px -12px rgba(16, 24, 40, .28), 0 2px 6px rgba(16, 24, 40, .06);
+  --row-h: 2.25rem;
+
+  /* -- neutrals: every pair below reaches 4.5:1 on its surface ------------
+     The page ground is white rather than a mid grey, because the thing it most resembles is
+     a printed assessment. ``--panel-2`` is the one fill, a few points off white, used by
+     inputs, tracks and the two blocks that must read as insets. */
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --panel-2: #f5f7f9;
+  --ink: #14171c;          /* 15.8:1 on the ground */
+  --ink-2: #464e5c;        /*  8.4:1 */
+  --ink-3: #5f6875;        /*  5.4:1 */
+
+  /* -- one accent -------------------------------------------------------- */
+  --accent: #1f5fbf;       /*  5.9:1 */
+  --accent-soft: #eaf1fb;
+  --accent-line: #b9d0ee;
+
+  /* -- the severity and risk ramp. Nothing outside severity uses these. --- */
+  --sev-critical: #a52218;
+  --sev-high: #a75209;
+  --sev-medium: #7a5c10;
+  --sev-low: #55606e;
+  --sev-info: #656e7b;     /* 5.2:1 - it is set at 9.5px, so it has to clear 4.5:1 */
+
+  /* -- status: outcome, not decoration ----------------------------------- */
+  --ok: #1a6d4a;
+  --warn: #a75209;
+  --bad: #a52218;
+
+  /* -- evidence groups, used only in chart legends and the factor split --- */
+  --gA: #6b34c9;
+  --gB: #1f5fbf;
+  --gC: #0a6f62;
+  --gBASE: #5f6875;
+
+  /* -- back-compat aliases for marks that predate the ramp --------------- */
+  --crit: var(--sev-critical);
+  --high: var(--sev-high);
+  --med: var(--sev-medium);
+  --low: var(--sev-low);
+  --kev: var(--sev-critical);
+  --line-2: var(--line-soft);
+
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --ease: 140ms ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101317;
+    --panel: #101317;
+    --panel-2: #191e25;
+    --ink: #e8edf3;
+    --ink-2: #b2bbc7;
+    --ink-3: #8b95a3;
+    --line: #2b323b;
+    --line-soft: #212831;
+    --shadow: 0 16px 40px -12px rgba(0, 0, 0, .6), 0 2px 6px rgba(0, 0, 0, .35);
+    --accent: #6ba3f5;
+    --accent-soft: #16243a;
+    --accent-line: #2c456b;
+    --sev-critical: #f08175;
+    --sev-high: #e4a24f;
+    --sev-medium: #d4bb5c;
+    --sev-low: #98a3b1;
+    --sev-info: #8b95a3;
+    --ok: #5ac596;
+    --warn: #e4a24f;
+    --bad: #f08175;
+    --gA: #b794f6;
+    --gB: #6ba3f5;
+    --gC: #4fd1c5;
+    --gBASE: #8b95a3;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #101317; --panel: #101317; --panel-2: #191e25;
+  --ink: #e8edf3; --ink-2: #b2bbc7; --ink-3: #8b95a3;
+  --line: #2b323b; --line-soft: #212831;
+  --shadow: 0 16px 40px -12px rgba(0, 0, 0, .6), 0 2px 6px rgba(0, 0, 0, .35);
+  --accent: #6ba3f5; --accent-soft: #16243a; --accent-line: #2c456b;
+  --sev-critical: #f08175; --sev-high: #e4a24f; --sev-medium: #d4bb5c;
+  --sev-low: #98a3b1; --sev-info: #8b95a3;
+  --ok: #5ac596; --warn: #e4a24f; --bad: #f08175;
+  --gA: #b794f6; --gB: #6ba3f5; --gC: #4fd1c5; --gBASE: #8b95a3;
+}
+
+/* ================================================================== base */
+
+* { box-sizing: border-box; }
+
+/* ``hidden`` means hidden, everywhere, whatever else a rule says about display.
+ *
+ * The UA stylesheet's ``[hidden] { display: none }`` is the weakest rule there is, so any
+ * author rule that sets ``display`` on an element silently defeats it. That is not a
+ * theoretical hazard: ``.skeleton`` set ``display: grid`` and ``.reportframe`` set
+ * ``display: block``, so the report view's loading skeleton was on screen permanently,
+ * above a report that had finished loading, and ``frame.hidden = true`` had never once
+ * hidden the frame. The JavaScript was correct in both cases and the stylesheet was
+ * overruling it.
+ *
+ * ``!important`` is the right tool here precisely because this must outrank every author
+ * rule: an element is either in the document or it is not, and that is not a question any
+ * layout rule gets a say in. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: var(--w-regular) var(--t-body)/1.6 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+  /* Nothing on this page may scroll sideways except a marked table container. */
+  overflow-x: clip;
+}
+
+a { color: var(--accent); text-underline-offset: 2px; }
+
+h1, h2, h3, h4 {
+  font-weight: var(--w-bold);
+  letter-spacing: -.012em;
+  text-wrap: balance;
+}
+
+p { text-wrap: pretty; }
+
+/* One focus treatment, everywhere, always visible. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
+.sr-only {
+  position: absolute; inline-size: 1px; block-size: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+/* ================================================================= shell
+   A quiet product header, a navigation rail under it, then the content grid. The header
+   carries identity, the target, and two controls. What was assessed, by which scanner, on
+   what date, under which attacker model - all of that is provenance, and provenance belongs
+   in the generated report, which has a section for it, not stacked above the answer. */
+
+header.topbar {
+  container-type: inline-size;
+  container-name: bar;
+  position: sticky; inset-block-start: 0; z-index: 40;
+  display: flex; align-items: safe center; gap: var(--sp-3) var(--sp-4);
+  min-block-size: 3rem;
+  padding-block: var(--sp-2);
+  padding-inline: var(--gutter);
+  background: var(--bg);
+  border-block-end: 1px solid var(--line);
+}
+
+/* The header stays one row at every width. Rather than let three things fight over 320px and
+   all end in an ellipsis, the two that are repeated elsewhere step aside: the strapline is
+   decoration, and the target is also written into the lead figure's label, the footer and the
+   report. What is left is the product name and the two controls. */
+@container bar (inline-size < 34rem) { .brand .tag { display: none; } }
+@container bar (inline-size < 28rem) { .target { display: none; } }
+
+.brand { display: flex; align-items: baseline; gap: var(--sp-2); flex: 0 1 auto; min-inline-size: 0; }
+.brand .mark {
+  font-size: 0.9375rem; font-weight: var(--w-bold); letter-spacing: -.02em; color: var(--ink);
+  white-space: nowrap;
+}
+.brand .tag {
+  color: var(--ink-3); font-size: var(--t-small); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; min-inline-size: 0;
+}
+
+/* The one piece of run context that earns a place in the chrome, and it is set quietly:
+   which system these numbers are about. Flex items holding a URL need an explicit floor or
+   they refuse to shrink below their content and push the controls off the edge. */
+.target {
+  min-inline-size: 0; flex: 1 1 auto;
+  font-family: var(--mono); font-size: var(--t-small); color: var(--ink-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  border-inline-start: 1px solid var(--line); padding-inline-start: var(--sp-4);
+}
+
+.topactions { display: flex; gap: var(--sp-2); margin-inline-start: auto; flex: none; }
+
+/* The navigation rail. Selected state is carried by an underline, a weight and a colour at
+   once, so it never rests on hue alone. It scrolls sideways rather than wrapping into a
+   ragged block, and it is the only element on the page allowed to do that. */
+nav.mainnav {
+  position: sticky; inset-block-start: 3rem; z-index: 39;
+  display: flex; align-items: stretch; gap: var(--sp-4);
+  padding-inline: var(--gutter);
+  background: var(--bg); border-block-end: 1px solid var(--line);
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none;
+}
+nav.mainnav::-webkit-scrollbar { display: none; }
+.navgroup { display: flex; align-items: stretch; gap: var(--sp-1); }
+.navgroup.method {
+  border-inline-start: 1px solid var(--line);
+  padding-inline-start: var(--sp-4); align-items: safe center;
+}
+.navlabel {
+  font-size: var(--t-label); font-weight: var(--w-medium); color: var(--ink-3);
+  text-transform: uppercase; letter-spacing: .08em; white-space: nowrap;
+  align-self: center; margin-inline-end: var(--sp-1);
+}
+
+nav.mainnav button {
+  appearance: none; border: 0; background: none; cursor: pointer;
+  padding-inline: var(--sp-2); padding-block: var(--sp-3);
+  min-block-size: 2.5rem; white-space: nowrap;
+  font: inherit; font-size: var(--t-data); color: var(--ink-2);
+  border-block-end: 2px solid transparent;
+  transition: color var(--ease), border-color var(--ease);
+}
+nav.mainnav button:hover:not(:disabled) { color: var(--ink); }
+nav.mainnav button[aria-selected="true"] {
+  color: var(--ink); border-block-end-color: var(--accent); font-weight: var(--w-medium);
+}
+nav.mainnav button:disabled,
+nav.mainnav button[aria-disabled="true"] { color: var(--ink-3); opacity: .45; cursor: not-allowed; }
+
+main {
+  container-type: inline-size;
+  container-name: page;
+  display: block;
+  padding-block: var(--sp-6) var(--sp-8);
+}
+
+/* ------------------------------------------------------- the two measures
+   Prose and data are different jobs and do not share a column. Everything sits on one left
+   edge; running text stops at a reading measure of about seventy characters, and anything
+   marked .wide carries on to the full width of the view. That is the whole mechanism - no
+   track arithmetic, no breakpoints, and a paragraph never stretches to 1300px because it
+   happened to be next to a table. */
+section.view {
+  display: flow-root;
+  container-type: inline-size;
+  container-name: view;
+  max-inline-size: calc(var(--w-wide) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+section.view > * { max-inline-size: var(--w-prose); min-inline-size: 0; }
+section.view > .wide { max-inline-size: none; }
+
+.lede {
+  color: var(--ink-2); margin: 0 0 var(--sp-6);
+  font-size: var(--t-lead); line-height: 1.55;
+}
+
+footer.foot {
+  color: var(--ink-3); font-size: var(--t-small); line-height: 1.7;
+  padding-block: var(--sp-5);
+  padding-inline: var(--gutter);
+  border-block-start: 1px solid var(--line);
+  max-inline-size: calc(var(--w-wide) + var(--gutter) * 2);
+  margin-inline: auto;
+}
+.foottech { font-family: var(--mono); font-size: var(--t-label); }
+
+/* ============================================================== sections
+   A section is a heading, a rule, a line of explanation and its content. It is not a box.
+   The rule sits above the heading and runs the width of the content, which separates one
+   subject from the next without wrapping either of them in a card.
+
+   One section per view is the point of the view, and that one does not get a rule: it leads
+   instead, with a larger heading and the view's single accent mark. Uniform treatment for
+   everything is exactly the thing that makes a page look generated. */
+
+.block {
+  container-type: inline-size;
+  container-name: block;
+  margin-block-end: var(--sp-7);
+  padding-block-start: var(--sp-5);
+  border-block-start: 1px solid var(--line);
+}
+.block > h2 {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--t-h);
+}
+.block > h2 + .sub {
+  margin: 0 0 var(--sp-4); color: var(--ink-2);
+  font-size: var(--t-body); max-inline-size: 68ch;
+}
+
+.block.headline {
+  border-block-start: 0;
+  padding-block-start: 0;
+  margin-block-end: var(--sp-8);
+}
+.block.headline > h2 {
+  font-size: var(--t-h-big);
+  margin-block-end: var(--sp-2);
+  padding-block-start: var(--sp-3);
+  /* A heavier rule, in ink rather than in the accent. The accent is spent on interaction and
+     on the one datum that is the answer; emphasis of structure is done with weight. */
+  border-block-start: 2px solid var(--ink);
+  display: inline-block;
+}
+
+/* Two things of equal weight, side by side when there is room for both. auto-fit rather
+   than a column count: the pair decides for itself from the track it is given. */
+.grid { display: grid; gap: var(--sp-6) var(--sp-6); }
+.grid.two { grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr)); }
+.grid.three { grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr)); }
+.grid > .block:first-child { padding-block-start: var(--sp-5); }
+
+/* Kept so that anything still asking for a panel gets the section treatment rather than a
+   stray card. */
+.panel { container-type: inline-size; container-name: block; margin-block-end: var(--sp-6); }
+.panel > h2 { margin: 0 0 var(--sp-2); font-size: var(--t-h); }
+.panel > h2 + .sub { margin: 0 0 var(--sp-4); color: var(--ink-2); max-inline-size: 68ch; }
+
+/* ================================================================== lead
+   The answer, at a size that says it is the answer, with its explanation beside it rather
+   than in a second box of the same dimensions. Asymmetric because the content is. */
+
+.lead {
+  container-type: inline-size;
+  container-name: lead;
+  margin-block-end: var(--sp-6);
+}
+.lead-inner {
+  display: grid; gap: var(--sp-4) var(--sp-7);
+  align-items: safe start; justify-content: start;
+}
+@container lead (inline-size >= 38rem) {
+  /* max-content, not auto: an auto track would swallow the leftover space and push the
+     explanation away from the figure it explains. */
+  .lead-inner { grid-template-columns: max-content minmax(0, 34rem); }
+}
+
+.leadnum {
+  font-size: var(--t-answer); font-weight: var(--w-bold); letter-spacing: -.03em;
+  line-height: 1.02; color: var(--accent);
+  min-inline-size: 0; text-wrap: balance; overflow-wrap: break-word;
+}
+.leadnum .unit { font-size: .48em; font-weight: var(--w-medium); letter-spacing: -.01em; }
+.leadlabel {
+  font-size: var(--t-small); color: var(--ink-3); margin-block-start: var(--sp-2);
+  max-inline-size: 26ch; overflow-wrap: anywhere;
+}
+.leadlabel b { color: var(--ink-2); font-weight: var(--w-medium); }
+.leadtext {
+  margin: 0; font-size: var(--t-lead); color: var(--ink-2); line-height: 1.55;
+  align-self: safe center;
+}
+.leadtext b { color: var(--ink); font-weight: var(--w-medium); }
+.leadtext + .leadnote { margin-block-start: var(--sp-3); }
+.leadnote { margin: 0; font-size: var(--t-small); color: var(--ink-3); max-inline-size: 64ch; }
+
+/* ============================================================== figure run
+   The supporting numbers. Subordinate to the lead, and not six identical boxes: no border,
+   no fill, no radius, one rule above the whole run. They are a fact sheet, not a scoreboard,
+   and they keep their DOM order while the figure reads before its label. */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(9.5rem, 100%), 1fr));
+  gap: var(--sp-5) var(--sp-6);
+  margin-block: 0 var(--sp-6);
+  padding-block-start: var(--sp-4);
+  border-block-start: 1px solid var(--line);
+}
+.tile {
+  display: grid; grid-template-areas: "v" "k" "n"; align-content: start;
+  min-inline-size: 0;
+}
+.tile .k {
+  grid-area: k; color: var(--ink-2); font-size: var(--t-small); line-height: 1.35;
+  margin-block-start: 2px;
+}
+.tile .v {
+  grid-area: v; font-size: var(--t-figure); font-weight: var(--w-bold);
+  letter-spacing: -.02em; line-height: 1.1; color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.tile .n {
+  grid-area: n; color: var(--ink-3); font-size: var(--t-small); line-height: 1.4;
+  margin-block-start: var(--sp-1);
+}
+/* Outcome, not decoration: a figure is only coloured when the colour is the finding. */
+.tile.good .v { color: var(--ok); }
+.tile.warn .v { color: var(--warn); }
+.tile.bad .v { color: var(--bad); }
+
+/* In a narrow column the run turns itself inside out: one figure per line with its label
+   beside it rather than stacked under it, which is half the height and reads as a list of
+   facts instead of a column of orphaned numbers. */
+/* Queried against the view rather than against the run itself: a container query cannot
+   style its own container, and the run always spans the view. */
+@container view (inline-size < 30rem) {
+  .tiles { grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr)); gap: var(--sp-4); }
+  .tile {
+    grid-template-areas: "v k" "v n";
+    grid-template-columns: minmax(2.25rem, auto) minmax(0, 1fr);
+    column-gap: var(--sp-3);
+    align-items: baseline;
+  }
+  .tile .v { font-size: var(--t-h); align-self: start; }
+  .tile .k { margin-block-start: 0; color: var(--ink); }
+  .tile .n { margin-block-start: 0; }
+}
+
+/* ================================================================ tables
+   These are the product. They look like tables: hairline rules, tabular figures, tight
+   rows, no card around them and no rounded corners on a data grid.
+
+   Narrow containers are handled by dropping columns, not by crushing them. Every cell
+   carries data-pri, the wrapper is a containment context, and a column appears when the
+   wrapper is wide enough to hold it honestly. Rank, finding and expected loss are priority
+   one and are never dropped; the endpoint path folds into the finding cell as a second line
+   the moment its own column goes, so nothing is lost, only moved.
+
+   The one exception is a matrix - metrics by ranker, ablation cells, the capability grid -
+   where every column is one observation and dropping one would change what the table says.
+   Those scroll inside their own container, and the container says so.
+*/
+
+.tablewrap {
+  container-type: inline-size;
+  container-name: tbl;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  max-inline-size: 100%;
+}
+/* A long table gets its own vertical scroll so the column headings stay put - but only when
+   the page is wide enough that a nested scroller is a convenience rather than a trap. In a
+   narrow column the page itself scrolls and the table is simply long. */
+.tablewrap.tall { max-block-size: 38rem; overflow-y: auto; scrollbar-gutter: stable; }
+@container view (inline-size < 48rem) {
+  .tablewrap.tall { max-block-size: none; overflow-y: visible; }
+}
+
+/* Only shown when the content really is wider than the box. CSS cannot ask whether
+   something overflows, so app.js measures it and sets the flag - and clears it again when
+   the box grows, so the page never claims a scrollbar it does not have. */
+:is(.tablewrap, .graphbox).is-scrollable { border-inline-end: 1px solid var(--line); }
+:is(.tablewrap, .graphbox).is-scrollable::after {
+  content: "scrolls horizontally \2192";
+  display: block; position: sticky; inset-inline-start: 0;
+  inline-size: max-content;
+  padding-block: var(--sp-2) 0;
+  font-size: var(--t-label); color: var(--ink-3); letter-spacing: .02em;
+}
+.graphbox.is-scrollable::after { padding-inline: var(--sp-3); padding-block-end: var(--sp-2); }
+
+table {
+  border-collapse: collapse; inline-size: 100%;
+  font-size: var(--t-data); border-radius: 0;
+}
+th, td {
+  text-align: start; padding-inline: var(--sp-3); padding-block: 0;
+  block-size: var(--row-h);
+  border-block-end: 1px solid var(--line-soft); vertical-align: middle;
+}
+th {
+  color: var(--ink-3); font-weight: var(--w-medium); font-size: var(--t-label);
+  text-transform: uppercase; letter-spacing: .06em; white-space: nowrap;
+  position: sticky; inset-block-start: 0; z-index: 2;
+  background: var(--bg); border-block-end: 1px solid var(--line);
+  block-size: 1.75rem;
+}
+th:first-child, td:first-child { padding-inline-start: 0; }
+th:last-child, td:last-child { padding-inline-end: 0; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: var(--ink); }
+th .arrow { opacity: .6; font-size: .6875rem; }
+td.num, th.num { text-align: end; font-variant-numeric: tabular-nums; }
+td { color: var(--ink-2); }
+td b { color: var(--ink); font-weight: var(--w-medium); }
+tbody tr:last-child td { border-block-end: 0; }
+
+tbody tr.clickable { cursor: pointer; }
+tbody tr.clickable:hover td { background: var(--panel-2); }
+tbody tr.clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+table.roomy td { block-size: auto; padding-block: var(--sp-3); vertical-align: top; }
+table.roomy th { vertical-align: bottom; }
+table.roomy .note { margin-block-start: 2px; max-inline-size: 54ch; }
+
+/* Fix guidance is useful at a glance but must not set the row height. */
+.clamp2 {
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; max-inline-size: 46ch;
+}
+
+/* Paths and identifiers are the long unbreakable strings that blow a table out. They are
+   allowed to break anywhere rather than to force the grid wider than its container. */
+.path, .cveline, td .mono { overflow-wrap: anywhere; }
+.cveline { color: var(--ink-3); font-size: var(--t-label); line-height: 1.4; }
+.rankcell { white-space: nowrap; }
+td .chip { vertical-align: middle; }
+.sigcell { white-space: nowrap; }
+
+/* The second line that appears inside the finding cell when the columns it belongs to have
+   been dropped. Nothing disappears at a narrow width; it moves. */
+.rowfold {
+  display: block; font-family: var(--mono); font-size: var(--t-label); color: var(--ink-3);
+  margin-block-start: 2px; overflow-wrap: anywhere;
+}
+.rowfold .sep { opacity: .5; padding-inline: var(--sp-1); }
+
+/* ------------------------------------------------- priority-driven columns */
+:is(th, td)[data-pri="2"],
+:is(th, td)[data-pri="3"],
+:is(th, td)[data-pri="4"] { display: none; }
+
+@container tbl (inline-size >= 34rem) {
+  :is(th, td)[data-pri="2"] { display: table-cell; }
+  .rowfold { display: none; }
+}
+@container tbl (inline-size >= 52rem) {
+  :is(th, td)[data-pri="3"] { display: table-cell; }
+}
+@container tbl (inline-size >= 68rem) {
+  :is(th, td)[data-pri="4"] { display: table-cell; }
+}
+
+/* The top of the list should read as the top of the list, and the mark is a rule in the
+   margin rather than a tinted row: a whole row of accent-tinted background would make the
+   colour decorative. */
+#queueTable tbody tr.p1 td:first-child { box-shadow: inset 2px 0 0 var(--accent); padding-inline-start: var(--sp-2); }
+#queueTable tbody tr.p2 td:first-child { box-shadow: inset 2px 0 0 var(--accent-line); padding-inline-start: var(--sp-2); }
+#queueTable tbody tr.p1 td:nth-child(2) { color: var(--ink); font-weight: var(--w-medium); }
+
+td.emptyrow {
+  block-size: auto; padding-block: var(--sp-7); padding-inline: 0;
+  text-align: start; color: var(--ink-3);
+}
+.empty {
+  font-size: var(--t-body); color: var(--ink-3); line-height: 1.65;
+  margin: 0; padding-block: var(--sp-6); max-inline-size: 62ch;
+}
+
+/* ================================================================== marks */
+
+.chip {
+  display: inline-block; padding-inline: var(--sp-2); padding-block: 1px;
+  border-radius: var(--r-sm);
+  font-size: var(--t-label); font-weight: var(--w-medium); line-height: 1.6;
+  white-space: nowrap; border: 1px solid transparent;
+}
+.chip + .chip { margin-inline-start: var(--sp-1); }
+/* Exactly one kind of filled mark, and it is the strongest claim the page can make: this is
+   being exploited right now. Everything else is an outline. A column of solid colour reads
+   as a paint chart and tells you nothing about which of them to look at first. */
+.chip.kev, .chip.crit { background: var(--sev-critical); color: #fff; border-color: var(--sev-critical); }
+.chip.high { background: transparent; color: var(--sev-high); border-color: var(--sev-high); }
+.chip.med { background: transparent; color: var(--sev-medium); border-color: var(--sev-medium); }
+.chip.low { background: transparent; color: var(--sev-low); border-color: var(--line); }
+.chip.ok { background: transparent; color: var(--ok); border-color: var(--ok); }
+.chip.ghost { background: transparent; color: var(--ink-2); border-color: var(--line); }
+.chip.alert { background: transparent; color: var(--warn); border-color: var(--warn); }
+.chip.choke { background: transparent; color: var(--gC); border-color: var(--gC); }
+.chip.na {
+  background: transparent; color: var(--ink-3); border-color: var(--line);
+  text-decoration: line-through;
+}
+
+:root[data-theme="dark"] :is(.chip.kev, .chip.crit) { color: #10141a; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) :is(.chip.kev, .chip.crit) { color: #10141a; }
+}
+
+.delta { font-weight: var(--w-medium); }
+.delta.up { color: var(--ok); }
+.delta.down { color: var(--bad); }
+.delta.same { color: var(--ink-3); }
+
+/* Severity: a letter and a colour, never a colour alone. */
+.sev {
+  display: inline-grid; place-items: center; inline-size: 1rem; block-size: 1rem;
+  border-radius: var(--r-sm); font-size: .59375rem; font-weight: var(--w-bold);
+  margin-inline-end: var(--sp-2); vertical-align: 1px; color: #fff; flex: none;
+}
+.sev.critical { background: var(--sev-critical); }
+.sev.high { background: var(--sev-high); }
+.sev.medium { background: var(--sev-medium); }
+.sev.low { background: transparent; color: var(--sev-low); border: 1px solid var(--line); }
+.sev.info, .sev.unrated { background: transparent; color: var(--sev-info); border: 1px solid var(--line); }
+:root[data-theme="dark"] .sev.critical, :root[data-theme="dark"] .sev.high,
+:root[data-theme="dark"] .sev.medium { color: #10141a; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .sev.critical, :root:not([data-theme="light"]) .sev.high,
+  :root:not([data-theme="light"]) .sev.medium { color: #10141a; }
+}
+
+/* ================================================================ controls */
+
+.controls {
+  display: flex; gap: var(--sp-2); flex-wrap: wrap; align-items: safe center;
+  margin-block-end: var(--sp-4);
+}
+.controls label {
+  font-size: var(--t-small); color: var(--ink-3); display: flex; align-items: safe center;
+  gap: var(--sp-2); min-inline-size: 0;
+}
+.controls .note { margin-block-start: 0; margin-inline-start: auto; }
+
+input[type="search"], input[type="text"], input[type="url"], select, textarea {
+  font: inherit; font-size: var(--t-data); color: var(--ink);
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding-block: var(--sp-2); padding-inline: var(--sp-3);
+  min-inline-size: 0; max-inline-size: 100%;
+  transition: border-color var(--ease);
+}
+input:hover, select:hover, textarea:hover { border-color: var(--ink-3); }
+input[type="search"] { flex: 1 1 14rem; min-inline-size: 0; max-inline-size: 22rem; }
+input[type="range"] { padding: 0; accent-color: var(--accent); }
+input[type="radio"], input[type="checkbox"] { accent-color: var(--accent); }
+
+/* Secondary actions: a hairline and nothing else. A filled grey button reads as disabled,
+   so the fill only appears on hover, where it means "this is live". */
+.toggle {
+  appearance: none; border: 1px solid var(--line); background: transparent;
+  color: var(--ink-2); border-radius: var(--r-sm);
+  padding-block: var(--sp-2); padding-inline: var(--sp-3);
+  font: inherit; font-size: var(--t-small);
+  cursor: pointer; white-space: nowrap;
+  transition: color var(--ease), background var(--ease), border-color var(--ease);
+}
+.toggle:hover:not(:disabled) { color: var(--ink); background: var(--panel-2); }
+.toggle:disabled { color: var(--ink-3); opacity: .5; cursor: not-allowed; }
+.toggle[aria-pressed="true"] {
+  background: var(--accent-soft); border-color: var(--accent-line);
+  color: var(--accent); font-weight: var(--w-medium);
+}
+
+.primary {
+  appearance: none; border: 1px solid var(--accent); background: var(--accent); color: #fff;
+  border-radius: var(--r);
+  padding-block: var(--sp-3); padding-inline: var(--sp-6);
+  font: inherit; font-size: var(--t-body); font-weight: var(--w-medium); cursor: pointer;
+  transition: opacity var(--ease);
+}
+.primary:hover:not(:disabled) { opacity: .9; }
+.primary:disabled { opacity: .4; cursor: not-allowed; }
+:root[data-theme="dark"] .primary { color: #10141a; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .primary { color: #10141a; }
+}
+
+.linkish {
+  border: 0; background: none; padding: 0; font: inherit; font-size: var(--t-small);
+  color: var(--accent); cursor: pointer; text-decoration: underline;
+}
+
+.field {
+  display: block; margin: 0 0 var(--sp-5);
+  font-size: var(--t-small); color: var(--ink-2);
+}
+.field > .fieldlabel { display: block; margin-block-end: var(--sp-2); }
+.field input[type="text"], .field input[type="url"], .field textarea, .field select {
+  display: block; inline-size: 100%; margin-block-start: var(--sp-2);
+}
+.field textarea { resize: vertical; min-block-size: 3rem; line-height: 1.5; }
+.field .note { margin-block-start: var(--sp-2); }
+
+.rangerow {
+  display: flex; align-items: safe center; gap: var(--sp-3); margin-block-start: var(--sp-2);
+  flex-wrap: wrap;
+}
+.rangerow input[type="range"] { flex: 1 1 10rem; min-inline-size: 0; }
+.rangerow output {
+  min-inline-size: 3.5rem; text-align: end; color: var(--ink); font-weight: var(--w-medium);
+}
+
+.check {
+  display: grid; grid-template-columns: 1rem minmax(0, 1fr); gap: var(--sp-2);
+  align-items: start;
+  margin: 0 0 var(--sp-2); font-size: var(--t-small); color: var(--ink-2);
+  line-height: 1.5; cursor: pointer;
+}
+.check input { margin: 3px 0 0; }
+.check b { color: var(--ink); font-weight: var(--w-medium); }
+
+/* ================================================================== charts */
+
+.chartwrap { container-type: inline-size; container-name: chart; max-inline-size: 100%; }
+svg.chart { display: block; inline-size: 100%; max-inline-size: 100%; block-size: auto; }
+/* The one exception: a node-link diagram cannot be reflowed, so it keeps its natural width
+   and the box around it scrolls. */
+svg.graph { inline-size: auto; max-inline-size: none; }
+svg text { fill: var(--ink-3); font-size: 11px; font-family: var(--sans); }
+svg .gridline { stroke: var(--line-soft); stroke-width: 1; }
+svg .bar-label { fill: var(--ink-2); font-size: 11px; }
+svg .whisker { stroke: var(--ink-3); stroke-width: 1; }
+
+.legend {
+  display: flex; gap: var(--sp-2) var(--sp-4); flex-wrap: wrap; font-size: var(--t-small);
+  color: var(--ink-3); margin-block-start: var(--sp-3);
+}
+.legend i {
+  display: inline-block; inline-size: 9px; block-size: 9px; border-radius: 2px;
+  margin-inline-end: var(--sp-1);
+}
+
+/* Every chart says what to take from it. A chart with no takeaway is decoration. */
+.caption {
+  margin: var(--sp-3) 0 0; font-size: var(--t-small); color: var(--ink-3);
+  max-inline-size: 72ch; line-height: 1.6;
+}
+
+/* ================================================================== drawer
+   The one thing on this page that genuinely floats, so the one thing with a shadow. */
+
+.drawer {
+  container-type: inline-size;
+  container-name: drawer;
+  position: fixed; inset-block: 0; inset-inline-end: 0;
+  inline-size: min(34rem, 100%);
+  background: var(--panel); border-inline-start: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  padding-block: var(--sp-5) var(--sp-8);
+  padding-inline: var(--sp-5);
+  overflow: auto; overscroll-behavior: contain; z-index: 60;
+  transform: translateX(100%);
+  transition: transform 180ms ease;
+}
+.drawer.open { transform: translateX(0); }
+.drawer[aria-hidden="true"] { visibility: hidden; }
+.drawer.open[aria-hidden="false"] { visibility: visible; }
+.drawer h3 {
+  margin: 0 0 var(--sp-1); font-size: var(--t-h); padding-inline-end: var(--sp-6);
+  overflow-wrap: anywhere;
+}
+.drawer .close {
+  position: absolute; inset-block-start: var(--sp-3); inset-inline-end: var(--sp-4);
+  border: 1px solid transparent;
+  background: none; font-size: 1.25rem; line-height: 1; color: var(--ink-3);
+  cursor: pointer; border-radius: var(--r-sm); padding-inline: var(--sp-1);
+  transition: color var(--ease);
+}
+.drawer .close:hover { color: var(--ink); }
+.drawerpath { font-family: var(--mono); font-size: var(--t-small); color: var(--ink-3); overflow-wrap: anywhere; }
+.drawerh {
+  margin: var(--sp-6) 0 var(--sp-2); font-size: var(--t-small);
+  text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3);
+  font-weight: var(--w-medium);
+  padding-block-end: var(--sp-2); border-block-end: 1px solid var(--line-soft);
+}
+.drawerdesc { font-size: var(--t-body); color: var(--ink-2); margin: var(--sp-4) 0 0; }
+.estimate {
+  font-size: var(--t-label); font-weight: var(--w-medium); text-transform: none;
+  letter-spacing: 0; color: var(--ink-3); border: 1px solid var(--line);
+  border-radius: var(--r-sm); padding-inline: var(--sp-2); margin-inline-start: var(--sp-2);
+}
+
+.kv {
+  display: grid; grid-template-columns: minmax(9rem, 42%) minmax(0, 1fr);
+  gap: var(--sp-2) var(--sp-4);
+  font-size: var(--t-data); margin: var(--sp-3) 0;
+}
+.kv dt { color: var(--ink-3); }
+.kv dd { margin: 0; color: var(--ink-2); min-inline-size: 0; }
+.kv dd b { color: var(--ink); }
+@container drawer (inline-size < 24rem) {
+  .kv { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .kv dt { margin-block-start: var(--sp-3); }
+}
+
+.reasons { margin: var(--sp-2) 0 0; padding-inline-start: var(--sp-4); font-size: var(--t-data); }
+.reasons li { margin-block-end: var(--sp-2); color: var(--ink-2); }
+
+.fixbox {
+  margin: var(--sp-5) 0 0; padding-block: var(--sp-3); padding-inline: var(--sp-4);
+  border-inline-start: 2px solid var(--ok);
+  font-size: var(--t-data); color: var(--ink-2);
+}
+.fixlabel {
+  font-size: var(--t-label); font-weight: var(--w-bold); text-transform: uppercase;
+  letter-spacing: .08em; color: var(--ok); margin-block-end: var(--sp-1);
+}
+
+.barrow {
+  display: grid; grid-template-columns: minmax(0, 1fr) 6rem; gap: var(--sp-2);
+  align-items: safe center;
+  margin-block-end: var(--sp-1); font-size: var(--t-small);
+}
+.barrow .track {
+  position: relative; block-size: 14px; background: var(--line-soft);
+  border-radius: var(--r-sm); overflow: hidden;
+}
+.barrow .fill { position: absolute; inset-block: 0; }
+.barrow .name { font-family: var(--mono); font-size: var(--t-label); min-inline-size: 0; }
+
+/* =================================================================== graph */
+
+.graphbox {
+  overflow: auto; border: 1px solid var(--line);
+  background: var(--panel-2); max-inline-size: 100%;
+}
+.node rect { stroke-width: 1; }
+.node text { font-size: 10.5px; }
+.edge { fill: none; }
+.edge.exploit { stroke: var(--accent); }
+.edge.privilege_implication { stroke: var(--ink-3); stroke-dasharray: 3 3; }
+.edge.lateral { stroke: var(--gC); stroke-dasharray: 6 3; }
+.edge.hot { stroke: var(--sev-critical); stroke-width: 2.4; }
+
+.story {
+  display: grid; grid-template-columns: 1.5rem minmax(0, 1fr); gap: var(--sp-3);
+  align-items: start;
+  padding-block: var(--sp-4); border-block-end: 1px solid var(--line-soft);
+}
+.story:last-child { border-block-end: 0; }
+.storynum {
+  inline-size: 1.375rem; block-size: 1.375rem; display: grid; place-items: center;
+  color: var(--ink-3); font-size: var(--t-small); font-weight: var(--w-bold);
+  border: 1px solid var(--line); border-radius: 50%;
+}
+.story p { margin: 0 0 var(--sp-2); font-size: var(--t-data); color: var(--ink-2); }
+.story p:last-child { margin-block-end: 0; }
+.story p b { color: var(--ink); font-weight: var(--w-medium); }
+.story .note { margin-block-start: 0; }
+
+/* ==================================================================== misc */
+
+.note { font-size: var(--t-small); color: var(--ink-3); margin-block-start: var(--sp-2); }
+.mono { font-family: var(--mono); font-size: .9em; }
+.pill-row { display: flex; gap: var(--sp-1); flex-wrap: wrap; margin-block-start: var(--sp-3); }
+
+/* A banner is an aside about the data, so it gets a rule in the margin and no box. */
+.banner {
+  border-inline-start: 2px solid var(--accent);
+  color: var(--ink-2);
+  padding-block: var(--sp-1); padding-inline: var(--sp-4);
+  margin-block-end: var(--sp-6); font-size: var(--t-body);
+  max-inline-size: 72ch;
+}
+.banner b { color: var(--ink); font-weight: var(--w-medium); }
+.banner.bad { border-inline-start-color: var(--bad); }
+.banner.bad b { color: var(--bad); }
+
+/* A restarted server invalidates the page's session token. This is the one banner that is an
+   interruption rather than information, so it is allowed to look like one. */
+.banner.stale {
+  display: flex; align-items: safe center; gap: var(--sp-3); flex-wrap: wrap;
+  border: 1px solid var(--line); border-inline-start: 2px solid var(--warn);
+  background: var(--panel-2);
+  padding-block: var(--sp-3); max-inline-size: none;
+}
+.banner.stale button { margin-inline-start: auto; }
+
+/* Loading: a skeleton of the layout that is coming, never a spinner. */
+.skeleton { display: grid; gap: var(--sp-3); padding-block: var(--sp-4); }
+.skel { block-size: 12px; border-radius: var(--r-sm); background: var(--line-soft); }
+.skel.wide { inline-size: 100%; }
+.skel.half { inline-size: 52%; }
+.skel.tall { block-size: 56px; }
+
+/* ================================================================= analyze
+   The one page someone lands on before there is anything to read. It is a form, so it is
+   laid out like a form: left-aligned, one column, grouped by hairline, with the decision
+   that matters - am I allowed to point this at that machine - given the weight of a box
+   because it is the one thing here that must not be skimmed. */
+
+/* The form itself keeps its reading width whatever the window does - a text input two
+   thousand pixels wide is not a better text input. But the *view* is as wide as every other
+   view, and a form alone in it leaves the right two thirds of a large screen empty, which
+   reads as a broken layout rather than as a restrained one. So the space beside the form
+   carries the one thing a reader on this page does not yet have: what the run produces.
+   Below 64rem of view there is no room for a second column and the aside stacks under the
+   form, where it is still worth reading. */
+.landing { container-type: inline-size; container-name: landing; }
+.landing-head, .landing-main { max-inline-size: 42rem; min-inline-size: 0; }
+
+.landing-aside { min-inline-size: 0; margin-block-start: var(--sp-7); }
+.asidetitle {
+  font-size: var(--t-label); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-3); margin: 0 0 var(--sp-4);
+  padding-block-start: var(--sp-3); border-block-start: 1px solid var(--line);
+}
+.whatnext {
+  list-style: none; margin: 0; padding: 0; counter-reset: whatnext;
+  display: grid; gap: var(--sp-5);
+  color: var(--ink-2); font-size: var(--t-small); line-height: 1.6;
+  max-inline-size: 46ch;
+}
+.whatnext b { color: var(--ink); font-weight: 600; }
+.whatnext > li { counter-increment: whatnext; position: relative; padding-inline-start: 1.9rem; }
+.whatnext > li::before {
+  content: counter(whatnext);
+  position: absolute; inset-inline-start: 0; inset-block-start: .05em;
+  font-family: var(--mono); font-size: var(--t-label);
+  color: var(--accent);
+}
+
+@container view (inline-size >= 64rem) {
+  .landing {
+    display: grid;
+    grid-template-columns: minmax(0, 42rem) minmax(15rem, 26rem);
+    column-gap: var(--sp-8);
+    /* The two columns sit on the view's outer edges, so this page's left and right margins
+       are the ones a table uses on every other view. The gutter between them absorbs the
+       slack instead of pooling it against the right edge. */
+    justify-content: space-between;
+    align-items: start;
+  }
+  .landing-head { grid-column: 1 / -1; }
+  .landing-main { grid-column: 1; grid-row: 2; }
+
+  /* The explainer and the progress panel share one cell. They are never both shown: the
+     form is long, the second column's content is short, and putting them in separate rows
+     would leave the right-hand side of the page empty for most of the scroll. Sticky keeps
+     whichever one is showing beside the part of the form being read, offset by the height
+     of the two sticky bars above it. */
+  .landing-aside,
+  .landing > #progressPanel {
+    grid-column: 2; grid-row: 2;
+    margin-block-start: 0;
+    position: sticky;
+    inset-block-start: calc(var(--chrome) + var(--sp-5));
+    max-block-size: calc(100dvh - var(--chrome) - var(--sp-7));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  /* Once a run starts, what the assessment produces is no longer the useful thing to be
+     reading. ``:has`` rather than a class, because the panel's ``hidden`` attribute is
+     already the single source of truth and a second flag could disagree with it. */
+  .landing:has(> #progressPanel:not([hidden])) .landing-aside { display: none; }
+
+  /* Aligned with the top of the form's first control rather than with the heading, so the
+     two columns read as one composition instead of two stacks that happen to be adjacent. */
+  .asidetitle { margin-block-start: .15rem; }
+}
+
+.landing-title {
+  font-size: var(--t-h-big); margin: 0 0 var(--sp-3);
+}
+.landing-sub {
+  color: var(--ink-2); margin: 0 0 var(--sp-6);
+  max-inline-size: 58ch; font-size: var(--t-lead); line-height: 1.55;
+}
+
+.card { margin-block-end: var(--sp-6); }
+
+/* A segmented control: one light track, one raised segment. Two filled slabs side by side
+   read as two competing buttons, which is the thing this is not. */
+.modeswitch {
+  display: flex; inline-size: fit-content; max-inline-size: 100%;
+  margin-block-end: var(--sp-5); padding: 3px;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--r);
+}
+.modeswitch button {
+  appearance: none; cursor: pointer; font: inherit; font-size: var(--t-data);
+  border: 1px solid transparent; background: transparent; color: var(--ink-2);
+  padding-block: var(--sp-2); padding-inline: var(--sp-4);
+  flex: 1 1 auto; min-inline-size: 0; text-align: center; white-space: nowrap;
+  border-radius: var(--r-sm);
+  transition: color var(--ease), background var(--ease), border-color var(--ease);
+}
+.modeswitch button:hover:not(:disabled):not([aria-pressed="true"]) { color: var(--ink); }
+.modeswitch button[aria-pressed="true"] {
+  background: var(--panel); border-color: var(--line); color: var(--ink);
+  font-weight: var(--w-medium);
+}
+.modeswitch button:disabled { opacity: .4; cursor: not-allowed; }
+
+/* The border is the affordance here, so the border is earned. */
+.dropzone {
+  display: flex; flex-direction: column; align-items: safe center; justify-content: center;
+  gap: var(--sp-2); text-align: center; min-block-size: 10rem;
+  border: 1px dashed var(--line); border-radius: var(--r);
+  background: var(--panel-2);
+  padding-block: var(--sp-6); padding-inline: var(--sp-5); cursor: pointer;
+  transition: border-color var(--ease), background var(--ease), color var(--ease);
+}
+.dropzone:hover, .dropzone.over { border-color: var(--accent); background: var(--accent-soft); }
+.dropicon { inline-size: 1.625rem; block-size: 1.625rem; color: var(--ink-3); }
+.dropzone:hover .dropicon, .dropzone.over .dropicon { color: var(--accent); }
+.dropmain { font-size: var(--t-lead); color: var(--ink); font-weight: var(--w-medium); }
+.dropalt { font-size: var(--t-data); color: var(--ink-2); }
+.dropformats {
+  font-size: var(--t-small); color: var(--ink-3); line-height: 1.9; margin-block-start: var(--sp-1);
+  text-wrap: balance;
+}
+.dropformats code {
+  font-family: var(--mono); background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--r-sm); padding-inline: var(--sp-1);
+}
+
+.filechosen {
+  margin-block-start: var(--sp-3); padding-block: var(--sp-3); padding-inline: var(--sp-4);
+  font-size: var(--t-data); border-inline-start: 2px solid var(--line);
+  background: var(--panel-2); color: var(--ink-2);
+}
+.filechosen.ok { border-inline-start-color: var(--ok); }
+.filechosen.bad { border-inline-start-color: var(--bad); color: var(--bad); }
+.filerow { display: flex; align-items: safe center; gap: var(--sp-2); flex-wrap: wrap; min-inline-size: 0; }
+.filerow > b { min-inline-size: 0; overflow-wrap: anywhere; }
+.filetick {
+  display: grid; place-items: center; inline-size: 1rem; block-size: 1rem;
+  border-radius: var(--r-sm); background: var(--ok); color: var(--panel);
+  font-size: 10px; flex: none;
+}
+.filemeta { color: var(--ink-3); }
+.filechosen .linkish { margin-inline-start: auto; }
+
+/* A stale report is a fork in the road, not an error: it gets the weight of a notice and two
+   real actions, in the warning hue rather than the failure one. */
+.stalenotice {
+  margin-block-start: var(--sp-4); padding-block: var(--sp-4); padding-inline: var(--sp-4);
+  border: 1px solid var(--line); border-inline-start: 2px solid var(--warn);
+  background: var(--panel-2); font-size: var(--t-data); color: var(--ink-2);
+}
+.stalehead {
+  font-size: var(--t-label); font-weight: var(--w-bold); text-transform: uppercase;
+  letter-spacing: .08em; color: var(--warn); margin-block-end: var(--sp-2);
+}
+.stalenotice p { margin: 0 0 var(--sp-3); }
+.stalenotice p:last-child { margin-block-end: 0; }
+.stalenotice b { color: var(--ink); font-weight: var(--w-medium); }
+.staleactions { display: flex; gap: var(--sp-2); flex-wrap: wrap; margin-block-end: var(--sp-3); }
+
+.profiles { margin-block-start: var(--sp-2); }
+.profileopt {
+  display: inline-flex; align-items: safe center; gap: var(--sp-2);
+  margin: 0 var(--sp-5) var(--sp-2) 0; font-size: var(--t-data); cursor: pointer;
+}
+.profilename { color: var(--ink); font-weight: var(--w-medium); }
+.profilebody {
+  border-inline-start: 1px solid var(--line); padding-inline-start: var(--sp-4);
+  margin-block-start: var(--sp-3);
+}
+.profiledesc { margin: 0 0 var(--sp-3); font-size: var(--t-data); color: var(--ink-2); max-inline-size: 62ch; }
+/* One unheaded list of what the profile does. It had a heading and a coloured marker when
+   it sat beside a second, negative list and the pair needed telling apart; alone it is just
+   the description continued, and a warning colour on a plain capability list overstated it. */
+.plainlist {
+  margin: 0; padding-inline-start: var(--sp-4); font-size: var(--t-small); color: var(--ink-2);
+  max-inline-size: 62ch;
+}
+.plainlist li { margin-block-end: var(--sp-1); }
+
+/* Which scanner will run. Rows, not chips: each carries a sentence about what it is. */
+.scanners { margin-block-start: var(--sp-2); }
+.scanopt {
+  display: grid; grid-template-columns: 1rem minmax(0, 1fr); gap: var(--sp-2);
+  align-items: start;
+  padding-block: var(--sp-3); cursor: pointer; border-block-end: 1px solid var(--line-soft);
+}
+.scanopt:last-of-type { border-block-end: 0; }
+.scanopt input { margin: 3px 0 0; }
+.scanname { display: block; font-size: var(--t-data); color: var(--ink); font-weight: var(--w-medium); }
+.scandetail {
+  display: block; font-size: var(--t-small); color: var(--ink-3); margin-block-start: 2px;
+  max-inline-size: 66ch; line-height: 1.5;
+}
+.scanopt.muted .scanname { color: var(--ink-3); }
+.scanwarn {
+  margin-block-start: var(--sp-3); padding-block: var(--sp-3); padding-inline: var(--sp-4);
+  border-inline-start: 2px solid var(--warn);
+  background: var(--panel-2); font-size: var(--t-small); color: var(--ink-2);
+}
+.scanwarn p { margin: 0 0 var(--sp-2); }
+.scanwarn p:last-child { margin-block-end: 0; }
+.scanwarn b { color: var(--ink); font-weight: var(--w-medium); }
+
+/* The authorisation block. This is a box on a page that has almost no boxes, deliberately:
+   it is the one thing here that must be read rather than skimmed, and it is mandatory. */
+.authbox {
+  border: 1px solid var(--line); border-inline-start: 3px solid var(--warn);
+  background: var(--panel-2); padding: var(--sp-4);
+  margin-block: var(--sp-5) var(--sp-2);
+}
+.authbox.loud { border-inline-start-color: var(--bad); }
+.authhead {
+  font-size: var(--t-label); font-weight: var(--w-bold); text-transform: uppercase;
+  letter-spacing: .08em; color: var(--warn); margin-block-end: var(--sp-3);
+}
+.authbox.loud .authhead { color: var(--bad); }
+.authcheck { font-size: var(--t-data); color: var(--ink); margin-block-end: var(--sp-4); }
+.authbox .field { margin-block-end: var(--sp-3); }
+#privateCheckRow { border-block-start: 1px solid var(--line); padding-block-start: var(--sp-3); }
+
+.advanced {
+  border-block-start: 1px solid var(--line); margin-block-start: var(--sp-6);
+  padding-block-start: var(--sp-3);
+}
+.advanced > summary {
+  cursor: pointer; list-style: none; display: flex; align-items: baseline;
+  gap: var(--sp-2); flex-wrap: wrap; font-size: var(--t-data); color: var(--ink-2);
+}
+.advanced > summary::-webkit-details-marker { display: none; }
+.advanced > summary::before {
+  content: "\203A"; display: inline-block; color: var(--ink-3); font-size: 1.0625rem;
+  line-height: 1; transition: transform var(--ease);
+}
+.advanced[open] > summary::before { transform: rotate(90deg); }
+.advtitle { font-weight: var(--w-medium); color: var(--ink); }
+.advsummary { color: var(--ink-3); font-size: var(--t-small); min-inline-size: 0; }
+.advbody { padding-block-start: var(--sp-5); padding-inline-start: var(--sp-4); }
+
+.runbar {
+  display: flex; align-items: safe center; gap: var(--sp-3); flex-wrap: wrap;
+  margin-block-start: var(--sp-6);
+}
+.runhint {
+  font-size: var(--t-data); color: var(--ink-3);
+  margin-block-start: var(--sp-3); min-block-size: 1.5em; max-inline-size: 62ch;
+}
+.runhint.blocked { color: var(--warn); }
+
+.stepper {
+  list-style: none; display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-4);
+  margin: 0 0 var(--sp-4); padding: 0;
+}
+.step { display: flex; align-items: safe center; gap: var(--sp-2); font-size: var(--t-small); }
+.stepmark {
+  display: grid; place-items: center; inline-size: 1.25rem; block-size: 1.25rem;
+  border-radius: 50%;
+  font-size: 10px; font-weight: var(--w-bold); border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink-3); flex: none;
+  transition: background var(--ease), color var(--ease), border-color var(--ease);
+}
+.step.done .stepmark { background: var(--ok); border-color: var(--ok); color: var(--panel); }
+.step.active .stepmark { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.step.done .steplabel { color: var(--ink-3); }
+.step.active .steplabel { color: var(--ink); font-weight: var(--w-medium); }
+.step.todo .steplabel { color: var(--ink-3); opacity: .7; }
+
+/* The progress panel is a working surface while a run is live, so it is the one inset on
+   this page besides authorisation. */
+#progressPanel {
+  border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--panel-2); padding: var(--sp-5);
+  margin-block-end: var(--sp-6);
+}
+.progressrow { display: flex; align-items: safe center; gap: var(--sp-3); margin-block-end: var(--sp-3); }
+.progressbar {
+  flex: 1 1 auto; min-inline-size: 0; block-size: 4px; background: var(--line);
+  overflow: hidden;
+}
+.progressbar .fill { block-size: 100%; inline-size: 0; background: var(--accent); transition: inline-size 160ms linear; }
+.progressphase { font-size: var(--t-data); color: var(--ink-2); margin: 0 0 var(--sp-3); }
+.logbox > summary {
+  cursor: pointer; font-size: var(--t-small); color: var(--ink-3); margin-block-end: var(--sp-2);
+}
+.logbox > summary:hover { color: var(--ink-2); }
+pre.log {
+  margin: 0; max-block-size: 15rem; overflow: auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: var(--sp-3); font-family: var(--mono); font-size: var(--t-small);
+  line-height: 1.7; color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere;
+}
+
+/* =================================================================== report */
+
+/* The generated report, embedded. It is served with the page's own palette and without its
+   own page furniture, so it reads as this page's content rather than as a second document
+   framed inside the first: no border, no background of its own, and no scrollbar. The
+   height is set from the document once it loads, which is what makes the page scroll once
+   instead of twice and what lets a long report print in full. */
+.reportframe {
+  inline-size: 100%; border: 0; background: none; display: block;
+  /* Only until the measurement lands, and only if it never does. */
+  min-block-size: 70vh;
+}
+.reportframe.fitted { min-block-size: 0; }
+
+/* ================================================================== novelty */
+
+table.matrix td { vertical-align: top; padding-block: var(--sp-3); block-size: auto; }
+table.matrix .note { margin-block-start: var(--sp-1); max-inline-size: 52ch; }
+.stack {
+  display: flex; block-size: 8px; min-inline-size: 7.5rem; border-radius: var(--r-sm);
+  overflow: hidden; background: var(--line-soft); margin-block-start: var(--sp-1);
+}
+.stack i { display: block; block-size: 100%; }
+.stack i.has { background: var(--ok); }
+.stack i.part { background: var(--sev-medium); }
+.stack i.lacks { background: var(--line); }
+
+/* ==================================================================== print
+   People print the Report view and hand it to someone. It goes on white, without the
+   application shell, and a finding's detail block does not straddle a page break. */
+
+@media print {
+  :root {
+    --bg: #fff; --panel: #fff; --panel-2: #fff;
+    --ink: #000; --ink-2: #222; --ink-3: #555;
+    --line: #bbb; --line-soft: #ddd; --shadow: none; --accent: #000;
+    --accent-soft: #fff; --accent-line: #bbb;
+    --w-prose: 100%; --w-wide: 100%; --gutter: 0px;
+  }
+  header.topbar, nav.mainnav, .drawer, .controls, .runbar, .toggle, .primary {
+    display: none !important;
+  }
+  body { background: #fff; color: #000; overflow-x: visible; }
+  main { padding: 0; }
+  section.view { display: block; max-inline-size: none; padding-inline: 0; }
+  section.view > * { max-inline-size: none; }
+  .block, .panel, .tile, .lead { break-inside: avoid; page-break-inside: avoid; }
+  .story, .kv, .fixbox, tr { break-inside: avoid; page-break-inside: avoid; }
+  .tablewrap, .tablewrap.tall, .graphbox { max-block-size: none; overflow: visible; border: 0; }
+  :is(.tablewrap, .graphbox).is-scrollable::after { content: none; }
+  svg.graph { max-inline-size: 100%; block-size: auto; }
+  :is(th, td)[data-pri] { display: table-cell !important; }
+  .rowfold { display: none !important; }
+  th { position: static; }
+  /* The frame is already sized to its document, and that measured height is what makes
+     a long report print in full rather than as a clipped box, so it is left alone. */
+  .reportframe { min-block-size: 0; border: 0; }
+  a[href]::after { content: ""; }
+}
+
+/* A hairline system disappears under forced colours, so the rules become system borders and
+   the accent becomes the system's own highlight. */
+@media (forced-colors: active) {
+  .block, .tiles, th, td, .banner, .fixbox, .filechosen, .scanwarn, .target {
+    border-color: CanvasText;
+  }
+  nav.mainnav button[aria-selected="true"] { border-block-end-color: Highlight; }
+  .leadnum { color: CanvasText; }
+}

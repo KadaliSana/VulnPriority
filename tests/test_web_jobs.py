@@ -1,6 +1,6 @@
 """The background job registry.
 
-The HTTP layer hands work to :mod:`vulnprio.web.jobs` and then reports whatever it says, so
+The HTTP layer hands work to :mod:`vulnpriority.web.jobs` and then reports whatever it says, so
 these tests are about the properties the rest of the application relies on rather than about
 any particular analysis: a job goes through the states it claims to, a cancelled or failed
 one never leaves a result behind, the history stays bounded without ever dropping live work,
@@ -16,7 +16,7 @@ import time
 
 import pytest
 
-from vulnprio.web.jobs import TERMINAL_STATUSES, Job, JobCancelled, JobStatus, JobStore
+from vulnpriority.web.jobs import TERMINAL_STATUSES, Job, JobCancelled, JobStatus, JobStore
 
 
 def _wait_for(store: JobStore, job_id: str, timeout: float = 5.0) -> dict:
@@ -363,3 +363,31 @@ def test_two_stores_are_independent() -> None:
     job = first.create()
     assert second.snapshot(job.job_id) is None
     assert len(second) == 0
+
+
+def test_shutdown_honours_one_deadline_for_every_job_not_one_each() -> None:
+    """The timeout is the caller's budget for the whole shutdown.
+
+    Joining each thread for the full timeout made the worst case N x timeout, so a store
+    with ten stuck jobs and a five-second budget blocked for fifty. The jobs here never
+    notice cancellation, which is exactly the case the deadline exists to bound.
+    """
+    import time
+
+    store = JobStore()
+    release = threading.Event()
+    for _ in range(5):
+        job = store.create()
+        store.submit(job, lambda _ctx: release.wait(30))
+
+    for _ in range(100):                      # let the threads actually start
+        if all(j.status is JobStatus.RUNNING for j in store.jobs()):
+            break
+        time.sleep(0.01)
+
+    started = time.monotonic()
+    store.shutdown(timeout=0.3)
+    elapsed = time.monotonic() - started
+    release.set()
+
+    assert elapsed < 0.3 * 5, f"shutdown took {elapsed:.2f}s for 5 jobs on a 0.3s budget"

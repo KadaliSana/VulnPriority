@@ -12,22 +12,22 @@ from datetime import date
 
 import pytest
 
-from vulnprio.attacker.likelihood import (
+from vulnpriority.attacker.likelihood import (
     EVIDENCE_TERMS,
     build_evidence,
     epss_logit_term,
     function_ordinal,
     logit,
 )
-from vulnprio.attacker.model import (
+from vulnpriority.attacker.model import (
     explain_terms,
     horizon_factor,
     log_odds_terms,
     p_exploit,
     sigmoid,
 )
-from vulnprio.attacker.presets import list_presets, load_all_presets, load_preset
-from vulnprio.core.enums import (
+from vulnpriority.attacker.presets import list_presets, load_all_presets, load_preset
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     AttackComplexity,
     EndpointFunction,
@@ -35,8 +35,8 @@ from vulnprio.core.enums import (
     PrivilegeLevel,
     UserInteraction,
 )
-from vulnprio.core.errors import ConfigError
-from vulnprio.core.models import (
+from vulnpriority.core.errors import ConfigError
+from vulnpriority.core.models import (
     ApplicabilityAssessment,
     AssetCriticality,
     AttackerModel,

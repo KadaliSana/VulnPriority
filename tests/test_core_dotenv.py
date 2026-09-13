@@ -14,12 +14,12 @@ from pathlib import Path
 
 import pytest
 
-from vulnprio.core.config import DOTENV_PATH, PROJECT_ROOT, load_config, load_dotenv
+from vulnpriority.core.config import DOTENV_PATH, PROJECT_ROOT, load_config, load_dotenv
 
 
 @pytest.fixture
 def clean_env(monkeypatch: pytest.MonkeyPatch):
-    for name in ("VULNPRIO_TEST_KEY", "VULNPRIO_TEST_OTHER", "ANTHROPIC_API_KEY"):
+    for name in ("VULNPRIORITY_TEST_KEY", "VULNPRIORITY_TEST_OTHER", "ANTHROPIC_API_KEY"):
         monkeypatch.delenv(name, raising=False)
     return monkeypatch
 
@@ -31,49 +31,49 @@ def _write(tmp_path: Path, text: str) -> Path:
 
 
 def test_values_reach_the_environment(clean_env, tmp_path: Path) -> None:
-    load_dotenv(_write(tmp_path, "VULNPRIO_TEST_KEY=abc123\n"))
-    assert os.environ["VULNPRIO_TEST_KEY"] == "abc123"
+    load_dotenv(_write(tmp_path, "VULNPRIORITY_TEST_KEY=abc123\n"))
+    assert os.environ["VULNPRIORITY_TEST_KEY"] == "abc123"
 
 
 def test_a_real_environment_variable_wins(clean_env, tmp_path: Path) -> None:
     """The precedence people expect: an exported key or a CI secret is not overwritten."""
-    clean_env.setenv("VULNPRIO_TEST_KEY", "from-the-environment")
-    load_dotenv(_write(tmp_path, "VULNPRIO_TEST_KEY=from-the-file\n"))
-    assert os.environ["VULNPRIO_TEST_KEY"] == "from-the-environment"
+    clean_env.setenv("VULNPRIORITY_TEST_KEY", "from-the-environment")
+    load_dotenv(_write(tmp_path, "VULNPRIORITY_TEST_KEY=from-the-file\n"))
+    assert os.environ["VULNPRIORITY_TEST_KEY"] == "from-the-environment"
 
 
 def test_override_is_available_but_not_the_default(clean_env, tmp_path: Path) -> None:
-    clean_env.setenv("VULNPRIO_TEST_KEY", "from-the-environment")
-    load_dotenv(_write(tmp_path, "VULNPRIO_TEST_KEY=from-the-file\n"), override=True)
-    assert os.environ["VULNPRIO_TEST_KEY"] == "from-the-file"
+    clean_env.setenv("VULNPRIORITY_TEST_KEY", "from-the-environment")
+    load_dotenv(_write(tmp_path, "VULNPRIORITY_TEST_KEY=from-the-file\n"), override=True)
+    assert os.environ["VULNPRIORITY_TEST_KEY"] == "from-the-file"
 
 
 @pytest.mark.parametrize(
     "line,expected",
     [
-        ("VULNPRIO_TEST_KEY=plain", "plain"),
-        ('VULNPRIO_TEST_KEY="double quoted"', "double quoted"),
-        ("VULNPRIO_TEST_KEY='single quoted'", "single quoted"),
-        ("  VULNPRIO_TEST_KEY = spaced  ", "spaced"),
-        ("export VULNPRIO_TEST_KEY=exported", "exported"),
-        ("VULNPRIO_TEST_KEY=sk-ant-api03-aa/bb+cc=", "sk-ant-api03-aa/bb+cc="),
+        ("VULNPRIORITY_TEST_KEY=plain", "plain"),
+        ('VULNPRIORITY_TEST_KEY="double quoted"', "double quoted"),
+        ("VULNPRIORITY_TEST_KEY='single quoted'", "single quoted"),
+        ("  VULNPRIORITY_TEST_KEY = spaced  ", "spaced"),
+        ("export VULNPRIORITY_TEST_KEY=exported", "exported"),
+        ("VULNPRIORITY_TEST_KEY=sk-ant-api03-aa/bb+cc=", "sk-ant-api03-aa/bb+cc="),
     ],
 )
 def test_line_forms(clean_env, tmp_path: Path, line: str, expected: str) -> None:
     load_dotenv(_write(tmp_path, line + "\n"))
-    assert os.environ["VULNPRIO_TEST_KEY"] == expected
+    assert os.environ["VULNPRIORITY_TEST_KEY"] == expected
 
 
 def test_comments_and_blank_lines_are_ignored(clean_env, tmp_path: Path) -> None:
-    load_dotenv(_write(tmp_path, "# a comment\n\n   \nVULNPRIO_TEST_KEY=value\n"))
-    assert os.environ["VULNPRIO_TEST_KEY"] == "value"
+    load_dotenv(_write(tmp_path, "# a comment\n\n   \nVULNPRIORITY_TEST_KEY=value\n"))
+    assert os.environ["VULNPRIORITY_TEST_KEY"] == "value"
     assert "# a comment" not in os.environ
 
 
 def test_a_malformed_file_degrades_rather_than_raising(clean_env, tmp_path: Path) -> None:
     """A broken secrets file must not abort a scan that did not need a key."""
-    load_dotenv(_write(tmp_path, "not a key value line\n=missing-name\nVULNPRIO_TEST_KEY=ok\n"))
-    assert os.environ["VULNPRIO_TEST_KEY"] == "ok"
+    load_dotenv(_write(tmp_path, "not a key value line\n=missing-name\nVULNPRIORITY_TEST_KEY=ok\n"))
+    assert os.environ["VULNPRIORITY_TEST_KEY"] == "ok"
 
 
 def test_a_missing_file_is_not_an_error(clean_env, tmp_path: Path) -> None:
@@ -81,8 +81,8 @@ def test_a_missing_file_is_not_an_error(clean_env, tmp_path: Path) -> None:
 
 
 def test_the_return_value_never_carries_the_secret(clean_env, tmp_path: Path) -> None:
-    applied = load_dotenv(_write(tmp_path, "VULNPRIO_TEST_KEY=super-secret-value\n"))
-    assert "VULNPRIO_TEST_KEY" in applied
+    applied = load_dotenv(_write(tmp_path, "VULNPRIORITY_TEST_KEY=super-secret-value\n"))
+    assert "VULNPRIORITY_TEST_KEY" in applied
     assert "super-secret-value" not in json.dumps(applied)
 
 
@@ -126,9 +126,9 @@ def test_a_blank_assignment_sets_nothing(clean_env, tmp_path: Path) -> None:
     the variable to an empty string, an untouched file would make every provider look
     configured and the live path would be chosen with no credentials behind it.
     """
-    load_dotenv(_write(tmp_path, "VULNPRIO_TEST_KEY=\nVULNPRIO_TEST_OTHER=real\n"))
-    assert "VULNPRIO_TEST_KEY" not in os.environ
-    assert os.environ["VULNPRIO_TEST_OTHER"] == "real"
+    load_dotenv(_write(tmp_path, "VULNPRIORITY_TEST_KEY=\nVULNPRIORITY_TEST_OTHER=real\n"))
+    assert "VULNPRIORITY_TEST_KEY" not in os.environ
+    assert os.environ["VULNPRIORITY_TEST_OTHER"] == "real"
 
 
 def test_the_working_env_file_is_readable_and_never_committed(clean_env) -> None:

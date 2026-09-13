@@ -10,9 +10,9 @@ from __future__ import annotations
 
 import pytest
 
-from vulnprio.core.enums import VersionMatch
-from vulnprio.core.models import AffectedProduct, TechComponent
-from vulnprio.semantic.cpe_match import (
+from vulnpriority.core.enums import VersionMatch
+from vulnpriority.core.models import AffectedProduct, TechComponent
+from vulnpriority.semantic.cpe_match import (
     cpe_product_matches,
     describe_range,
     match_affected,

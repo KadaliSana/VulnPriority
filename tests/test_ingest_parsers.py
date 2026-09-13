@@ -13,14 +13,14 @@ from pathlib import Path
 
 import pytest
 
-from vulnprio.core.enums import HttpMethod, PrivilegeLevel, Provenance, ScannerSeverity, TrustTier
-from vulnprio.core.models import Scan
-from vulnprio.core.registry import SCANNER_PARSERS
-from vulnprio.ingest.burp import BurpParser
-from vulnprio.ingest.generic import GenericJsonParser, detect_parser
-from vulnprio.ingest.nuclei import NucleiParser
-from vulnprio.ingest.tech_fingerprint import fingerprint_response
-from vulnprio.ingest.zap import ZapParser
+from vulnpriority.core.enums import HttpMethod, PrivilegeLevel, Provenance, ScannerSeverity, TrustTier
+from vulnpriority.core.models import Scan
+from vulnpriority.core.registry import SCANNER_PARSERS
+from vulnpriority.ingest.burp import BurpParser
+from vulnpriority.ingest.generic import GenericJsonParser, detect_parser
+from vulnpriority.ingest.nuclei import NucleiParser
+from vulnpriority.ingest.tech_fingerprint import fingerprint_response
+from vulnpriority.ingest.zap import ZapParser
 
 FIXTURES = Path("data/fixtures/scans")
 CASES = [
@@ -183,7 +183,7 @@ def test_a_zap_json_report_falls_back_to_created_when_generated_will_not_parse(t
     import json
     from datetime import date
 
-    from vulnprio.ingest.normalize import DEFAULT_SCANNED_AT
+    from vulnpriority.ingest.normalize import DEFAULT_SCANNED_AT
 
     payload = {
         "@programName": "ZAP",
@@ -212,7 +212,7 @@ def test_the_sept_spelling_is_handled_by_the_timestamp_parser_itself(tmp_path):
     """It belongs to the parser, not to one report format, and it is word-bounded."""
     from datetime import datetime
 
-    from vulnprio.ingest.normalize import parse_timestamp
+    from vulnpriority.ingest.normalize import parse_timestamp
 
     assert parse_timestamp("Sun, 13 Sept 2026 09:16:41") == datetime(2026, 9, 13, 9, 16, 41)
     assert parse_timestamp("Sun, 13 Sep 2026 09:16:41") == datetime(2026, 9, 13, 9, 16, 41)

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from vulnprio.sandbox.normalize import (
+from vulnpriority.sandbox.normalize import (
     ELIDED_BLOB_TEMPLATE,
     HOMOGLYPHS,
     collapse_whitespace,

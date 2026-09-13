@@ -13,8 +13,8 @@ from datetime import date, datetime
 
 import pytest
 
-from vulnprio.adversarial.corpus import load_corpus
-from vulnprio.adversarial.injector import (
+from vulnpriority.adversarial.corpus import load_corpus
+from vulnpriority.adversarial.injector import (
     PAYLOAD_SEPARATOR,
     inject,
     inject_many,
@@ -26,9 +26,9 @@ from vulnprio.adversarial.injector import (
     stable_index,
     target_finding_id,
 )
-from vulnprio.core.enums import InjectionCategory, Provenance, TrustTier
-from vulnprio.core.errors import ConfigError
-from vulnprio.core.models import (
+from vulnpriority.core.enums import InjectionCategory, Provenance, TrustTier
+from vulnpriority.core.errors import ConfigError
+from vulnpriority.core.models import (
     AdversarialCase,
     ReferenceDoc,
     Scan,

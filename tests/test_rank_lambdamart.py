@@ -2,7 +2,7 @@
 
 The headline test plants a signal - KEV membership decides relevance, CVSS is noise - and
 asserts the learned ranker beats the CVSS-only baseline on NDCG@10. NDCG is computed by a
-local helper rather than imported from ``vulnprio.eval``, which is written in parallel.
+local helper rather than imported from ``vulnpriority.eval``, which is written in parallel.
 
 The cost-sensitive probability head is tested here too, because Gap 7 pairs the two: the
 ranker's impact-weighted pairs and the head's ``scale_pos_weight`` are the same correction
@@ -18,8 +18,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from vulnprio.core.config import RankingConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import RankingConfig
+from vulnpriority.core.enums import (
     ApplicabilityVerdict,
     CvssVersion,
     EndpointFunction,
@@ -33,9 +33,9 @@ from vulnprio.core.enums import (
     ScoreSource,
     VersionMatch,
 )
-from vulnprio.core.errors import RankerNotFittedError, VulnprioError
-from vulnprio.core.interfaces import ProbabilityModel, Ranker
-from vulnprio.core.models import (
+from vulnpriority.core.errors import RankerNotFittedError, VulnPriorityError
+from vulnpriority.core.interfaces import ProbabilityModel, Ranker
+from vulnpriority.core.models import (
     ApplicabilityAssessment,
     AssetCriticality,
     BusinessImpact,
@@ -55,11 +55,11 @@ from vulnprio.core.models import (
     UntrustedText,
     VulnIntel,
 )
-from vulnprio.core.registry import get_ranker
-from vulnprio.rank.baselines import CvssOnlyRanker
-from vulnprio.rank.features import FeatureBuilder
-from vulnprio.rank.lambdamart import LambdaMartRanker
-from vulnprio.rank.likelihood_head import CostSensitiveExploitHead
+from vulnpriority.core.registry import get_ranker
+from vulnpriority.rank.baselines import CvssOnlyRanker
+from vulnpriority.rank.features import FeatureBuilder
+from vulnpriority.rank.lambdamart import LambdaMartRanker
+from vulnpriority.rank.likelihood_head import CostSensitiveExploitHead
 
 AS_OF = date(2024, 6, 1)
 OBSERVED_AT = datetime(2024, 5, 1, 9, 0, 0)
@@ -67,7 +67,7 @@ SEED = 7
 
 
 # ---------------------------------------------------------------------------
-# NDCG, defined locally so this module does not depend on vulnprio.eval
+# NDCG, defined locally so this module does not depend on vulnpriority.eval
 # ---------------------------------------------------------------------------
 
 
@@ -311,14 +311,14 @@ def test_scoring_before_fitting_is_an_error() -> None:
 
 def test_a_relevance_vector_of_the_wrong_length_is_rejected() -> None:
     train, _, _ = split_frames()
-    with pytest.raises(VulnprioError):
+    with pytest.raises(VulnPriorityError):
         LambdaMartRanker(fast_config()).fit(train, np.zeros(3))
 
 
 def test_scoring_a_frame_from_a_different_ablation_cell_is_refused(fitted) -> None:
     ranker, _, _, _ = fitted
     _, narrow, _ = split_frames(ComponentFlags(a=False, b=True, c=True))
-    with pytest.raises(VulnprioError):
+    with pytest.raises(VulnPriorityError):
         ranker.score(narrow)
 
 
@@ -420,8 +420,8 @@ def test_no_monotone_constraint_sits_on_a_feature_untrusted_content_can_reach() 
     this reason; the exploitation evidence it corroborates is already constrained through
     ``b_kev``, where nothing untrusted can follow it.
     """
-    from vulnprio.core.enums import UNTRUSTED_TIERS
-    from vulnprio.rank.explain import FEATURE_TIER
+    from vulnpriority.core.enums import UNTRUSTED_TIERS
+    from vulnpriority.rank.explain import FEATURE_TIER
 
     constrained = {name for name, value in RankingConfig().monotone.items() if value != 0}
     assert constrained
@@ -468,7 +468,7 @@ def test_weights_supplied_per_group_are_used_unchanged() -> None:
 def test_a_weight_vector_of_an_impossible_length_is_rejected() -> None:
     train, _, relevance = split_frames()
     labels = np.array([relevance[finding_id] for finding_id in train.finding_ids], dtype=float)
-    with pytest.raises(VulnprioError):
+    with pytest.raises(VulnPriorityError):
         LambdaMartRanker(fast_config()).fit(train, labels, np.ones(5), seed=SEED)
 
 
@@ -572,7 +572,7 @@ def test_a_fallback_ranker_round_trips_as_a_fallback_ranker(tmp_path) -> None:
 
 
 def test_loading_without_the_metadata_sidecar_is_an_error(tmp_path) -> None:
-    with pytest.raises(VulnprioError):
+    with pytest.raises(VulnPriorityError):
         LambdaMartRanker.load(tmp_path / "absent.json")
 
 
@@ -653,7 +653,7 @@ def test_the_calibration_method_can_be_overridden_per_instance() -> None:
 
 
 def test_an_unknown_calibration_method_is_rejected() -> None:
-    with pytest.raises(VulnprioError):
+    with pytest.raises(VulnPriorityError):
         CostSensitiveExploitHead(calibration="magic")
 
 
@@ -694,13 +694,13 @@ def test_predicting_before_fitting_is_an_error() -> None:
 def test_predicting_on_a_different_ablation_cell_is_refused(fitted_head) -> None:
     head, _, _, _ = fitted_head
     _, narrow, _ = split_frames(ComponentFlags(a=False, b=True, c=True))
-    with pytest.raises(VulnprioError):
+    with pytest.raises(VulnPriorityError):
         head.predict_proba(narrow)
 
 
 def test_a_label_vector_of_the_wrong_length_is_rejected() -> None:
     train, _, _ = split_frames()
-    with pytest.raises(VulnprioError):
+    with pytest.raises(VulnPriorityError):
         CostSensitiveExploitHead(head_config()).fit(train, np.zeros(4))
 
 

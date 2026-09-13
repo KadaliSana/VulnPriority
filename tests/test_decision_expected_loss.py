@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import pytest
 
-from vulnprio.core.models import BusinessImpact, ExploitLikelihood
-from vulnprio.decision.expected_loss import chain_adjusted_loss, expected_loss
+from vulnpriority.core.models import BusinessImpact, ExploitLikelihood
+from vulnpriority.decision.expected_loss import chain_adjusted_loss, expected_loss
 
 
 def likelihood(p: float) -> ExploitLikelihood:

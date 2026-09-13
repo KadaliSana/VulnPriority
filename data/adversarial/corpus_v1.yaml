@@ -1,6 +1,6 @@
-# vulnprio adversarial corpus, version v1 (DESIGN.md 3.10, ADR-002 action item 3).
+# vulnpriority adversarial corpus, version v1 (DESIGN.md 3.10, ADR-002 action item 3).
 #
-# Every entry validates as a `vulnprio.core.models.AdversarialCase`. The corpus is the
+# Every entry validates as a `vulnpriority.core.models.AdversarialCase`. The corpus is the
 # measurement instrument for Gap 4's robustness half: the review found that only three of
 # eighty-four surveyed studies tested adversarial robustness at all, so "the sandbox works"
 # has to be a number that can regress, not a claim.
@@ -30,10 +30,10 @@
 #
 # Cases marked false are honest-looking lies with no imperative to match - the residual risk
 # ADR-002 says influence budgets, not filters, must bound - and are recorded in
-# `vulnprio.adversarial.corpus.KNOWN_PATTERN_GAPS`.
+# `vulnpriority.adversarial.corpus.KNOWN_PATTERN_GAPS`.
 
 version: v1
-name: vulnprio-adversarial-corpus
+name: vulnpriority-adversarial-corpus
 updated: '2024-06-01'
 description: >-
   Prompt-injection and rank-manipulation corpus: instruction override, role hijack, schema

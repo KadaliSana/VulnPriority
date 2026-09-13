@@ -17,17 +17,17 @@ import json
 import pytest
 from pydantic import ValidationError
 
-from vulnprio.core.config import LLMConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import LLMConfig
+from vulnpriority.core.enums import (
     EndpointFunction,
     ExploitMaturity,
     LLMBackendKind,
     PrivilegeLevel,
     Provenance,
 )
-from vulnprio.core.errors import ConfigError
-from vulnprio.core.interfaces import SandboxedPrompt
-from vulnprio.llm.gemini_backend import (
+from vulnpriority.core.errors import ConfigError
+from vulnpriority.core.interfaces import SandboxedPrompt
+from vulnpriority.llm.gemini_backend import (
     DEFAULT_GEMINI_MODEL,
     DEFAULT_KEY_ENV,
     GeminiBackend,
@@ -36,11 +36,11 @@ from vulnprio.llm.gemini_backend import (
     resolve_key_env,
     resolve_model,
 )
-from vulnprio.llm.guarded import GuardedBackend
-from vulnprio.llm.heuristic import HeuristicBackend
-from vulnprio.llm.openai_compatible import RateLimiter
-from vulnprio.llm.prompts import format_operator_context, prompt_hash, system_prompt
-from vulnprio.llm.schemas import (
+from vulnpriority.llm.guarded import GuardedBackend
+from vulnpriority.llm.heuristic import HeuristicBackend
+from vulnpriority.llm.openai_compatible import RateLimiter
+from vulnpriority.llm.prompts import format_operator_context, prompt_hash, system_prompt
+from vulnpriority.llm.schemas import (
     ApplicabilityOut,
     AssetCriticalityOut,
     ExploitabilityOut,

@@ -19,8 +19,8 @@ from datetime import date, datetime, timedelta
 
 import pytest
 
-from vulnprio.core.config import PipelineConfig, SimulationConfig
-from vulnprio.core.enums import (
+from vulnpriority.core.config import PipelineConfig, SimulationConfig
+from vulnpriority.core.enums import (
     EndpointFunction,
     HttpMethod,
     LabelSource,
@@ -29,7 +29,7 @@ from vulnprio.core.enums import (
     RankerName,
     ScannerSeverity,
 )
-from vulnprio.core.models import (
+from vulnpriority.core.models import (
     ApplicabilityAssessment,
     AssetCriticality,
     BusinessImpact,
@@ -46,7 +46,7 @@ from vulnprio.core.models import (
     SimulationResult,
     UntrustedText,
 )
-from vulnprio.eval.simulation import (
+from vulnpriority.eval.simulation import (
     DAYS_PER_WEEK,
     LongitudinalSimulator,
     prevention_rate,
