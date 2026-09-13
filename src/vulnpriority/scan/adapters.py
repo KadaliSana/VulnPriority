@@ -220,16 +220,40 @@ def _zap_docker_argv(tool: ExternalTool, request: ScanRequest, report: Path) -> 
     target = safe_argument(rewritten, what="target URL")
     workdir = Path(report).parent.resolve()
     script = "zap-baseline.py" if request.profile == ScanProfile.PASSIVE else "zap-full-scan.py"
-    # The external scanner's own budget, not the built-in crawler's: see
-    # ``ScanRequest.external_time_budget_s`` for why conflating them made every run
-    # of the same target return different findings.
-    minutes = max(1, int(round(request.external_time_budget_s / 60.0)))
     image = safe_argument(tool.image or ZAP_DOCKER_IMAGE, what="container image")
+
+    # A container must not be able to kill the machine that hosts it. Without these an
+    # active scan grew until the Docker Desktop WSL VM died, which failed the scan *and*
+    # left the runtime wedged for every scan afterwards; see ``external_memory_gb``.
+    #
+    # ``--memory-swap`` equal to ``--memory`` disables swap for the container. Allowing it
+    # to swap just moves the same exhaustion into the VM's disk and takes longer to fail.
+    #
+    # ZAP sizes its own heap from this limit, so setting one is the whole fix. Measured on
+    # this image, ``zap.sh`` reports "Available memory" as the cgroup limit when there is one
+    # and the host's total when there is not, then takes a quarter of it for ``-Xmx``:
+    #
+    #     no limit        7864 MB  ->  heap 1966m     (the host, which is the bug)
+    #     --memory 6g     6144 MB  ->  heap 1536m
+    #     --memory 2g     2048 MB  ->  heap  512m
+    #
+    # The heap is the smaller half of the story. With no limit the container reached 4.94GB
+    # on a 1.92GB heap, so roughly 3GB was non-heap and invisible to ``-Xmx``: thread stacks
+    # and direct buffers for an active-scan pool sized from ``nproc``, metaspace, and ZAP's
+    # in-memory session holding every request and response the scan generates. That is why
+    # the bound has to be on the container rather than on the JVM - and why passing a larger
+    # ``-Xmx`` would make matters worse, not better.
+    #
+    # ``--memory-swap`` equal to ``--memory`` disables swap for the container. Allowing it to
+    # swap just moves the same exhaustion onto disk and takes longer to fail.
+    memory_gb = float(request.external_memory_gb)
     return [
         [
             str(tool.executable),
             "run",
             "--rm",
+            "--memory", f"{memory_gb:g}g",
+            "--memory-swap", f"{memory_gb:g}g",
             # Harmless when Docker already provides the name (Docker Desktop does); the
             # difference between a working scan and a silent no-op on plain Linux.
             "--add-host", f"{DOCKER_HOST_ALIAS}:host-gateway",
@@ -239,7 +263,11 @@ def _zap_docker_argv(tool: ExternalTool, request: ScanRequest, report: Path) -> 
             "-t", target,
             "-J", report.name,
             "-I",                       # report warnings without failing the run
-            "-T", str(minutes),         # hard cap on the whole scan, in minutes
+            # No ``-T`` deliberately. It never bounded the active scan -- ZAP's own help
+            # reads "max time in minutes to wait for ZAP to start and the passive scan to
+            # run" -- so all it could do was cut the passive wait short and discard findings
+            # the scan had already paid for. Unset, the passive wait is unbounded and the
+            # startup wait falls back to ZAP's own 600s, which is ample for a container.
             "-z", f"-config spider.maxDepth={request.max_depth}",
         ]
     ]
@@ -738,9 +766,28 @@ def run_external(
 ) -> Path:
     """Run an external scanner into a temporary report file and return its path.
 
-    The command is executed with ``shell=False`` and a hard timeout derived from the
-    request's time budget. Standard output is captured rather than inherited, so a tool
-    that decides to be interactive cannot block the process.
+    The command is executed with ``shell=False``. Standard output is captured rather than
+    inherited, so a tool that decides to be interactive cannot block the process.
+
+    **No outer timeout by default.** There used to be one, derived from the request budget,
+    and killing a scanner from out here has exactly one effect: the scan is paid for in full
+    and its findings are thrown away, because a tool that is killed has not yet written its
+    report. A 20 minute ZAP budget became a 32 minute wait ending in "exceeded its 1920s
+    timeout" and a silent fallback to the built-in crawler, which is how a real run of
+    localhost:3000 returned zero findings.
+
+    What this means per tool, accurately, because the tools differ:
+
+    * ``nikto`` (``-maxtime``) and ``nuclei`` (``-timeout``) are bounded from their own argv
+      and will stop on their own.
+    * ``zap-docker`` in PASSIVE mode runs ``zap-baseline.py``, where ``-T`` caps startup plus
+      the passive scan - that is the whole run, so it is bounded.
+    * ``zap-docker`` in ACTIVE mode runs ``zap-full-scan.py``, where ``-T`` caps startup and
+      the *passive* phase only. The active scan that follows is **not** bounded by anything
+      we pass, and on a large application it can run for hours. That is the deliberate
+      trade: an unbounded scan that produces findings beats a capped one that produces none.
+
+    Pass ``timeout_s`` explicitly to reinstate a ceiling for a caller that wants one.
     """
     directory = Path(out_dir) if out_dir is not None else Path(tempfile.mkdtemp(prefix="vulnpriority-scan-"))
     directory.mkdir(parents=True, exist_ok=True)
@@ -748,15 +795,10 @@ def run_external(
     steps = build_argv(tool, request, report)
 
     execute = runner or subprocess.run
-    # Our own kill switch has to sit *outside* the tool's cap, not inside it. It used to
-    # be twice the built-in crawler's budget - five minutes - so a ZAP scan told to take
-    # twenty was killed at five, part-way through, before it had written its report. The
-    # headroom covers container startup and the image pull on a cold machine.
-    budget = float(
-        timeout_s
-        if timeout_s is not None
-        else max(request.external_time_budget_s * 1.5 + 120.0, 120.0)
-    )
+    # ``None`` means no outer timeout: the tool bounds itself from its own argv, and killing
+    # it from out here only ever discarded a scan that was already stopping. See the
+    # docstring. A caller that genuinely needs a ceiling passes one.
+    budget = float(timeout_s) if timeout_s is not None else None
     for argv in steps:
         try:
             completed = execute(
@@ -772,6 +814,7 @@ def run_external(
         except FileNotFoundError as error:
             raise ExternalToolError(f"{tool.name} is not executable at {tool.executable}: {error}") from error
         except subprocess.TimeoutExpired as error:
+            # Only reachable when a caller asked for a ceiling; the default does not set one.
             raise ExternalToolError(f"{tool.name} exceeded its {budget:.0f}s timeout") from error
         returncode = getattr(completed, "returncode", 0)
         if returncode not in (0, 1, 2):   # scanners use small non-zero codes for "findings present"

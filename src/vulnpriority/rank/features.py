@@ -29,6 +29,7 @@ attacker picks the worst of a finding's CVEs.
 ===============================  =======  ==========================================================
 feature                          group    derivation
 ===============================  =======  ==========================================================
+cve_present                      BASE     1.0 when the finding names at least one CVE
 cvss_base_max                    BASE     max base score over the driving CVE's records; 0.0 if none
 cvss_version_ord                 BASE     ``cvss_version_ordinal`` of the selected record (2.0->0 .. 4.0->3)
 cvss_source_agreement            BASE     ``feeds.cvss_policy.source_agreement``; 1.0 when absent
@@ -236,7 +237,15 @@ INTEL_LOG_SCALED: frozenset[str] = frozenset({"a_intel_documents"})
 #: is never promoted by ignorance. The one exception is ``cvss_source_agreement``, which
 #: is 1.0 when there is nothing to disagree about - the value
 #: ``feeds.cvss_policy.select_cvss`` itself returns for an empty record set.
+#:
+#: 0.0 is the right *value* and still an ambiguous *encoding*: it makes an absent CVE
+#: indistinguishable from a present one that scores zero, and on a web scan those two
+#: populations have opposite risk. ``cve_present`` exists so a split can separate them;
+#: see its entry in ``FEATURE_SPECS``. Any further CVE-derived column inherits that
+#: resolution and needs no indicator of its own.
 NEUTRAL: dict[str, float] = {
+    # A finding with no CVE, which is most of what a web application scan reports.
+    "cve_present": 0.0,
     "cvss_base_max": 0.0,
     "cvss_version_ord": 0.0,
     "cvss_source_agreement": 1.0,
@@ -308,6 +317,7 @@ NEUTRAL: dict[str, float] = {
 #: report builder prints it beside the SHAP summary so a reader never has to guess what a
 #: column means.
 FEATURE_DOC: dict[str, str] = {
+    "cve_present": "the finding names at least one CVE, so the feed columns are about it",
     "cvss_base_max": "highest CVSS base score across the driving CVE's records",
     "cvss_version_ord": "CVSS version ordinal of the record chosen by the selection policy",
     "cvss_source_agreement": "1 - normalised spread of base scores across scoring sources",
@@ -520,13 +530,20 @@ class FeatureBuilder:
     ) -> "IntelResult | None":
         """Retrieved intelligence for one finding, explicit mapping first.
 
-        Read through ``getattr`` rather than attribute access so this package keeps working
-        against an :class:`EnrichedFinding` from before ``retrieved_intel`` was added, and
-        against one from after it, with no version check at the call site.
+        The attribute is ``intel_result``. It was read as ``retrieved_intel`` through a
+        defensive ``getattr`` that was meant to tolerate an older model and instead
+        swallowed a name that has never existed: every finding carrying intelligence
+        returned ``None`` here, so all seven ``a_intel_*`` columns sat at their neutral no
+        matter what the retrieval layer found. The suite did not catch it because its one
+        test supplies intelligence through the explicit ``intel`` mapping, which is the
+        path this line is not on.
+
+        Accessed directly now. If the field is ever renamed again, that must be an
+        ``AttributeError`` at the first call rather than a column of quiet zeros.
         """
         if intel is not None and enriched.finding_id in intel:
             return intel[enriched.finding_id]
-        return getattr(enriched, "retrieved_intel", None)
+        return enriched.intel_result
 
     # -- internals ----------------------------------------------------------
 
@@ -563,6 +580,10 @@ class FeatureBuilder:
         records = usable_intel(enriched)
 
         features = dict(self._cvss_features(records))
+        # Read off the finding, not off ``records``: a CVE the feeds have nothing for is
+        # still a CVE, and what this column draws is "is there an identifier for the feed
+        # columns to be about", not "did the feeds answer".
+        features["cve_present"] = 1.0 if finding.cve_ids else 0.0
         features["scanner_severity_ord"] = severity_ordinal(finding.scanner_severity)
         features["scanner_confidence"] = float(finding.scanner_confidence)
         features["cwe_owasp_top10"] = (

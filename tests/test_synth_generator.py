@@ -399,7 +399,12 @@ def test_epss_is_correlated_with_latent_exploitability_but_not_equal_to_it() -> 
     correlation = covariance / denominator
 
     assert 0.25 < correlation < 0.95, f"EPSS correlation with the truth is {correlation:.2f}"
-    assert statistics.median(observed) < 0.2, "EPSS must stay right-skewed, as the real feed is"
+    # The real feed's median CVE sits near 0.0005; a synthetic feed an order of
+    # magnitude above that teaches the model split points no real scan will reach.
+    assert statistics.median(observed) < 0.005, (
+        f"EPSS median {statistics.median(observed):.5f} is too high: the real feed is far "
+        "more right-skewed, and a model split on this would go dead on real data"
+    )
 
 
 # ---------------------------------------------------------------------------

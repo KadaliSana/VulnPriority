@@ -1,6 +1,7 @@
 {
   "ranker": "lambdamart",
   "columns": [
+    "cve_present",
     "cvss_base_max",
     "cvss_version_ord",
     "cvss_source_agreement",

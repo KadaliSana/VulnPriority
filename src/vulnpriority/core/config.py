@@ -297,6 +297,20 @@ class EvaluationConfig(BaseModel):
     gap_days: int = 30
     min_train_scans: int = 4
     label_policy: LabelPolicy = LabelPolicy()
+    #: Refuse to score the ranker against labels it could have read off its own features.
+    #:
+    #: ``KEV`` and ``EXPLOIT_EVIDENCE`` are accepted ground truth *and* feature columns
+    #: (``b_kev``, ``b_exploit_count``). A positive justified by nothing else is a lookup
+    #: dressed as a prediction. On the shipped 10,000-scan corpus 6,311 of 31,589 positives
+    #: are in that state and are not scored; the 25,278 the oracle confirms are. Gap 3 made
+    #: this argument about CVSS and stopped one column short.
+    #:
+    #: This governs only what the model is *graded* on, not what it may be trained on. The
+    #: corpus builder happens to train on the filtered set too, but for a different reason
+    #: (see scripts/build_training_corpus.py): a model taught that "in KEV" means
+    #: "exploited" learns to restate its own b_kev column. Turn this off to reproduce a
+    #: number computed the old way, and expect it to be optimistic.
+    exclude_circular_labels: bool = True
     seeds: tuple[int, ...] = (42, 43, 44)
     bootstrap_iters: int = 500
     baselines: tuple[RankerName, ...] = (

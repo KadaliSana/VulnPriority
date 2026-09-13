@@ -75,6 +75,9 @@ DEFAULT_MAX_PAGES = 200
 DEFAULT_MAX_DEPTH = 3
 DEFAULT_MAX_REQUESTS = 600
 DEFAULT_TIME_BUDGET_S = 150.0
+#: Memory ceiling for a containerised scanner, in GiB. See ``ScanRequest.external_memory_gb``.
+DEFAULT_EXTERNAL_MEMORY_GB: float = 6.0
+
 #: Wall clock for an external scanner. See ``ScanRequest.external_time_budget_s``.
 DEFAULT_EXTERNAL_TIME_BUDGET_S = 1200.0
 #: Per-response read cap. Four megabytes rather than one because a truncated
@@ -165,8 +168,9 @@ class ScanRequest(Frozen):
     max_requests: int = Field(DEFAULT_MAX_REQUESTS, ge=1, le=5000)
     requests_per_second: float = Field(DEFAULT_REQUESTS_PER_SECOND, gt=0.0, le=20.0)
     time_budget_s: float = Field(DEFAULT_TIME_BUDGET_S, gt=0.0, le=3600.0)
-    #: Wall clock an *external* scanner is allowed, in seconds. Separate from
-    #: ``time_budget_s`` because the two measure different things for different tools.
+    #: Wall clock an *external* scanner is allowed, in seconds, where that scanner has a
+    #: cap of its own worth spending it on. Separate from ``time_budget_s`` because the two
+    #: measure different things for different tools.
     #:
     #: ``time_budget_s`` bounds the built-in crawler, which fetches pages at a polite rate
     #: and is done in a minute. Handing that same number to ZAP as its ``-T`` cap gave a
@@ -176,11 +180,30 @@ class ScanRequest(Frozen):
     #: findings on every run. That looked like non-determinism in the framework and was
     #: actually a stopwatch set to the wrong tool's budget.
     #:
-    #: Twenty minutes is enough for ZAP to finish a mid-sized application. A scan that still
-    #: hits the cap is reported as truncated rather than presented as complete.
+    #: Raising it to twenty minutes only made that rarer, so ZAP no longer receives it at
+    #: all. ``-T`` bounds ZAP's startup and passive-scan waits and never its active phase,
+    #: so it could not do the job its name implies and could only end the passive wait
+    #: early, discarding findings the scan had already paid for. An unbounded scan that
+    #: returns findings is the trade this package makes over a capped one that returns
+    #: none. Today this reaches ``nikto`` alone, through ``-maxtime``, which caps the thing
+    #: it says it caps.
     external_time_budget_s: float = Field(
         DEFAULT_EXTERNAL_TIME_BUDGET_S, gt=0.0, le=21_600.0
     )
+    #: Memory ceiling for a containerised external scanner, in GiB.
+    #:
+    #: Without one, a container can consume the whole virtual machine that hosts the
+    #: container runtime and kill it. That is not hypothetical: an active ZAP scan of a
+    #: mid-sized application reached 4.94GiB of a Docker Desktop WSL VM's 7.68GiB in three
+    #: minutes, the VM died, and the client reported ``exit 125: error waiting for
+    #: container: unexpected EOF``. Worse, the runtime then sat half-alive - its pipes and
+    #: port forwards still accepting connections with nothing behind them - so every
+    #: *subsequent* scan also failed, against a daemon the previous scan had killed.
+    #:
+    #: The ceiling has to sit far enough below the host VM that the container dies first.
+    #: A container hitting its own limit is a failed scan; a VM hitting its limit is a
+    #: broken machine.
+    external_memory_gb: float = Field(DEFAULT_EXTERNAL_MEMORY_GB, ge=0.5, le=256.0)
     max_response_bytes: int = Field(DEFAULT_MAX_RESPONSE_BYTES, ge=1024, le=20_000_000)
     max_total_bytes: int | None = Field(None, ge=1024)
     timeout_s: float = Field(10.0, gt=0.0, le=120.0)

@@ -310,35 +310,6 @@ def test_a_routable_target_is_passed_through_untouched(tmp_path):
         assert not any(item.startswith("http") and "host.docker.internal" in item for item in argv)
 
 
-def test_zap_docker_is_capped_by_the_external_budget_not_the_crawler_budget(tmp_path):
-    """The two budgets measure different things and conflating them truncated every scan.
-
-    ``time_budget_s`` bounds the built-in crawler, which is polite and quick.
-    ``external_time_budget_s`` bounds a real scanner, which is neither. Passing the first
-    to ZAP gave a full active scan two minutes, so it was killed part-way through at a
-    different point on every run and the same target produced different findings each time.
-    """
-    argv = build_argv(
-        tool("zap-docker"),
-        make_request(time_budget_s=60.0, external_time_budget_s=600.0),
-        tmp_path / "r.json",
-    )[0]
-    assert argv[argv.index("-T") + 1] == "10"       # minutes, from the external budget
-
-    # The crawler's budget must not reach it at all.
-    argv = build_argv(
-        tool("zap-docker"),
-        make_request(time_budget_s=3000.0, external_time_budget_s=120.0),
-        tmp_path / "r.json",
-    )[0]
-    assert argv[argv.index("-T") + 1] == "2"
-
-
-# ---------------------------------------------------------------------------
-# argv construction
-# ---------------------------------------------------------------------------
-
-
 def test_argv_is_a_list_of_strings_never_a_shell_string(tmp_path):
     request = make_request(profile=ScanProfile.ACTIVE)
     for name in TOOL_PREFERENCE:
@@ -413,6 +384,37 @@ def test_rate_limit_and_budget_reach_the_external_tool(tmp_path):
     assert nikto_argv[nikto_argv.index("-maxtime") + 1] == "30"
 
 
+def test_the_zap_container_cannot_eat_the_machine_that_hosts_it(tmp_path):
+    """A container with no memory limit killed the VM running the container runtime.
+
+    An active scan reached 4.94GiB of a Docker Desktop WSL VM's 7.68GiB in three minutes.
+    The VM died, the client reported ``exit 125: error waiting for container: unexpected
+    EOF``, and - the expensive part - the runtime was left half-alive, accepting connections
+    on its pipes and port forwards with nothing behind them, so every subsequent scan failed
+    too. Three consecutive runs returned zero findings against a daemon the first one killed.
+    """
+    request = make_request(external_memory_gb=6.0, profile=ScanProfile.ACTIVE)
+    argv = build_argv(tool("zap-docker"), request, tmp_path / "r.json")[0]
+
+    assert argv[argv.index("--memory") + 1] == "6g"
+    # Equal to --memory, so the container cannot swap its way to the same exhaustion.
+    assert argv[argv.index("--memory-swap") + 1] == "6g"
+
+    # No -Xmx of our own, deliberately. ``zap.sh`` reads the cgroup limit and takes a
+    # quarter of it for the heap (6144MB -> 1536m, measured), so the container limit sizes
+    # the JVM correctly on its own. An -Xmx we passed would be overridden by zap.sh anyway,
+    # and if it were not it could only make the total larger.
+    assert not any("Xmx" in item for item in argv)
+
+
+def test_the_memory_ceiling_is_configurable(tmp_path):
+    argv = build_argv(tool("zap-docker"),
+                      make_request(external_memory_gb=2.0, profile=ScanProfile.ACTIVE),
+                      tmp_path / "r.json")[0]
+    assert argv[argv.index("--memory") + 1] == "2g"
+    assert argv[argv.index("--memory-swap") + 1] == "2g"
+
+
 def test_zap_cli_is_two_argv_steps(tmp_path):
     steps = build_argv(tool("zap-cli"), make_request(profile=ScanProfile.ACTIVE), tmp_path / "r.json")
     assert len(steps) == 2
@@ -434,7 +436,7 @@ def test_run_external_never_uses_a_shell(tmp_path):
     call = runner.calls[0]
     assert call["shell"] is False
     assert isinstance(call["argv"], list)
-    assert call["timeout"] > 0
+    assert call["timeout"] is None      # no outer cap unless a caller asks for one
     assert call["capture_output"] is True
 
 
@@ -836,19 +838,36 @@ def test_assess_target_refuses_a_metadata_target_before_launching_a_tool(tmp_pat
     assert runner.calls == []
 
 
-def test_our_own_kill_switch_sits_outside_the_tools_own_cap(tmp_path):
-    """Killing the scanner before its own deadline loses the report it was about to write.
+def test_a_zap_scan_is_capped_neither_from_outside_nor_from_within(tmp_path):
+    """Killing the scanner from out here loses the report it was about to write.
 
-    The subprocess timeout used to be twice the built-in crawler's budget - five minutes -
-    so a ZAP scan told to take twenty was killed at five, part-way through, having written
-    nothing. The result was a different set of findings on every run of the same target.
+    There used to be a derived subprocess timeout, and every outcome it produced was bad:
+    a scanner killed mid-run has written nothing, so the scan is paid for in full and the
+    findings are discarded. A real 20 minute ZAP budget became a 32 minute wait ending in
+    "exceeded its 1920s timeout" and a silent fallback to the built-in crawler, which
+    reported zero findings for an application that has plenty.
+
+    ``-T`` was the same mistake one layer in. It reads as a scan cap but ZAP's own help
+    calls it "max time in minutes to wait for ZAP to start and the passive scan to run",
+    so it never bounded the active phase and the only thing it could do was end the passive
+    wait early, discarding findings already paid for. Neither budget reaches ZAP now.
+
+    The tools carry their own caps on their own argv where they have them, and where they
+    do not - zap-full-scan's active phase - an unbounded scan that returns findings is the
+    trade this package chooses over a capped one that returns none.
     """
     request = make_request(external_time_budget_s=600.0, profile=ScanProfile.ACTIVE)
     runner = RecordingRunner(report_body=fixture("zap_sample.json"))
     run_external(tool("zap-docker"), request, out_dir=tmp_path, runner=runner)
 
-    timeout = runner.calls[0]["timeout"]
-    tool_cap_seconds = 600.0
-    assert timeout > tool_cap_seconds, (
-        "our timeout must outlast the scanner's own deadline, or we kill it mid-write"
-    )
+    assert runner.calls[0]["timeout"] is None       # nothing caps it from outside
+    assert "-T" not in runner.calls[0]["argv"]      # nor from within its own argv
+
+
+def test_a_caller_can_still_ask_for_a_ceiling(tmp_path):
+    """Removing the default is not removing the capability."""
+    runner = RecordingRunner(report_body=fixture("zap_sample.json"))
+    run_external(tool("zap-docker"), make_request(profile=ScanProfile.ACTIVE),
+                 out_dir=tmp_path, runner=runner, timeout_s=45.0)
+
+    assert runner.calls[0]["timeout"] == 45.0

@@ -197,6 +197,28 @@ class LabelSource(str, Enum):
     SYNTHETIC_ORACLE = "synthetic_oracle"
 
 
+#: Label sources the ranker can also read as features, and which therefore cannot be used to
+#: *score* it without circularity.
+#:
+#: ``KEV`` is the ``b_kev`` column. ``EXPLOIT_EVIDENCE`` is ``b_exploit_count``,
+#: ``b_exploit_maturity_feed_ord`` and ``a_exploit_maturity_ord``. A finding labelled
+#: exploited *because* it is in KEV, and then ranked by a model that was told it is in KEV,
+#: has not been predicted - it has been looked up, and every metric computed over it is
+#: measuring the lookup.
+#:
+#: Excluding CVSS from ground truth (Gap 3) was the same argument applied to a different
+#: column, and stopping there left the larger hole. On the shipped corpus a fifth of the
+#: positives rest on nothing but these two sources. Scoring the 2026-09 model against all of
+#: them reads NDCG@10 0.477; against the independently confirmed ones it reads 0.451, and
+#: only the second number is a measurement of anything.
+#:
+#: They remain perfectly good *training* signal. The distinction this constant draws is
+#: between what may teach the model and what may be used to grade it.
+FEATURE_VISIBLE_LABEL_SOURCES: frozenset["LabelSource"] = frozenset(
+    {LabelSource.KEV, LabelSource.EXPLOIT_EVIDENCE}
+)
+
+
 class Component(str, Enum):
     A = "A"  # agentic semantic assessment
     B = "B"  # contextual / threat-intelligence enrichment and decision theory

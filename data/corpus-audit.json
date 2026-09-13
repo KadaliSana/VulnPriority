@@ -1,0 +1,128 @@
+{
+  "scale": {
+    "scans": 10000,
+    "findings": 432067,
+    "applications": 2000,
+    "endpoints": 228675,
+    "cves": 28000,
+    "rows": 432067,
+    "features": 61,
+    "query_groups": 10000,
+    "shards": 20
+  },
+  "positive_rate": 0.05850481522541643,
+  "optimistic_positive_rate": 0.07311134615696177,
+  "independent_positives": 25278,
+  "circular_positives": 6311,
+  "group_sizes": {
+    "mean": 43.2067,
+    "min": 16,
+    "max": 76,
+    "p10": 27.0,
+    "p90": 60.0
+  },
+  "dead_features": [],
+  "top_single_feature_auc": [
+    {
+      "feature": "b_p_exploit_attacker",
+      "auc": 0.7244
+    },
+    {
+      "feature": "b_expected_loss_log",
+      "auc": 0.6935
+    },
+    {
+      "feature": "a_is_auth_boundary",
+      "auc": 0.6739
+    },
+    {
+      "feature": "a_asset_criticality",
+      "auc": 0.6687
+    },
+    {
+      "feature": "method_state_changing",
+      "auc": 0.6602
+    },
+    {
+      "feature": "a_exposure",
+      "auc": 0.6522
+    },
+    {
+      "feature": "a_p_applicable",
+      "auc": 0.6009
+    },
+    {
+      "feature": "a_data_sensitivity",
+      "auc": 0.599
+    }
+  ],
+  "split": {
+    "train_groups": 375,
+    "test_groups": 125,
+    "train_last": "2027-03-30",
+    "test_first": "2027-04-14"
+  },
+  "held_out_ndcg_at_10": {
+    "lambdamart": 0.4503404608242143,
+    "b_epss": 0.09356167352722798,
+    "b_kev": 0.1454521426712381,
+    "cvss_base_max": 0.08938582481305889,
+    "b_expected_loss_log": 0.29430396241058243,
+    "c_reach_delta_log": 0.20324341082384523,
+    "scanner_severity_ord": 0.13678400762195553,
+    "random": 0.12681727691859127
+  },
+  "circularity": {
+    "ndcg_at_10_against_leaky_labels": 0.4824692150577092,
+    "delta": 0.03212875423349487,
+    "note": "The headline metric excludes positives justified only by KEV or exploit evidence, both of which the ranker reads as features. This line is the same model scored with those positives included, and is not a result. A model trained on the honest labels should score worse here, because it was not taught to restate its own b_kev column."
+  },
+  "checks": [
+    {
+      "check": "at least 10,000 scans",
+      "pass": true,
+      "detail": "10000 scans, 432067 findings"
+    },
+    {
+      "check": "positives are rare but present",
+      "pass": true,
+      "detail": "5.850% of findings were independently confirmed exploited (want 1%-15%)"
+    },
+    {
+      "check": "enough positives that no feature column already contains",
+      "pass": true,
+      "detail": "25278 oracle-backed positives, 6311 more resting only on KEV or exploit evidence and therefore not scored (want at least 500)"
+    },
+    {
+      "check": "query groups are big enough to rank within",
+      "pass": true,
+      "detail": "mean 43.2 findings per scan (min 16, max 76)"
+    },
+    {
+      "check": "every feature carries signal",
+      "pass": true,
+      "detail": "all 61 features vary"
+    },
+    {
+      "check": "no NaN or infinity in the matrix",
+      "pass": true,
+      "detail": "all values finite"
+    },
+    {
+      "check": "no single feature gives the answer away",
+      "pass": true,
+      "detail": "strongest is b_p_exploit_attacker at AUC 0.724 (ceiling 0.95)"
+    },
+    {
+      "check": "the split is time-ordered with no overlap",
+      "pass": true,
+      "detail": "train ends 2027-03-30, test starts 2027-04-14"
+    },
+    {
+      "check": "the learned ranker beats the best single signal",
+      "pass": true,
+      "detail": "lambdamart 0.450 vs b_expected_loss_log 0.294 (+0.156, want +0.03)"
+    }
+  ],
+  "passed": true
+}

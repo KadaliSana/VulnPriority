@@ -819,3 +819,45 @@ def test_component_grouping_matches_the_frozen_spec() -> None:
             assert group is Component.C, name
         else:
             assert group is None, name
+
+
+def test_intelligence_attached_to_the_finding_reaches_the_matrix(builder) -> None:
+    """The path a real run uses: ``EnrichedFinding.intel_result``, no explicit mapping.
+
+    The suite only ever exercised the ``intel=`` argument, so a feature builder that read
+    the wrong attribute name returned neutral columns for every finding that carried
+    intelligence and nothing failed. That is the whole intelligence layer contributing
+    nothing to the ranking, silently.
+    """
+    enriched = make_enriched()
+    result = intel_result(
+        enriched.finding_id,
+        documents=4,
+        exploit_urls=("https://example.test/poc1",),
+        active=True,
+        confidence=0.75,
+        corroborates=True,
+        signals=2,
+    )
+    carrying = enriched.model_copy(update={"intel_result": result})
+
+    row = builder.build([carrying], {}, ComponentFlags()).X.iloc[0]
+
+    assert row["a_intel_documents"] == pytest.approx(math.log1p(4.0))
+    assert row["a_intel_public_exploit_urls"] == pytest.approx(1.0)
+    assert row["a_intel_active_exploitation"] == pytest.approx(1.0)
+    assert row["a_intel_confidence"] == pytest.approx(0.75)
+    assert row["a_intel_injection_signals"] == pytest.approx(2.0)
+
+
+def test_an_explicit_mapping_still_wins_over_the_attached_result(builder) -> None:
+    """Both paths exist; the transitional one must take precedence, as documented."""
+    enriched = make_enriched()
+    attached = intel_result(enriched.finding_id, documents=1, confidence=0.1)
+    explicit = intel_result(enriched.finding_id, documents=9, confidence=0.9)
+    carrying = enriched.model_copy(update={"intel_result": attached})
+
+    row = builder.build([carrying], {}, ComponentFlags(),
+                        {enriched.finding_id: explicit}).X.iloc[0]
+
+    assert row["a_intel_documents"] == pytest.approx(math.log1p(9.0))

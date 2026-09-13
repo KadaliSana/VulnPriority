@@ -316,6 +316,12 @@ class GeminiSearchProvider(BaseSearchProvider):
                 "system_instruction": PHASE1_SYSTEM,
                 "max_output_tokens": int(config.max_tokens),
                 "tools": [search_tool(config)],
+                # Grounding runs on Google's side, so there is no local callable for the
+                # SDK to invoke and automatic function calling has nothing to do here.
+                # Saying so explicitly matters: any ``tools`` at all sends
+                # ``models.generate_content`` down its AFC path, which logs advice to use
+                # ``Chat.send_message`` instead. Disabling it returns before that.
+                "automatic_function_calling": {"disable": True},
             },
         }
 
