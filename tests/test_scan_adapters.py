@@ -434,7 +434,7 @@ def test_run_external_never_uses_a_shell(tmp_path):
     call = runner.calls[0]
     assert call["shell"] is False
     assert isinstance(call["argv"], list)
-    assert call["timeout"] > 0
+    assert call["timeout"] is None      # no outer cap unless a caller asks for one
     assert call["capture_output"] is True
 
 
@@ -836,19 +836,30 @@ def test_assess_target_refuses_a_metadata_target_before_launching_a_tool(tmp_pat
     assert runner.calls == []
 
 
-def test_our_own_kill_switch_sits_outside_the_tools_own_cap(tmp_path):
-    """Killing the scanner before its own deadline loses the report it was about to write.
+def test_no_outer_kill_switch_by_default(tmp_path):
+    """Killing the scanner from out here loses the report it was about to write.
 
-    The subprocess timeout used to be twice the built-in crawler's budget - five minutes -
-    so a ZAP scan told to take twenty was killed at five, part-way through, having written
-    nothing. The result was a different set of findings on every run of the same target.
+    There used to be a derived subprocess timeout, and every outcome it produced was bad:
+    a scanner killed mid-run has written nothing, so the scan is paid for in full and the
+    findings are discarded. A real 20 minute ZAP budget became a 32 minute wait ending in
+    "exceeded its 1920s timeout" and a silent fallback to the built-in crawler, which
+    reported zero findings for an application that has plenty.
+
+    The tools carry their own caps on their own argv where they have them, and where they
+    do not - zap-full-scan's active phase - an unbounded scan that returns findings is the
+    trade this package chooses over a capped one that returns none.
     """
     request = make_request(external_time_budget_s=600.0, profile=ScanProfile.ACTIVE)
     runner = RecordingRunner(report_body=fixture("zap_sample.json"))
     run_external(tool("zap-docker"), request, out_dir=tmp_path, runner=runner)
 
-    timeout = runner.calls[0]["timeout"]
-    tool_cap_seconds = 600.0
-    assert timeout > tool_cap_seconds, (
-        "our timeout must outlast the scanner's own deadline, or we kill it mid-write"
-    )
+    assert runner.calls[0]["timeout"] is None
+
+
+def test_a_caller_can_still_ask_for_a_ceiling(tmp_path):
+    """Removing the default is not removing the capability."""
+    runner = RecordingRunner(report_body=fixture("zap_sample.json"))
+    run_external(tool("zap-docker"), make_request(profile=ScanProfile.ACTIVE),
+                 out_dir=tmp_path, runner=runner, timeout_s=45.0)
+
+    assert runner.calls[0]["timeout"] == 45.0
