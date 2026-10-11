@@ -1,208 +1,141 @@
 # VulnPriority
 
-**AI-driven automated web application vulnerability prioritization.**
+**Decides which web application vulnerabilities to fix first.**
 
-A single web application scan returns hundreds of findings. Sorting them by CVSS does not tell
-you which ones an attacker will actually use: published severity correlates with real-world
-weaponisation at about rho = 0.1, and three quarters of all CVEs cluster into ten distinct
-scores. This framework orders a scan's findings by **expected loss** instead, combining what
-the scanner saw, what public vulnerability intelligence says, what the referenced advisories
-and exploit reports mean, and where the finding sits on the path to something worth stealing.
+A scan of one web application returns hundreds of findings, and sorting them by CVSS severity
+does not tell you which ones an attacker will actually use. VulnPriority ranks them by
+**expected loss**: how likely the chosen attacker is to exploit each finding, multiplied by what
+it would cost the business. It combines the scanner output, public vulnerability intelligence
+(CVSS, EPSS, CISA KEV), advisories and exploit write-ups, and the finding's place on attack
+paths through the application.
 
-It is the implementation of the framework proposed in the accompanying literature review, and
-it is built so that every claim in that review's gap analysis is answered by a module and a
-test rather than by prose. See [GAP_TRACEABILITY.md](GAP_TRACEABILITY.md).
+<p align="center">
+  <img src="assets/readme/architecture-overview.png" width="560"
+       alt="Scanner reports, vulnerability databases and public write-ups are prepared, assessed by three components (AI evidence, attacker and cost, attack paths), combined by a learned ranker and turned into a prioritised fix list">
+</p>
 
----
+## How it works
 
-## What it does
+- **A · AI evidence.** A sandboxed language model reads advisories and exploit write-ups and
+  fills in a fixed set of facts. It never decides the order itself, and text an attacker could
+  control has a capped influence on any score.
+- **B · Attacker and cost.** Five attacker profiles ship (opportunistic, targeted criminal,
+  insider, advanced persistent, content-controlling). Switching profile re-ranks the queue
+  without retraining.
+- **C · Attack paths.** Findings are scored by the valuable assets they open up, alone or
+  chained with others, so a quiet chokepoint can outrank a loud dead end.
+- **Ranking and plan.** A gradient-boosted ranker (XGBoost LambdaMART) combines the signals,
+  explains each position, and picks the fixes worth the most within the engineering hours you
+  have.
 
-```
-scanner output ─► ingest ─► intelligence ─┬─► A  semantic assessment   (sandboxed model)
-                                          ├─► B  attacker model + monetary impact
-                                          ├─► C  attack graph contribution
-                                          └─► features ─► LambdaMART ─► explained ranking
-                                                              │
-                                          evaluation ◄────────┴───────► selection, simulation,
-                                          (splits, labels, metrics,      adversarial robustness
-                                           ablation, calibration)
-```
+<p align="center">
+  <img src="assets/readme/attack-graph-example.png" width="680"
+       alt="Example attack graph: SQL injection on /search is the most likely route to the customer database">
+  <br><sub>Percentages are the attacker's chance of succeeding at each step; the bold route is
+  the most likely path to the customer database.</sub>
+</p>
 
-**Priority is defined, not asserted.** `expected_loss = P(exploit | evidence, attacker) × impact`,
-in the configured currency, with every term in the probability recorded for audit.
-
-**The attacker is explicit.** Five presets ship (opportunistic, targeted criminal, insider,
-advanced persistent, content-controlling). Changing the attacker re-prioritises the queue
-without retraining, because the adversary is a parameter rather than an assumption.
-
-**The model extracts features; it does not decide.** Advisories and application responses are
-read inside a sandbox and turned into bounded, schema-validated assessments. A gradient-boosted
-ranker learns the ordering from confirmed-exploitation labels.
-
-**Attacker-controlled text is contained.** Evidence carries a trust tier, and a tier's
-influence on any feature is capped. A reference page can move a normalised feature by at most
-0.35; text authored by the target itself by at most 0.15; neither can argue away a KEV listing.
-Robustness is measured against a corpus of injection attacks, in the test suite.
-
-**Chains are first class.** Findings are scored by how much reachable compromise they enable,
-over a directed multi-hop attack graph, so a low-severity chokepoint outranks a high-severity
-leaf. Patching can never increase computed risk, and a property test proves it.
-
-**It runs offline.** The default configuration needs no API key and no network. A synthetic
-world with a latent exploitation oracle supplies the confirmed ground truth and the
-counterfactual remediation outcomes that no public dataset provides.
-
----
+It runs **offline by default**: no API key and no network. A synthetic world supplies the
+confirmed-exploitation ground truth that no public dataset provides.
 
 ## Install
 
 Python 3.12 or newer.
 
 ```bash
-python -m pip install -e .
+python -m pip install -e ".[web]"
 ```
 
-Optional extras: `pip install -e ".[gemini]"` for the free-tier backend, `".[llm]"` for
-Anthropic, `".[web]"` for the interactive site, `".[dev]"` for pytest.
-
-Every command below also works as `python -m vulnpriority ...`. On Windows the console script
-lands in Python's user scripts directory, which is often not on `PATH`, so `vulnpriority serve`
-can fail with "not recognized as a name of a cmdlet" even though the install succeeded. The
-module form needs nothing but the interpreter that already imported the package.
+Other extras: `.[gemini]` or `.[llm]` for a live language model, `.[dev]` for the tests. If
+the `vulnpriority` command is not found (common on Windows), use `python -m vulnpriority`.
 
 ## Quick start
 
-Generate a synthetic world, run the whole pipeline on it, and write the report:
-
 ```bash
-vulnpriority run-all --config configs/default.yaml --synthetic
-```
+# Run the whole pipeline on a generated synthetic world
+vulnpriority run-all --synthetic
 
-Rank a real OWASP ZAP report:
+# Rank your own scanner report (OWASP ZAP, Burp, Nuclei, Wapiti, Nikto)
+vulnpriority run-all --scan report.json
 
-```bash
-vulnpriority ingest --input scan.json --scanner zap --output runs/myapp
-vulnpriority run-all --config configs/default.yaml --scan runs/myapp/scan.json
-```
+# The same, for a different attacker
+vulnpriority run-all --scan report.json --set component_b.attacker_preset=insider
 
-Use live feeds and the Anthropic backend:
-
-```bash
-export ANTHROPIC_API_KEY=...        # Windows: setx ANTHROPIC_API_KEY ...
-vulnpriority run-all --config configs/live.yaml --scan runs/myapp/scan.json
-```
-
-Re-prioritise the same scan for a different adversary:
-
-```bash
-vulnpriority rank --config configs/default.yaml --attacker insider
-```
-
-## The results website
-
-The framework ships with a website that presents a run: the remediation queue with the
-reasoning behind each position, the attack graph and its highest-value paths, the evaluation
-against baselines, the component ablation, budget and exposure outcomes, the adversarial
-robustness measurements, and a live traceability table tying each research gap to the numbers
-this run produced.
-
-It runs in two modes.
-
-**As an application.** Start the server, open it, and give it either a scanner report to
-upload or a target to assess. It runs the pipeline and shows the prioritized queue, the attack
-chains, the generated report and the novelty analysis.
-
-```bash
-pip install -e ".[web]"
+# Open the dashboard: upload a report, or assess a target you are authorized to test
 vulnpriority serve
 ```
 
-Assessing a target requires an explicit authorization attestation: you state that you are
-authorized to test it, and that statement is recorded in the report. The scanner stays on the
-host you name, rate-limits itself, refuses to follow destructive-looking links, and sends no
-exploitation payloads. If OWASP ZAP, Nuclei, Wapiti or Nikto is installed, it drives those
-instead of its own crawler.
+`vulnpriority --help` lists every command. Settings live in `configs/`; any of them can be
+overridden with `--set key=value`. `configs/live.yaml` switches on live feeds and a language
+model.
 
-`robots.txt` is read but **advisory by default**. It is a crawler convention, not an access
-control: it keeps search engines out of a directory and keeps nobody else out of anything,
-and an attacker reads it as a list of what the operator thought worth hiding. An authorized
-assessment that honours it reports those paths as clean when it never looked at them. Every
-dedicated scanner ignores it for the same reason. The paths it names are reported either
-way, and `--respect-robots` restores the crawler-courtesy behaviour; `Crawl-delay` is
-honoured regardless, because that one is a statement about what the server can take.
+## Dashboard
 
-**Single-page applications are visible to it.** An application whose HTML is one mount
-element and three bundles gives a link-following crawler nothing to follow, so a naive
-crawl ends after the shell and reports a short queue - which reads as a clean application
-rather than as a scan that never started. Instead, the request paths the client code names
-in its own JavaScript are recovered and crawled, subject to every existing control; routes
-that come back as the shell are recognised and not counted twice. On OWASP Juice Shop that
-is the difference between 6 endpoints and 90.
+Each position in the queue comes with the reasons behind it. These screenshots are from a
+run on the synthetic world.
 
-**What the scan could not see is stated, not implied.** Every assessment ends with coverage
-notes: that the target was a single-page application, how many mined paths a budget cut
-short, which paths `robots.txt` disallowed and therefore went unassessed. A short list of
-findings is ambiguous on its own, and these sentences are what disambiguate it.
+<p align="center">
+  <img src="assets/readme/dashboard-explanation.png" width="820"
+       alt="Findings in VulnPriority order, with the explanation panel for the top finding: impact, probability of exploitation, expected loss and the reasons for its position">
+  <br><sub>One scan's findings in fix order, with the panel explaining the top-ranked one.</sub>
+</p>
 
-**As a static page.** Export a finished run to a self-contained page: one HTML file, one
-stylesheet, one script and one data document. It opens from disk with no server and no
-network, which matters because offline reproducibility is the framework's own claim.
+<p align="center">
+  <img src="assets/readme/dashboard-attack-chains.png" width="820"
+       alt="Attack chains view: routes an attacker could take through the application and the finding that holds each one open">
+  <br><sub>Attack routes through the application, and the finding that holds each one open.</sub>
+</p>
+
+`vulnpriority web --run runs/<run_id>` exports a finished run as a static page that opens
+without a server.
+
+## Results
+
+Every ranker is tested the same way: time-ordered splits with a 30-day gap, labels from
+confirmed exploitation (never CVSS), and the same metrics. VulnPriority is compared with six
+practitioner baselines and nine methods re-implemented from the research literature
+(`src/vulnpriority/rank/literature.py`). On a synthetic world of 24 scans and 901 findings:
+
+| Ranker | Finds exploited flaws early (NDCG@10) | Monetary risk in top 10 |
+|---|---|---|
+| **VulnPriority** | 0.883 | **0.741** |
+| VPSS random forest (Hore et al.) | **0.900** | 0.508 |
+| LICALITY (Zeng et al.) | 0.785 | 0.665 |
+| VMC chain (Shimizu & Hashimoto) | 0.702 | 0.683 |
+| EPSS only | 0.693 | 0.673 |
+| CVSS only | 0.503 | 0.667 |
+
+VulnPriority is level with the best competitor at finding exploited flaws (the confidence
+intervals overlap) and captures the most monetary risk. Under a stricter test that gives no
+credit for answers a ranker can read straight from KEV, it ranks first (0.610 against 0.573).
+
+<p align="center">
+  <img src="assets/readme/literature-comparison.png" width="760"
+       alt="All sixteen rankers: NDCG@10 and RiskCapture@10 with 95% bootstrap intervals">
+</p>
+
+Over a simulated 26 weeks with 20 engineering hours a week, it fixed 12 of 145 exploited flaws
+before they were first exploited (1 of 145 for CVSS, EPSS or KEV ordering), and cut the time
+exploited flaws stayed open by 32.5% compared with CVSS.
+
+To reproduce the comparison on a finished run:
 
 ```bash
-vulnpriority web --run runs/<run_id> --output site
-python -m vulnpriority.web --demo --serve      # see the page before running anything
+python scripts/compare_literature.py runs/<run_id> inclusive   # or: strict
 ```
 
-## Commands
+These numbers come from synthetic data. They show that the method and the evaluation work,
+not how it will perform on a particular real application.
 
-| Command | What it does |
-|---|---|
-| `synth` | Generate the synthetic world: scans, feed fixtures, reference pages, exploitation oracle |
-| `ingest` | Parse ZAP, Burp, Nuclei or canonical JSON into a `Scan`, template paths, correlate root causes |
-| `fetch-feeds` | Populate the feed cache for an as-of date |
-| `assess` | Component A: asset criticality, exploitability, applicability |
-| `enrich` | Component B: attacker likelihood, monetary impact, remediation cost, expected loss |
-| `chain` | Component C: build the attack graph and score each finding's reachability contribution |
-| `rank` | Build features, run the ranker, produce the explained remediation queue |
-| `train-ranker` | Fit the LambdaMART ranker on a labelled corpus and save it, so single-scan runs score with a learned model rather than falling back |
-| `explain` | Show the factors behind one finding's position |
-| `evaluate` | Time-ordered evaluation against confirmed-exploitation labels, with baselines |
-| `ablate` | Full 2³ factorial ablation over components A, B and C |
-| `select` | Knapsack selection under a remediation budget |
-| `simulate` | Longitudinal exposure simulation per policy |
-| `adversarial` | Run the prompt-injection and rank-manipulation corpus |
-| `report` | Write `report.md`, `report.json` and figures |
-| `run-all` | The whole chain, one command |
-| `scan` | Assess an authorized target directly, with no scanner report |
-| `serve` | Run the interactive site: upload a report or assess a target |
-| `web` | Export the static results website from a finished run |
-| `novelty` | Compare this framework's capabilities against the reviewed prior work |
-| `manifest` | Print the run manifest: config hash, seeds, dataset hash, library versions |
+## The shipped model
 
-## Configuration
+`src/vulnpriority/rank/models/lambdamart.ubj` ranks a single real scan, which on its own has
+too few labelled findings to learn from. It is trained on 10,000 synthetic scans that are not
+committed but are fixed by a seed, so the model can be rebuilt:
 
-`configs/default.yaml` is offline and deterministic. `configs/live.yaml` uses live feeds and
-the Anthropic backend. Attacker presets live in `configs/attacker_models/`, impact models in
-`configs/impact_models/`, and the injection pattern library in `configs/sandbox/`.
-
-Any field can be overridden on the command line, for example `--set ranking.n_estimators=500`.
-
-## Evaluation
-
-The protocol is fixed in advance and recorded in the run manifest, because the review's
-clearest finding is that published results are not comparable to each other.
-
-| Element | Choice |
-|---|---|
-| Splits | Time-ordered with a 30-day gap; leave-one-application-out for transfer; random only as a control |
-| Labels | KEV, exploit evidence, incidents, synthetic oracle. Never CVSS |
-| Ranking | NDCG@{5,10,20}, Precision@K, RiskCapture@K, MAP, MRR, mean rank of exploited |
-| Classification | ROC-AUC, PR-AUC, MCC, minority-class F1, balanced accuracy |
-| Calibration | Brier, expected calibration error, reliability bins |
-| Decision | Efficiency, coverage, workload reduction, risk capture under budget |
-| Longitudinal | 26-week exposure-day simulation per policy |
-| Baselines | CVSS-only, EPSS-only, KEV-first, scanner severity, expected loss, threat-chained, random |
-| Ablation | Full factorial over A, B, C with main effects, interactions and paired bootstrap intervals |
+```bash
+python scripts/build_training_corpus.py --scans 10000
+```
 
 ## Tests
 
@@ -210,24 +143,12 @@ clearest finding is that published results are not comparable to each other.
 python -m pytest -q
 ```
 
-Everything runs offline. The suite includes property tests (patching never increases graph
-risk), adversarial tests (attack success rate and canary leak rate are assertions), temporal
-leakage tests, and an end-to-end run on synthetic data.
-
-## Documentation
-
-- [docs/DESIGN.md](docs/DESIGN.md) - module-by-module specification
-- [docs/adr/ADR-001](docs/adr/ADR-001-decision-theoretic-priority-with-learned-ranking.md) - why expected loss with a learned ranker
-- [docs/adr/ADR-002](docs/adr/ADR-002-trust-tiered-untrusted-content-sandbox.md) - why trust tiers and influence budgets
-- [docs/adr/ADR-003](docs/adr/ADR-003-monotone-attack-graph-contribution.md) - why maximum-probability paths
-- [GAP_TRACEABILITY.md](GAP_TRACEABILITY.md) - every research gap mapped to code and tests
+Everything runs offline, including property tests (fixing a vulnerability never increases
+attack-path risk) and adversarial tests against a corpus of prompt-injection attacks.
 
 ## Limitations
 
-The exploitation oracle used for offline evaluation is synthetic. It is deliberately driven by
-latent variables the framework never sees, so the evaluation is not circular, but a synthetic
-world is not a real one and the absolute numbers should be read as protocol validation rather
-than as field performance. Attacker and impact parameters are configured, not fitted; the
-weights are defensible priors awaiting deployment data. Influence budgets are judgement calls
-measured by the adversarial corpus rather than derived. Maximum-probability paths understate
-risk when many independent paths reach the same target.
+The ground truth is synthetic, so absolute numbers validate the method rather than predict
+field performance. Attacker and cost parameters are configured priors, not fitted to real
+incidents, and attack-path risk can be understated when many independent routes reach the
+same asset.

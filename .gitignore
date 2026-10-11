@@ -24,3 +24,23 @@ site-demo/
 .env
 .env.*
 !.env.example
+# Paper and design documents are kept locally, not in the repository: the code is the deliverable.
+docs/
+GAP_TRACEABILITY.md
+*.docx
+# Scripts that rewrite those documents.
+scripts/update_docs*.py
+scripts/*paper*.py
+# Run outputs of any kind (runs/ and runs-adv/ are listed above).
+runs-*/
+# Model weights. The shipped default ranker is the one exception: it is what a fresh clone
+# ranks a single real scan with, so it stays tracked.
+*.ubj
+*.pkl
+*.joblib
+*.pt
+*.onnx
+*.safetensors
+!src/vulnpriority/rank/models/lambdamart.ubj
+# Local editor/agent settings.
+.claude/

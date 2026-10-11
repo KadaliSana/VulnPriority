@@ -57,6 +57,7 @@ from vulnpriority.rank.features import (
     version_match_ordinal,
 )
 from vulnpriority.rank.lambdamart import FALLBACK_COLUMNS, LambdaMartRanker
+from vulnpriority.rank.literature import LITERATURE_RANKERS
 from vulnpriority.rank.likelihood_head import CALIBRATION_METHODS, CostSensitiveExploitHead
 from vulnpriority.rank.rank_guard import (
     DEFAULT_DISPLACEMENT_MAD_MULTIPLIER,
@@ -96,6 +97,7 @@ __all__ = [
     "ExpectedLossRanker",
     "VmcChainRanker",
     "RandomRanker",
+    "LITERATURE_RANKERS",
     "KEV_BAND",
     "VMC_BAND_EXPLOITED",
     "VMC_BAND_SEVERE",
