@@ -1,4 +1,4 @@
-"""The CLI: every command of DESIGN.md 3.11 is registered, documented and invocable.
+"""The CLI: every command is registered, documented and invocable.
 
 Help output is not cosmetic here. The application is the only interface most readers of the
 review will ever touch, and three properties have to hold before any of it is useful:
@@ -25,30 +25,21 @@ from typer.testing import CliRunner
 from vulnpriority import cli
 from vulnpriority.cli import app
 
-#: Exactly the command list in DESIGN.md 3.11.
+#: The pipeline commands. Single stages that ``run-all`` already covers are not commands.
 EXPECTED_COMMANDS: tuple[str, ...] = (
     "synth",
     "ingest",
-    "assess",
-    "enrich",
-    "chain",
     "rank",
     "train-ranker",
     "explain",
     "evaluate",
-    "ablate",
-    "select",
-    "simulate",
     "adversarial",
     "report",
     "run-all",
-    "fetch-feeds",
-    "manifest",
 )
 
-#: The application layer of DESIGN.md section 6. Each becomes required once its package
-#: lands; until then an absent one is not a failure, but an unlisted command still is.
-APPLICATION_COMMANDS: tuple[str, ...] = ("scan", "serve", "web", "novelty")
+#: The application commands. An absent one is not a failure, but an unlisted command is.
+APPLICATION_COMMANDS: tuple[str, ...] = ("scan", "serve", "web")
 
 
 @pytest.fixture(scope="module")
@@ -75,10 +66,10 @@ def test_every_design_command_is_registered() -> None:
 
 
 def test_no_undocumented_commands_were_added() -> None:
-    """Every registered command must appear in DESIGN.md; an unlisted one is a drift."""
+    """Every registered command must be one of the lists above; an unlisted one is a drift."""
     documented = set(EXPECTED_COMMANDS) | set(APPLICATION_COMMANDS)
     extra = sorted(_registered_names() - documented)
-    assert extra == [], f"commands not in DESIGN.md sections 3.11 or 6: {extra}"
+    assert extra == [], f"commands not in the expected lists: {extra}"
 
 
 def test_the_application_is_named_vulnpriority() -> None:
@@ -131,16 +122,11 @@ def test_every_stage_command_takes_config_and_output_dir(runner: CliRunner, comm
     [
         ("synth", ("--seed", "--apps", "--scans-per-app", "--injection-fraction")),
         ("ingest", ("--input", "--dataset")),
-        ("fetch-feeds", ("--as-of", "--cve")),
-        ("enrich", ("--attacker", "--impact")),
         ("rank", ("--ranker", "--attacker", "--top")),
         ("explain", ("--finding",)),
         ("evaluate", ("--split",)),
-        ("select", ("--budget-hours", "--method")),
-        ("simulate", ("--weeks", "--capacity")),
         ("adversarial", ("--corpus",)),
         ("run-all", ("--synthetic", "--dataset", "--scan", "--keep-going")),
-        ("manifest", ("--run-dir", "--json")),
     ],
 )
 def test_commands_expose_the_options_they_need(
@@ -225,12 +211,6 @@ def test_set_overrides_are_parsed_as_json() -> None:
 def test_set_without_a_value_is_rejected(runner: CliRunner, tmp_path: Path) -> None:
     result = runner.invoke(app, ["synth", "--output-dir", str(tmp_path), "--set", "nonsense"])
     assert result.exit_code != 0
-
-
-def test_manifest_on_a_missing_run_reports_the_directory(runner: CliRunner, tmp_path: Path) -> None:
-    result = runner.invoke(app, ["manifest", "--run-dir", str(tmp_path / "nope")])
-    assert result.exit_code == 1
-    assert "no manifest" in " ".join(result.output.split()).lower()
 
 
 def test_run_all_without_a_source_explains_itself(runner: CliRunner, tmp_path: Path) -> None:

@@ -1,8 +1,9 @@
-"""``vulnpriority``: the command line application (DESIGN.md 3.11).
+"""``vulnpriority``: the command line application.
 
-The sixteen commands of DESIGN.md 3.11 - one per step of the framework, plus ``run-all`` and
-the two bookkeeping commands - and the application-layer commands of DESIGN.md 6, which
-register themselves onto the same application. Three conventions hold across all of them:
+``run-all`` runs the whole pipeline; ``synth`` and ``ingest`` prepare its input; ``rank``,
+``explain``, ``evaluate``, ``adversarial`` and ``report`` produce or inspect one part of a run;
+``train-ranker`` fits the shipped model; ``scan``, ``serve`` and ``web`` are the application
+commands. Three conventions hold across all of them:
 
 * ``--config`` names a YAML file (``configs/default.yaml`` when omitted, which is offline,
   deterministic and needs no API key), and ``--set key.path=value`` overrides any field of it
@@ -14,7 +15,7 @@ register themselves onto the same application. Three conventions hold across all
   somewhere else instead of silently overwriting the evidence behind a published number, or
   reloading it and presenting it as this run's answer.
 * A stage command runs everything it depends on, reloading whatever a previous invocation
-  already completed. ``vulnpriority rank`` after ``vulnpriority enrich`` re-uses the enrichment
+  already completed. ``vulnpriority explain`` after ``vulnpriority rank`` re-uses the ranking
   rather than recomputing it.
 
 Every import of a pipeline module happens inside a command body. That keeps ``--help``
@@ -262,7 +263,7 @@ def _run_through(
 ):
     """Run ``stage`` and everything it depends on, resuming whatever is already done.
 
-    Dependencies, not position: ``vulnpriority select`` needs a ranking and labels, and must not
+    Dependencies, not position: ``vulnpriority evaluate`` needs a ranking and labels, and must not
     fail because the dataset was too small to cut evaluation folds from.
     """
     import sys
@@ -512,170 +513,6 @@ def ingest(
 
 
 # ---------------------------------------------------------------------------
-# fetch-feeds
-# ---------------------------------------------------------------------------
-
-
-@app.command("fetch-feeds")
-def fetch_feeds(
-    config: Optional[Path] = typer.Option(None, "--config", "-c", help="Pipeline config YAML."),
-    as_of: Optional[str] = typer.Option(None, "--as-of", help="ISO date; nothing later is returned."),
-    cve: Optional[List[str]] = typer.Option(None, "--cve", help="CVE id to fetch (repeatable)."),
-    dataset: Optional[Path] = typer.Option(None, "--dataset", help="Synthetic dataset directory."),
-    output_dir: Optional[Path] = typer.Option(None, "--output-dir", "-o", help="Runs root directory."),
-    set_: Optional[List[str]] = typer.Option(None, "--set", help="Override a config field: key.path=value."),
-) -> None:
-    """Assemble intelligence for a set of CVEs as of a date, warming the cache in live modes."""
-    from datetime import date as date_type
-
-    from vulnpriority.feeds.bundle import DefaultIntelAssembler, build_feed_bundle
-
-    settings, world = _with_dataset(_config(config, set_, output_dir), dataset)
-    cutoff = date_type.fromisoformat(as_of) if as_of else date_type.today()
-    wanted = [item.strip().upper() for item in (cve or ()) if item.strip()]
-    if not wanted and world is not None:
-        wanted = [vuln.cve_id for vuln in world.world.vulns]
-    if not wanted:
-        _fail(ValueError("nothing to fetch: pass --cve or --dataset"))
-        return
-    try:
-        assembler = DefaultIntelAssembler(build_feed_bundle(settings), settings)
-        rows = []
-        for cve_id in wanted:
-            intel = assembler.assemble(cve_id, cutoff, settings.feeds.max_references_per_cve)
-            rows.append(
-                (
-                    cve_id,
-                    f"{max((record.base_score for record in intel.cvss), default=0.0):.1f}",
-                    f"{intel.epss.score:.4f}" if intel.epss else "-",
-                    "yes" if intel.kev and intel.kev.in_kev else "no",
-                    str(len(intel.exploits)),
-                    str(len(intel.references)),
-                )
-            )
-    except Exception as error:  # noqa: BLE001
-        _fail(error)
-        return
-    typer.echo(f"feed mode {settings.feeds.mode.value}, as of {cutoff.isoformat()}")
-    typer.echo(f"{'CVE':<20}{'CVSS':>6}{'EPSS':>9}{'KEV':>5}{'EXPL':>6}{'REFS':>6}")
-    for row in rows[:50]:
-        typer.echo(f"{row[0]:<20}{row[1]:>6}{row[2]:>9}{row[3]:>5}{row[4]:>6}{row[5]:>6}")
-    if len(rows) > 50:
-        typer.echo(f"... and {len(rows) - 50} more")
-
-
-# ---------------------------------------------------------------------------
-# assess / enrich / chain
-# ---------------------------------------------------------------------------
-
-
-@app.command("assess")
-def assess(
-    config: Optional[Path] = typer.Option(None, "--config", "-c", help="Pipeline config YAML."),
-    dataset: Optional[Path] = typer.Option(None, "--dataset", help="Synthetic dataset directory."),
-    input_: Optional[List[Path]] = typer.Option(None, "--input", "-i", help="Scanner report (repeatable)."),
-    output_dir: Optional[Path] = typer.Option(None, "--output-dir", "-o", help="Runs root directory."),
-    set_: Optional[List[str]] = typer.Option(None, "--set", help="Override a config field: key.path=value."),
-) -> None:
-    """Component A: asset criticality, exploitability and applicability, inside the sandbox."""
-    settings, world = _with_dataset(_config(config, set_, output_dir), dataset)
-    try:
-        artifacts = _run_through("enrich", settings, world, scan_paths=list(input_ or ()))
-    except Exception as error:  # noqa: BLE001
-        _fail(error)
-        return
-    admin = sum(1 for item in artifacts.enriched if item.asset.is_admin_surface)
-    signals = sum(item.trust.injection_signal_count for item in artifacts.enriched)
-    _echo_table(
-        "assess (component A)",
-        {
-            "run": artifacts.run_id,
-            "backend": settings.llm.backend.value,
-            "component_a": "on" if settings.component_a.enabled else "off (structural only)",
-            "findings assessed": len(artifacts.enriched),
-            "admin surfaces": admin,
-            "injection signals": signals,
-        },
-    )
-
-
-@app.command("enrich")
-def enrich(
-    config: Optional[Path] = typer.Option(None, "--config", "-c", help="Pipeline config YAML."),
-    dataset: Optional[Path] = typer.Option(None, "--dataset", help="Synthetic dataset directory."),
-    attacker: Optional[str] = typer.Option(None, "--attacker", help="Attacker preset name."),
-    impact: Optional[str] = typer.Option(None, "--impact", help="Impact model preset name."),
-    output_dir: Optional[Path] = typer.Option(None, "--output-dir", "-o", help="Runs root directory."),
-    set_: Optional[List[str]] = typer.Option(None, "--set", help="Override a config field: key.path=value."),
-) -> None:
-    """Component B: P(exploit) for this attacker, monetary impact, cost, expected loss."""
-    overrides = list(set_ or ())
-    if attacker:
-        overrides.append(f"component_b.attacker_preset={attacker}")
-    if impact:
-        overrides.append(f"component_b.impact_preset={impact}")
-    settings, world = _with_dataset(_config(config, overrides, output_dir), dataset)
-    try:
-        artifacts = _run_through("enrich", settings, world)
-    except Exception as error:  # noqa: BLE001
-        _fail(error)
-        return
-    currency = _currency(settings)
-    losses = sorted(artifacts.enriched, key=lambda item: -item.expected_loss)[:5]
-    _echo_table(
-        "enrich (component B)",
-        {
-            "run": artifacts.run_id,
-            "attacker": settings.component_b.attacker_preset,
-            "impact model": settings.component_b.impact_preset,
-            "component_b": "on" if settings.component_b.enabled else "off (neutral priors)",
-            "findings": len(artifacts.enriched),
-            "total expected loss": _money_phrase(
-                sum(item.expected_loss for item in artifacts.enriched), currency
-            ),
-        },
-    )
-    if losses:
-        typer.echo("\ntop expected loss")
-        for item in losses:
-            typer.echo(
-                f"  {item.finding_id}  p={item.likelihood.p_exploit:.3f}  "
-                f"{_money(item.expected_loss, currency):>16}  {item.finding.name}"
-            )
-
-
-@app.command("chain")
-def chain(
-    config: Optional[Path] = typer.Option(None, "--config", "-c", help="Pipeline config YAML."),
-    dataset: Optional[Path] = typer.Option(None, "--dataset", help="Synthetic dataset directory."),
-    output_dir: Optional[Path] = typer.Option(None, "--output-dir", "-o", help="Runs root directory."),
-    set_: Optional[List[str]] = typer.Option(None, "--set", help="Override a config field: key.path=value."),
-) -> None:
-    """Component C: build the attack graph and score each finding's reachability contribution."""
-    settings, world = _with_dataset(_config(config, set_, output_dir), dataset)
-    try:
-        artifacts = _run_through("chain", settings, world)
-    except Exception as error:  # noqa: BLE001
-        _fail(error)
-        return
-    currency = _currency(settings)
-    total_risk = sum(graph.total_risk for graph in artifacts.graphs)
-    rejected = sum(graph.rejected_untrusted_edges for graph in artifacts.graphs)
-    _echo_table(
-        "chain (component C)",
-        {
-            "run": artifacts.run_id,
-            "component_c": "on" if settings.component_c.enabled else "off (no chain features)",
-            "graphs": len(artifacts.graphs),
-            "nodes": sum(len(graph.nodes) for graph in artifacts.graphs),
-            "edges": sum(len(graph.edges) for graph in artifacts.graphs),
-            "rejected untrusted edges": rejected,
-            "total reachable risk": _money_phrase(total_risk, currency),
-        },
-    )
-
-
-# ---------------------------------------------------------------------------
 # rank / explain
 # ---------------------------------------------------------------------------
 
@@ -879,7 +716,7 @@ def explain(
 
 
 # ---------------------------------------------------------------------------
-# evaluate / ablate
+# evaluate
 # ---------------------------------------------------------------------------
 
 
@@ -922,114 +759,9 @@ def evaluate(
         typer.echo(f"  {bundle.ranker.value:<18} [{bundle.flags.label():<4}] {rendered}")
 
 
-@app.command("ablate")
-def ablate(
-    config: Optional[Path] = typer.Option(None, "--config", "-c", help="Pipeline config YAML."),
-    dataset: Optional[Path] = typer.Option(None, "--dataset", help="Synthetic dataset directory."),
-    output_dir: Optional[Path] = typer.Option(None, "--output-dir", "-o", help="Runs root directory."),
-    set_: Optional[List[str]] = typer.Option(None, "--set", help="Override a config field: key.path=value."),
-) -> None:
-    """Full 2^3 factorial ablation over components A, B and C, with main effects."""
-    from vulnpriority.pipeline.stages import ablate_stage
-
-    settings, world = _with_dataset(_config(config, set_, output_dir), dataset)
-    try:
-        artifacts = _run_through("label", settings, world)
-        table = ablate_stage(settings, artifacts.scans, artifacts.enriched, artifacts.labels)
-        artifacts.ablation = table
-        artifacts.save(artifacts.root)
-    except Exception as error:  # noqa: BLE001
-        _fail(error)
-        return
-    typer.echo(f"ablation over {len(getattr(table, 'cells', ()))} cells -> {artifacts.root}")
-    for cell in getattr(table, "cells", ()):
-        rendered = "  ".join(f"{key}={value:.4f}" for key, value in sorted(cell.mean.items())[:4])
-        typer.echo(f"  [{cell.flags.label():<4}] n={cell.n:<3} {rendered}")
-    for effect, values in getattr(table, "main_effects", {}).items():
-        rendered = "  ".join(f"{key}={value:+.4f}" for key, value in sorted(values.items())[:4])
-        typer.echo(f"  main effect {effect}: {rendered}")
-
-
 # ---------------------------------------------------------------------------
-# select / simulate / adversarial
+# adversarial
 # ---------------------------------------------------------------------------
-
-
-@app.command("select")
-def select(
-    config: Optional[Path] = typer.Option(None, "--config", "-c", help="Pipeline config YAML."),
-    dataset: Optional[Path] = typer.Option(None, "--dataset", help="Synthetic dataset directory."),
-    budget_hours: Optional[float] = typer.Option(None, "--budget-hours", help="Remediation budget."),
-    method: Optional[str] = typer.Option(
-        None, "--method", help="dp_exact (default), greedy_ratio or rank_prefix."
-    ),
-    output_dir: Optional[Path] = typer.Option(None, "--output-dir", "-o", help="Runs root directory."),
-    set_: Optional[List[str]] = typer.Option(None, "--set", help="Override a config field: key.path=value."),
-) -> None:
-    """Knapsack selection under a remediation budget, charged once per root cause."""
-    overrides = list(set_ or ())
-    if budget_hours is not None:
-        overrides.append(f"selection.budget_hours={budget_hours}")
-    if method:
-        overrides.append(f"selection.method={method}")
-    settings, world = _with_dataset(_config(config, overrides, output_dir), dataset)
-    try:
-        artifacts = _run_through("select", settings, world)
-    except Exception as error:  # noqa: BLE001
-        _fail(error)
-        return
-    scans = len({result.scan_id for result in artifacts.selection})
-    _echo_table(
-        "select",
-        {
-            "run": artifacts.run_id,
-            "budget": f"{settings.selection.budget_hours:.1f} h per scan",
-            "method": f"{settings.selection.method.value} (baselines: rank_prefix)",
-            "scans": scans,
-            "policies": len({result.ranker for result in artifacts.selection}),
-        },
-    )
-    _echo_ranking_provenance(artifacts.ranking)
-    _echo_budget_table(artifacts.selection, _currency(settings))
-
-
-@app.command("simulate")
-def simulate(
-    config: Optional[Path] = typer.Option(None, "--config", "-c", help="Pipeline config YAML."),
-    dataset: Optional[Path] = typer.Option(None, "--dataset", help="Synthetic dataset directory."),
-    weeks: Optional[int] = typer.Option(None, "--weeks", help="Simulation horizon in weeks."),
-    capacity: Optional[float] = typer.Option(
-        None, "--capacity", help="Remediation capacity in hours per week."
-    ),
-    output_dir: Optional[Path] = typer.Option(None, "--output-dir", "-o", help="Runs root directory."),
-    set_: Optional[List[str]] = typer.Option(None, "--set", help="Override a config field: key.path=value."),
-) -> None:
-    """Longitudinal exposure simulation per policy: exposure days, not prediction accuracy."""
-    overrides = list(set_ or ())
-    if weeks is not None:
-        overrides.append(f"simulation.weeks={weeks}")
-    if capacity is not None:
-        overrides.append(f"simulation.capacity_hours_per_week={capacity}")
-    settings, world = _with_dataset(_config(config, overrides, output_dir), dataset)
-    try:
-        artifacts = _run_through("simulate", settings, world)
-    except Exception as error:  # noqa: BLE001
-        _fail(error)
-        return
-    _echo_table(
-        "simulate",
-        {
-            "run": artifacts.run_id,
-            "weeks": settings.simulation.weeks,
-            "capacity": f"{settings.simulation.capacity_hours_per_week:.1f} h/week",
-            "policies": len(artifacts.simulation),
-        },
-    )
-    _echo_exposure_table(
-        artifacts.simulation,
-        settings.simulation.reference_policy,
-        artifacts.simulation_capacity,
-    )
 
 
 @app.command("adversarial")
@@ -1079,7 +811,7 @@ def adversarial(
 
 
 # ---------------------------------------------------------------------------
-# report / run-all / manifest
+# report / run-all
 # ---------------------------------------------------------------------------
 
 
@@ -1229,48 +961,6 @@ def run_all(
         typer.echo("\nunavailable stages")
         for name, message in runner.errors.items():
             typer.echo(f"  {name}: {message}")
-
-
-@app.command("manifest")
-def manifest(
-    config: Optional[Path] = typer.Option(None, "--config", "-c", help="Pipeline config YAML."),
-    dataset: Optional[Path] = typer.Option(
-        None, "--dataset", help="Synthetic dataset directory, so the run id matches that run."
-    ),
-    output_dir: Optional[Path] = typer.Option(None, "--output-dir", "-o", help="Runs root directory."),
-    run_dir: Optional[Path] = typer.Option(None, "--run-dir", help="Explicit run directory."),
-    as_json: bool = typer.Option(False, "--json", help="Print the manifest as JSON."),
-    set_: Optional[List[str]] = typer.Option(None, "--set", help="Override a config field: key.path=value."),
-) -> None:
-    """Print a run's manifest: config hash, seeds, dataset hash and library versions."""
-    from vulnpriority.pipeline.artifacts import find_run_root, load_manifest
-
-    settings, _world = _with_dataset(_config(config, set_, output_dir), dataset)
-    root = Path(run_dir) if run_dir is not None else find_run_root(settings)
-    try:
-        record = load_manifest(root)
-    except (FileNotFoundError, OSError) as error:
-        _fail(FileNotFoundError(f"no manifest in {root}: {error}"))
-        return
-    if as_json:
-        typer.echo(json.dumps(record.model_dump(mode="json"), indent=2))
-        return
-    _echo_table(
-        f"manifest {record.run_id}",
-        {
-            "created": record.created_at.isoformat(timespec="seconds"),
-            "config hash": record.config_hash,
-            "dataset hash": record.dataset_hash,
-            "seeds": ", ".join(str(seed) for seed in record.seeds),
-            "llm backend": f"{record.llm_backend.value} ({record.llm_model})",
-            "feed mode": record.feed_mode.value,
-            "as of": record.as_of.isoformat() if record.as_of else "-",
-            "command": record.command,
-        },
-    )
-    typer.echo("\npackage versions")
-    for name, version in record.package_versions.items():
-        typer.echo(f"  {name:<16} {version}")
 
 
 @app.command("web")
@@ -1434,32 +1124,6 @@ def scan_command(
     destination.write_text(json.dumps(scan.model_dump(mode="json"), indent=1), encoding="utf-8")
     typer.echo(f"\nscan written to {destination}")
     typer.echo(f"prioritise it with:  vulnpriority run-all --input {destination}")
-
-
-@app.command("novelty")
-def novelty_command(
-    as_json: bool = typer.Option(False, "--json", help="Print the whole payload as JSON."),
-) -> None:
-    """Compare this framework's capabilities against the reviewed prior work."""
-    from vulnpriority.novelty import novelty_payload
-
-    payload = novelty_payload()
-    if as_json:
-        typer.echo(json.dumps(payload, indent=2))
-        return
-
-    verdict = payload["verdict"]
-    typer.echo(verdict["overall_statement"] + "\n")
-    for level in ("novel", "novel_combination", "incremental", "not_novel", "not_claimed"):
-        items = verdict.get(level) or []
-        if not items:
-            continue
-        typer.echo(f"{level.replace('_', ' ')} ({len(items)})")
-        for item in items:
-            typer.echo(f"  - {item if isinstance(item, str) else item.get('capability', item)}")
-        typer.echo("")
-    threats = verdict.get("threats_to_novelty") or []
-    typer.echo(f"threats to these claims: {len(threats)} (use --json to read them)")
 
 
 def main() -> None:
