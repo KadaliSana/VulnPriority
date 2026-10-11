@@ -196,13 +196,62 @@ clearest finding is that published results are not comparable to each other.
 |---|---|
 | Splits | Time-ordered with a 30-day gap; leave-one-application-out for transfer; random only as a control |
 | Labels | KEV, exploit evidence, incidents, synthetic oracle. Never CVSS |
+| Label protocol | Strict by default: a positive backed only by KEV or exploit-feed evidence, which the ranker also reads as features, earns no credit. `--set evaluation.exclude_circular_labels=false` counts every confirmed-exploitation label |
 | Ranking | NDCG@{5,10,20}, Precision@K, RiskCapture@K, MAP, MRR, mean rank of exploited |
 | Classification | ROC-AUC, PR-AUC, MCC, minority-class F1, balanced accuracy |
 | Calibration | Brier, expected calibration error, reliability bins |
 | Decision | Efficiency, coverage, workload reduction, risk capture under budget |
 | Longitudinal | 26-week exposure-day simulation per policy |
-| Baselines | CVSS-only, EPSS-only, KEV-first, scanner severity, expected loss, threat-chained, random |
+| Practitioner baselines | CVSS-only, EPSS-only, KEV-first, scanner severity, expected loss, random |
+| Literature competitors | VMC chain (Shimizu & Hashimoto), CISA SSVC, CAVP temporal CVSS, the Albanese et al. decay metric, VulnScore, context-aware XGBoost (Sevimli Deniz & Koca), the VPSS random forest (Hore et al.), LICALITY, EPSS-weighted attack-graph importance (Tiță et al.) |
 | Ablation | Full factorial over A, B, C with main effects, interactions and paired bootstrap intervals |
+
+### Comparing against the literature
+
+The literature competitors live in `src/vulnpriority/rank/literature.py`. None of the original
+systems is published in a form that consumes web-scanner output, so each is re-implemented from
+its paper and handed only the inputs that paper assumes; none sees Component A's intel features,
+Component B's attacker probability or Component C's monetary reachability. The learned ones are
+trained on each fold exactly as LambdaMART is. To put every ranker through the same folds,
+labels and metrics on a finished run:
+
+```bash
+python scripts/compare_literature.py runs/<run_id> inclusive   # every confirmed label
+python scripts/compare_literature.py runs/<run_id> strict      # the default protocol above
+```
+
+Each call writes `literature_comparison_<protocol>.json` and `.md` into the run directory. On a
+synthetic world of 24 scans and 901 findings it gives:
+
+| Ranker | NDCG@10 (all labels) | RiskCapture@10 | NDCG@10 (strict) |
+|---|---|---|---|
+| **VulnPriority** | 0.883 | **0.741** | **0.610** |
+| VPSS random forest | **0.900** | 0.508 | 0.573 |
+| LICALITY | 0.785 | 0.665 | 0.361 |
+| Context-aware XGBoost | 0.762 | 0.596 | 0.429 |
+| VMC chain | 0.702 | 0.683 | 0.028 |
+| SSVC | 0.701 | 0.695 | 0.025 |
+| EPSS-only | 0.693 | 0.673 | 0.030 |
+| CVSS-only | 0.503 | 0.667 | 0.087 |
+| Random | 0.133 | 0.225 | 0.034 |
+
+The VPSS random forest and VulnPriority are level on NDCG@10 when every label counts (their
+95% intervals overlap almost entirely); VulnPriority captures the most monetary risk and ranks
+first under the strict protocol, where every threshold method that reads KEV or EPSS falls to
+the level of the random control. Like every number here, these come from a synthetic world and
+validate the protocol rather than measure field performance.
+
+### The shipped ranker
+
+`src/vulnpriority/rank/models/lambdamart.ubj` is what a single real scan is ranked with, since
+one scan alone has too few labelled pairs to learn from. It is trained on a 10,000-scan
+synthetic corpus that is too large to commit but is fixed by its seed, so it can be rebuilt and
+the model retrained:
+
+```bash
+python scripts/build_training_corpus.py --scans 10000    # writes data/synthetic-10k/ and the model
+python scripts/build_training_corpus.py --scans 500 --no-save-model --out data/synthetic-smoke --report data/smoke-audit.json   # smoke run; leaves the shipped model alone
+```
 
 ## Tests
 
