@@ -17,6 +17,11 @@ test rather than by prose.
 
 ## What it does
 
+<p align="center">
+  <img src="assets/readme/architecture-overview.png" width="560"
+       alt="Scanner reports, vulnerability databases and public write-ups are prepared, assessed by three components (AI evidence, attacker and cost, attack paths), combined by a learned ranker and turned into a prioritised fix list">
+</p>
+
 ```
 scanner output ─► ingest ─► intelligence ─┬─► A  semantic assessment   (sandboxed model)
                                           ├─► B  attacker model + monetary impact
@@ -47,6 +52,13 @@ Robustness is measured against a corpus of injection attacks, in the test suite.
 **Chains are first class.** Findings are scored by how much reachable compromise they enable,
 over a directed multi-hop attack graph, so a low-severity chokepoint outranks a high-severity
 leaf. Patching can never increase computed risk, and a property test proves it.
+
+<p align="center">
+  <img src="assets/readme/attack-graph-example.png" width="680"
+       alt="Example attack graph: from the internet, SQL injection on /search reaches the customer database with 54% probability, the most likely route; the auth bypass and file upload routes are less likely">
+  <br><sub>A worked example: percentages are the attacker's chance of succeeding at each step, and
+  the bold route is the most likely path to the customer database.</sub>
+</p>
 
 **It runs offline.** The default configuration needs no API key and no network. A synthetic
 world with a latent exploitation oracle supplies the confirmed ground truth and the
@@ -104,7 +116,36 @@ The framework ships with a website that presents a run: the remediation queue wi
 reasoning behind each position, the attack graph and its highest-value paths, the evaluation
 against baselines, the component ablation, budget and exposure outcomes, the adversarial
 robustness measurements, and a live traceability table tying each research gap to the numbers
-this run produced.
+this run produced. The screenshots below are from a run on the synthetic world; monetary
+figures are model estimates in the configured currency.
+
+<p align="center">
+  <img src="assets/readme/dashboard-findings.png" width="820"
+       alt="Findings view: one scan's 22 findings in VulnPriority order with estimated risk, effort, exploitation signals, likelihood, impact and CVSS">
+  <br><sub><b>Findings.</b> One scan's findings in remediation order, with estimated risk,
+  effort, exploitation signals and CVSS side by side.</sub>
+</p>
+
+<p align="center">
+  <img src="assets/readme/dashboard-explanation.png" width="820"
+       alt="Explanation panel for the top finding: impact if exploited, probability of exploitation, expected loss, impact breakdown, what drives the likelihood and the reasons for its position">
+  <br><sub><b>Why a finding is where it is.</b> Selecting a row opens its impact breakdown,
+  probability of exploitation, expected loss and the reasons for its position.</sub>
+</p>
+
+<p align="center">
+  <img src="assets/readme/dashboard-attack-chains.png" width="820"
+       alt="Attack chains view: routes an attacker could take through the application, each with the finding that holds it open, its probability and the value at stake">
+  <br><sub><b>Attack chains.</b> The routes through the application, in plain sentences, and the
+  finding that holds each one open.</sub>
+</p>
+
+<p align="center">
+  <img src="assets/readme/dashboard-robustness.png" width="820"
+       alt="Adversarial robustness view: 2.2% attack success, 0% canary leaks, 98% detection, 0% false positives, results by attack category and the containment layers">
+  <br><sub><b>Adversarial robustness.</b> The injection corpus results by attack category,
+  next to the containment layers each attack has to get through.</sub>
+</p>
 
 It runs in two modes.
 
@@ -206,6 +247,13 @@ clearest finding is that published results are not comparable to each other.
 | Literature competitors | VMC chain (Shimizu & Hashimoto), CISA SSVC, CAVP temporal CVSS, the Albanese et al. decay metric, VulnScore, context-aware XGBoost (Sevimli Deniz & Koca), the VPSS random forest (Hore et al.), LICALITY, EPSS-weighted attack-graph importance (Tiță et al.) |
 | Ablation | Full factorial over A, B, C with main effects, interactions and paired bootstrap intervals |
 
+<p align="center">
+  <img src="assets/readme/evaluation-protocol.png" width="760"
+       alt="Three time-ordered folds: each trains on earlier scans, skips a 30-day gap, then tests on later scans">
+  <br><sub>Time-ordered folds on the synthetic world: train on earlier scans, skip 30 days, test
+  on later ones.</sub>
+</p>
+
 ### Comparing against the literature
 
 The literature competitors live in `src/vulnpriority/rank/literature.py`. None of the original
@@ -240,6 +288,21 @@ The VPSS random forest and VulnPriority are level on NDCG@10 when every label co
 first under the strict protocol, where every threshold method that reads KEV or EPSS falls to
 the level of the random control. Like every number here, these come from a synthetic world and
 validate the protocol rather than measure field performance.
+
+<p align="center">
+  <img src="assets/readme/literature-comparison.png" width="760"
+       alt="Dot plots for all sixteen rankers: NDCG@10 on the left, RiskCapture@10 on the right, with 95% bootstrap intervals; VulnPriority highlighted">
+  <br><sub>All sixteen rankers on the inclusive protocol: finding exploited flaws early (left) and
+  capturing monetary risk (right). Dots are fold means, lines 95% bootstrap intervals.</sub>
+</p>
+
+Over a 26-week simulation with 20 engineering hours a week, the ordering decides which
+exploited flaws get fixed before they are first exploited and how long the rest stay open:
+
+<p align="center">
+  <img src="assets/readme/exposure-simulation.png" width="760"
+       alt="26-week simulation: VulnPriority leaves exploited flaws open for 12,950 days (32.5% less than CVSS-only) and fixes 12 of 145 before first exploitation, against 1 of 145 for EPSS-only, KEV-first and CVSS-only">
+</p>
 
 ### The shipped ranker
 
