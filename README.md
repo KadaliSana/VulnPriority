@@ -11,7 +11,7 @@ and exploit reports mean, and where the finding sits on the path to something wo
 
 It is the implementation of the framework proposed in the accompanying literature review, and
 it is built so that every claim in that review's gap analysis is answered by a module and a
-test rather than by prose. See [GAP_TRACEABILITY.md](GAP_TRACEABILITY.md).
+test rather than by prose.
 
 ---
 
@@ -213,10 +213,6 @@ python -m pytest -q
 Everything runs offline. The suite includes property tests (patching never increases graph
 risk), adversarial tests (attack success rate and canary leak rate are assertions), temporal
 leakage tests, and an end-to-end run on synthetic data.
-
-## Documentation
-
-- [GAP_TRACEABILITY.md](GAP_TRACEABILITY.md) - every research gap mapped to code and tests
 
 ## Limitations
 

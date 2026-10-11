@@ -26,6 +26,7 @@ site-demo/
 !.env.example
 # Paper and design documents are kept locally, not in the repository: the code is the deliverable.
 docs/
+GAP_TRACEABILITY.md
 *.docx
 # Scripts that rewrite those documents.
 scripts/update_docs*.py
