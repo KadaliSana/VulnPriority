@@ -298,6 +298,15 @@ class RankerName(str, Enum):
     SCANNER_SEVERITY = "scanner_severity"
     VMC_CHAIN = "vmc_chain"
     RANDOM = "random"
+    # competitors re-implemented from the literature review (rank/literature.py)
+    SSVC = "ssvc"
+    CAVP = "cavp"
+    ALBANESE = "albanese"
+    VULNSCORE = "vulnscore"
+    CONTEXT_XGB = "context_xgb"
+    VPSS_RF = "vpss_rf"
+    LICALITY = "licality"
+    TOPOLOGY_EPSS = "topology_epss"
 
 
 class SplitKind(str, Enum):
