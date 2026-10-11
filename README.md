@@ -216,10 +216,6 @@ leakage tests, and an end-to-end run on synthetic data.
 
 ## Documentation
 
-- [docs/DESIGN.md](docs/DESIGN.md) - module-by-module specification
-- [docs/adr/ADR-001](docs/adr/ADR-001-decision-theoretic-priority-with-learned-ranking.md) - why expected loss with a learned ranker
-- [docs/adr/ADR-002](docs/adr/ADR-002-trust-tiered-untrusted-content-sandbox.md) - why trust tiers and influence budgets
-- [docs/adr/ADR-003](docs/adr/ADR-003-monotone-attack-graph-contribution.md) - why maximum-probability paths
 - [GAP_TRACEABILITY.md](GAP_TRACEABILITY.md) - every research gap mapped to code and tests
 
 ## Limitations
