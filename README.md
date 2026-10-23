@@ -98,25 +98,28 @@ practitioner baselines and nine methods re-implemented from the research literat
 
 | Ranker | Finds exploited flaws early (NDCG@10) | Monetary risk in top 10 |
 |---|---|---|
-| **VulnPriority** | 0.883 | **0.741** |
-| VPSS random forest (Hore et al.) | **0.900** | 0.508 |
+| **VulnPriority** | **0.970** | 0.655 |
+| VPSS random forest (Hore et al.) | 0.900 | 0.508 |
 | LICALITY (Zeng et al.) | 0.785 | 0.665 |
 | VMC chain (Shimizu & Hashimoto) | 0.702 | 0.683 |
 | EPSS only | 0.693 | 0.673 |
+| Expected loss, no learning | 0.663 | **0.840** |
 | CVSS only | 0.503 | 0.667 |
 
-VulnPriority is level with the best competitor at finding exploited flaws (the confidence
-intervals overlap) and captures the most monetary risk. Under a stricter test that gives no
-credit for answers a ranker can read straight from KEV, it ranks first (0.610 against 0.573).
+VulnPriority finds exploited flaws earliest of all sixteen methods, clearly ahead of the best
+competitor (95% intervals 0.942–0.993 against 0.855–0.939). It stays first under a stricter
+test that gives no credit for answers a ranker can read straight from KEV (0.672 against
+0.573). The trade-off is monetary risk: ordering purely by modelled expected loss puts more of
+it in the top ten (0.840), as do several simpler orderings.
 
 <p align="center">
   <img src="assets/readme/literature-comparison.png" width="760"
        alt="All sixteen rankers: NDCG@10 and RiskCapture@10 with 95% bootstrap intervals">
 </p>
 
-Over a simulated 26 weeks with 20 engineering hours a week, it fixed 12 of 145 exploited flaws
+Over a simulated 26 weeks with 20 engineering hours a week, it fixed 15 of 145 exploited flaws
 before they were first exploited (1 of 145 for CVSS, EPSS or KEV ordering), and cut the time
-exploited flaws stayed open by 32.5% compared with CVSS.
+exploited flaws stayed open by 35.6% compared with CVSS.
 
 To reproduce the comparison on a finished run:
 
