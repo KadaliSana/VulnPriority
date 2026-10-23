@@ -257,9 +257,18 @@ class RankingConfig(BaseModel):
     #: expected-loss fallback instead, which is what an evaluation run wants so that it
     #: measures the model it just fitted.
     model_path: Path | None = DEFAULT_RANKER_MODEL
-    objective: str = "rank:ndcg"
+    #: Pairwise LambdaMART with pairs sampled uniformly per finding ("mean"). An evaluation run
+    #: trains on a handful of scans, so there are few query groups to learn from; weighting
+    #: pairs by NDCG change ("rank:ndcg") and drawing them only from the top of each list
+    #: ("topk") threw away most of the little signal there was. On six synthetic development
+    #: worlds this setting raised NDCG@10 from 0.697 to 0.750 (0.660 to 0.707 under the strict
+    #: label protocol), at the cost of RiskCapture@10 falling from 0.459 to 0.432. The gain is a
+    #: small-data effect: on the 10,000-scan training corpus "rank:ndcg"/"topk" is marginally
+    #: better (held-out NDCG@10 0.450 against 0.446), which is why the shipped model in
+    #: rank/models was trained with those settings and is kept.
+    objective: str = "rank:pairwise"
     eval_metric: str = "ndcg@10"
-    lambdarank_pair_method: str = "topk"
+    lambdarank_pair_method: str = "mean"
     lambdarank_num_pair_per_sample: int = 8
     n_estimators: int = 300
     max_depth: int = 4

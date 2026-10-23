@@ -423,7 +423,7 @@ CAPABILITIES: tuple[Capability, ...] = (
         ),
         framework_tests=("tests/test_rank_features.py", "tests/test_rank_lambdamart.py"),
         framework_note=(
-            "XGBoost LambdaMART with rank:ndcg, grouped by scan, monotone constraints on trusted "
+            "XGBoost LambdaMART grouped by scan, monotone constraints on trusted "
             "features and impact-weighted pairs."
         ),
         review_anchor="Research Goal 4; section 2.3",

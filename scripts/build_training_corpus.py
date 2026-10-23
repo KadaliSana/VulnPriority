@@ -518,6 +518,11 @@ def main() -> int:
     # taught that "in KEV" means "exploited" learns to restate its own b_kev column, and
     # graded against outcomes that column does not contain, that lesson is worth less than
     # nothing.
+    # The default objective suits training on a few scans, as an evaluation fold does; with
+    # thousands of query groups NDCG-weighted pairs from the top of each list are marginally
+    # better (held-out NDCG@10 0.450 against 0.446), so the shipped model is trained that way.
+    config = config.model_copy(update={"ranking": config.ranking.model_copy(
+        update={"objective": "rank:ndcg", "lambdarank_pair_method": "topk"})})
     model = build_ranker(config, config.ranking.ranker, int(config.ranking.seed))
     weights = None
     if config.ranking.impact_weighted_pairs:

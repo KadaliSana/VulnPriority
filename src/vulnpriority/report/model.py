@@ -1661,7 +1661,7 @@ def _section_methodology(
                     level=3,
                     paragraphs=[
                         "The queue is ordered by a learned ranker (XGBoost LambdaMART, "
-                        "objective `rank:ndcg`, grouped by scan) trained on the same evidence, "
+                        "grouped by scan) trained on the same evidence, "
                         "with monotone constraints forcing catalogue membership, EPSS, "
                         "expected loss and chain contribution to be non-decreasing in score. "
                         "The decision-theoretic ordering by expected loss is retained "

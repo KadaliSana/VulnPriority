@@ -1,6 +1,6 @@
 """``LambdaMartRanker``: the learned ordering (DESIGN.md 3.8, Architecture item 3).
 
-XGBoost's ``rank:ndcg`` objective with scans as query groups. Three design decisions are
+XGBoost's pairwise LambdaMART objective with scans as query groups. Three design decisions are
 worth stating plainly because they are what make the learned ranker defensible rather
 than merely accurate:
 
@@ -291,7 +291,7 @@ class LambdaMartRanker(Ranker):
 
     @staticmethod
     def _as_grades(labels: np.ndarray) -> np.ndarray:
-        """Relevance as the non-negative integers ``rank:ndcg`` expects."""
+        """Relevance as the non-negative integers the XGBoost ranking objectives expect."""
         return np.clip(np.rint(labels), 0, None).astype(int)
 
     def _degenerate_reason(self, labels: np.ndarray, groups: np.ndarray) -> str | None:
